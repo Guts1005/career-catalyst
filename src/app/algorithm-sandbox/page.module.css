@@ -1,0 +1,94 @@
+.container {
+  animation: fadeIn 0.3s ease;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--space-xl);
+  flex-wrap: wrap;
+  gap: var(--space-md);
+}
+
+.title {
+  font-size: 28px;
+  font-weight: 800;
+  letter-spacing: var(--tracking-tight);
+  color: var(--text-primary);
+}
+
+.subtitle {
+  font-size: 14px;
+  color: var(--text-secondary);
+  margin-top: 4px;
+}
+
+.tabs {
+  display: flex;
+  gap: 8px;
+  margin-bottom: var(--space-xl);
+}
+
+.sandboxCard {
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-xl);
+  padding: var(--space-xl);
+  box-shadow: var(--shadow-lg);
+}
+
+.controlsRow {
+  display: flex;
+  gap: var(--space-xl);
+  align-items: center;
+  background: var(--bg-tertiary);
+  padding: 16px 20px;
+  border-radius: var(--radius-md);
+  margin-bottom: var(--space-xl);
+  flex-wrap: wrap;
+}
+
+.controlItem {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 200px;
+}
+
+.controlLabel {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--text-muted);
+  text-transform: uppercase;
+}
+
+.slider {
+  width: 100%;
+  accent-color: var(--accent);
+  cursor: pointer;
+}
+
+.vizContainer {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: #08080c;
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--border);
+  padding: 24px;
+  overflow: hidden;
+}
+
+.mathDerivation {
+  margin-top: var(--space-xl);
+  padding: 16px;
+  background: var(--bg-tertiary);
+  border-radius: var(--radius-md);
+  border-left: 3px solid var(--accent);
+  font-size: 13.5px;
+  color: var(--text-secondary);
+  line-height: 1.6;
+}

@@ -1,0 +1,173 @@
+.showcase {
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: 40px 20px 80px;
+  animation: fadeIn 0.3s ease;
+}
+
+.hero {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: var(--space-xl);
+  margin-bottom: var(--space-2xl);
+  padding-bottom: var(--space-xl);
+  border-bottom: 1px solid var(--border);
+  flex-wrap: wrap;
+}
+
+.heroName {
+  font-size: 36px;
+  font-weight: 900;
+  letter-spacing: var(--tracking-tight);
+  color: var(--text-primary);
+}
+
+.heroRole {
+  font-size: 18px;
+  color: var(--accent);
+  font-weight: 600;
+  margin-top: 4px;
+}
+
+.heroBio {
+  font-size: 14.5px;
+  color: var(--text-secondary);
+  max-width: 600px;
+  line-height: 1.6;
+  margin-top: 12px;
+}
+
+.socialRow {
+  display: flex;
+  gap: 10px;
+  margin-top: 16px;
+}
+
+.socialBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  font-weight: 600;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  padding: 6px 12px;
+  border-radius: var(--radius-full);
+  color: var(--text-primary);
+  text-decoration: none;
+  transition: var(--transition-fast);
+}
+
+.socialBtn:hover {
+  border-color: var(--accent);
+  background: var(--accent-subtle);
+  color: var(--accent);
+}
+
+.section {
+  margin-bottom: var(--space-2xl);
+}
+
+.sectionTitle {
+  font-size: 20px;
+  font-weight: 800;
+  color: var(--text-primary);
+  letter-spacing: var(--tracking-tight);
+  margin-bottom: var(--space-lg);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.projectsGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(440px, 1fr));
+  gap: var(--space-lg);
+}
+
+@media (max-width: 768px) {
+  .projectsGrid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.projectCard {
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: var(--space-lg);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+  transition: var(--transition-spring);
+}
+
+.projectCard:hover {
+  border-color: var(--border-light);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-lg);
+}
+
+.projectName {
+  font-size: 17px;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.projectImpact {
+  font-size: 13px;
+  color: var(--success);
+  font-weight: 600;
+  background: rgba(52, 211, 153, 0.08);
+  padding: 6px 10px;
+  border-radius: var(--radius-xs);
+  margin-top: 4px;
+}
+
+.skillsPills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.skillPill {
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  padding: 8px 14px;
+  border-radius: var(--radius-md);
+  font-size: 13px;
+  color: var(--text-primary);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.skillLevel {
+  font-size: 11px;
+  color: var(--accent);
+  font-weight: 700;
+  background: var(--accent-subtle);
+  padding: 2px 6px;
+  border-radius: var(--radius-xs);
+}
+
+.certList {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: var(--space-md);
+}
+
+.certBadge {
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  padding: 14px 16px;
+  border-radius: var(--radius-md);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.certIcon {
+  font-size: 24px;
+}
