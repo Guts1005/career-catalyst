@@ -3,28 +3,48 @@
 import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import styles from './CommandPalette.module.css';
+import {
+  IconDashboard,
+  IconAnalytics,
+  IconResume,
+  IconCoverLetter,
+  IconJobs,
+  IconInterview,
+  IconAssessment,
+  IconCertifications,
+  IconProjects,
+  IconBlueprints,
+  IconCoding,
+  IconSandbox,
+  IconSkills,
+  IconResources,
+  IconSalary,
+  IconATS,
+  IconGitHub,
+  IconPortfolio,
+} from './Icons';
 
 const COMMANDS = [
-  { section: 'Navigation', icon: '📊', label: 'Dashboard', desc: 'Main overview and readiness score', href: '/' },
-  { section: 'Navigation', icon: '📄', label: 'Resume Studio', desc: 'AI Resume Builder & PDF Exporter', href: '/resume-builder' },
-  { section: 'Navigation', icon: '📝', label: 'Cover Letter & Recruiter Pitch', desc: 'Tailored letters & LinkedIn InMail outreach', href: '/cover-letter' },
-  { section: 'Navigation', icon: '📌', label: 'Job Pipeline', desc: 'Kanban board & skill matcher', href: '/job-tracker' },
-  { section: 'Navigation', icon: '🧠', label: 'Interview Prep Hub', desc: 'DS/ML flashcards & question bank', href: '/interview-prep' },
-  { section: 'Navigation', icon: '🎙️', label: 'Mock Interview Simulator', desc: 'Timed 15-min rounds with live rubric grading', href: '/mock-interview' },
-  { section: 'Navigation', icon: '💡', label: 'Project Blueprints', desc: 'STAR project ideas generator', href: '/project-generator' },
-  { section: 'Navigation', icon: '⚔️', label: 'Coding Arena', desc: 'LeetCode & Kaggle progress tracker', href: '/coding-tracker' },
-  { section: 'Navigation', icon: '🔬', label: 'Algorithm Sandbox', desc: 'Interactive Gradient Descent & Attention Math', href: '/algorithm-sandbox' },
-  { section: 'Navigation', icon: '🏆', label: 'Certifications', desc: 'Manage credentials & auto-level skills', href: '/certifications' },
-  { section: 'Navigation', icon: '🚀', label: 'Portfolio Projects', desc: 'Track projects & milestones', href: '/projects' },
-  { section: 'Navigation', icon: '🎯', label: 'Skill Map', desc: 'Skill gap analysis & radar', href: '/skills' },
-  { section: 'Navigation', icon: '📚', label: 'Learning Hub', desc: 'Courses, books, and tutorials', href: '/resources' },
-  { section: 'Intelligence', icon: '💰', label: 'Salary Intelligence', desc: 'Market benchmarks & offer negotiation scripts', href: '/salary-insights' },
-  { section: 'Intelligence', icon: '📋', label: 'ATS Checker', desc: 'Analyze resume for keyword matches', href: '/ats-checker' },
-  { section: 'Intelligence', icon: '🐙', label: 'GitHub Analyzer', desc: 'Analyze profile & 1-click project import', href: '/github' },
-  { section: 'Intelligence', icon: '🌐', label: 'Public Portfolio Showcase', desc: 'Verified profile page for recruiters', href: '/portfolio/sharvin' },
-  { section: 'Intelligence', icon: '📈', label: 'Career Analytics', desc: 'Data visualization & insights', href: '/analytics' },
-  { section: 'Data & Portability', icon: '💾', label: 'Backup Full Database', desc: 'Download JSON snapshot of your entire career portfolio', action: 'backup' },
-  { section: 'Data & Portability', icon: '📄', label: 'Export JSON Resume Standard', desc: 'Download resume in jsonresume.org standard format', action: 'jsonresume' },
+  { section: 'Navigation', icon: IconDashboard, label: 'Overview', desc: 'Main dashboard & metric KPIs', href: '/' },
+  { section: 'Navigation', icon: IconResume, label: 'Resume Builder', desc: 'ATS resume editor & PDF export', href: '/resume-builder' },
+  { section: 'Navigation', icon: IconCoverLetter, label: 'Cover Letter & Pitch', desc: 'Role-tailored letters & recruiter pitch', href: '/cover-letter' },
+  { section: 'Navigation', icon: IconJobs, label: 'Applications Pipeline', desc: 'Kanban board & skill matcher', href: '/job-tracker' },
+  { section: 'Navigation', icon: IconInterview, label: 'Interview Bank', desc: '50+ DS/ML flashcards & solutions', href: '/interview-prep' },
+  { section: 'Navigation', icon: IconAssessment, label: 'Technical Assessment', desc: '15-min timed mock interview rounds', href: '/mock-interview' },
+  { section: 'Navigation', icon: IconBlueprints, label: 'Project Blueprints', desc: 'STAR architecture generator', href: '/project-generator' },
+  { section: 'Navigation', icon: IconCoding, label: 'Coding Tracker', desc: 'LeetCode & Kaggle progress tracking', href: '/coding-tracker' },
+  { section: 'Navigation', icon: IconSandbox, label: 'Math Sandbox', desc: 'Interactive Gradient Descent & Attention', href: '/algorithm-sandbox' },
+  { section: 'Navigation', icon: IconCertifications, label: 'Certifications', desc: 'Credential manager & skill leveling', href: '/certifications' },
+  { section: 'Navigation', icon: IconProjects, label: 'Projects Manager', desc: 'Project milestone checklist & impact', href: '/projects' },
+  { section: 'Navigation', icon: IconSkills, label: 'Skill Map', desc: 'Competency radar & gap analysis', href: '/skills' },
+  { section: 'Navigation', icon: IconResources, label: 'Learning Hub', desc: 'Curated technical reference library', href: '/resources' },
+  { section: 'Market Intelligence', icon: IconSalary, label: 'Salary Benchmarks', desc: 'Compensation percentiles & negotiation scripts', href: '/salary-insights' },
+  { section: 'Market Intelligence', icon: IconATS, label: 'ATS Parser', desc: 'Keyword match & structural evaluation', href: '/ats-checker' },
+  { section: 'Market Intelligence', icon: IconGitHub, label: 'GitHub Sync', desc: 'Analyze repositories & language metrics', href: '/github' },
+  { section: 'Market Intelligence', icon: IconPortfolio, label: 'Public Profile', desc: 'Recruiter-facing verified showcase', href: '/portfolio/sharvin' },
+  { section: 'Market Intelligence', icon: IconAnalytics, label: 'Career Analytics', desc: 'Data visualization & pipeline funnel', href: '/analytics' },
+  { section: 'Data & Portability', icon: IconResume, label: 'Download JSON Snapshot', desc: 'Export full career data JSON archive', action: 'backup' },
+  { section: 'Data & Portability', icon: IconResume, label: 'Export JSON Resume Schema', desc: 'Official jsonresume.org standard export', action: 'jsonresume' },
 ];
 
 export default function CommandPalette() {
@@ -60,27 +80,26 @@ export default function CommandPalette() {
   }, [isOpen]);
 
   const filteredCommands = COMMANDS.filter((cmd) => {
-    if (!query.trim()) return true;
-    const term = query.toLowerCase();
+    const q = query.toLowerCase();
     return (
-      cmd.label.toLowerCase().includes(term) ||
-      cmd.desc.toLowerCase().includes(term) ||
-      cmd.section.toLowerCase().includes(term)
+      cmd.label.toLowerCase().includes(q) ||
+      cmd.desc.toLowerCase().includes(q) ||
+      cmd.section.toLowerCase().includes(q)
     );
   });
 
-  const handleSelect = (cmd) => {
+  const handleSelect = async (cmd) => {
     setIsOpen(false);
-    if (cmd.action === 'backup') {
+    if (cmd.href) {
+      router.push(cmd.href);
+    } else if (cmd.action === 'backup') {
       window.open('/api/backup', '_blank');
     } else if (cmd.action === 'jsonresume') {
       window.open('/api/backup?format=jsonresume', '_blank');
-    } else if (cmd.href) {
-      router.push(cmd.href);
     }
   };
 
-  const handleInputKeyDown = (e) => {
+  const handleKeyDown = (e) => {
     if (e.key === 'ArrowDown') {
       e.preventDefault();
       setSelectedIndex((prev) => (prev + 1) % (filteredCommands.length || 1));
@@ -98,57 +117,60 @@ export default function CommandPalette() {
   if (!isOpen) return null;
 
   return (
-    <div className={styles.backdrop} onClick={() => setIsOpen(false)}>
-      <div className={styles.palette} onClick={(e) => e.stopPropagation()}>
-        <div className={styles.searchHeader}>
-          <span className={styles.searchIcon}>🔍</span>
+    <div className={styles.overlay} onClick={() => setIsOpen(false)}>
+      <div className={styles.modal} onClick={(e) => e.stopPropagation()}>
+        <div className={styles.inputWrapper}>
+          <span className={styles.searchIcon}>
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="11" cy="11" r="8" /><path d="m21 21-4.3-4.3" /></svg>
+          </span>
           <input
             ref={inputRef}
-            className={styles.searchInput}
-            placeholder="Type a command or search tools (e.g. Resume, Interview, Kaggle)..."
+            type="text"
+            className={styles.input}
+            placeholder="Type a command or search tools..."
             value={query}
             onChange={(e) => {
               setQuery(e.target.value);
               setSelectedIndex(0);
             }}
-            onKeyDown={handleInputKeyDown}
+            onKeyDown={handleKeyDown}
           />
-          <span className={styles.shortcutBadge}>ESC</span>
+          <span className={styles.escBadge}>ESC</span>
         </div>
 
         <div className={styles.resultsList}>
           {filteredCommands.length === 0 ? (
-            <div style={{ textAlign: 'center', padding: '24px', color: 'var(--text-muted)', fontSize: '13px' }}>
-              No matching commands or pages found.
-            </div>
+            <div className={styles.noResults}>No matching tools or actions found.</div>
           ) : (
-            filteredCommands.map((cmd, idx) => (
-              <div
-                key={cmd.href || cmd.label}
-                className={`${styles.item} ${selectedIndex === idx ? styles.itemSelected : ''}`}
-                onClick={() => handleSelect(cmd)}
-                onMouseEnter={() => setSelectedIndex(idx)}
-              >
-                <div className={styles.itemLeft}>
-                  <span className={styles.itemIcon}>{cmd.icon}</span>
-                  <div>
+            filteredCommands.map((cmd, idx) => {
+              const IconComp = cmd.icon;
+              return (
+                <div
+                  key={`${cmd.label}-${idx}`}
+                  className={`${styles.item} ${idx === selectedIndex ? styles.itemActive : ''}`}
+                  onClick={() => handleSelect(cmd)}
+                  onMouseEnter={() => setSelectedIndex(idx)}
+                >
+                  <div className={styles.itemIcon}>
+                    <IconComp size={15} />
+                  </div>
+                  <div className={styles.itemContent}>
                     <div className={styles.itemLabel}>{cmd.label}</div>
                     <div className={styles.itemDesc}>{cmd.desc}</div>
                   </div>
+                  <div className={styles.itemCategory}>{cmd.section}</div>
                 </div>
-                <span className={styles.shortcutBadge}>Jump ↵</span>
-              </div>
-            ))
+              );
+            })
           )}
         </div>
 
         <div className={styles.footer}>
-          <div className={styles.footerKeys}>
-            <span><strong className={styles.shortcutBadge}>↑</strong> <strong className={styles.shortcutBadge}>↓</strong> Navigate</span>
-            <span><strong className={styles.shortcutBadge}>↵</strong> Select</span>
-            <span><strong className={styles.shortcutBadge}>ESC</strong> Close</span>
+          <div className={styles.footerHints}>
+            <span><kbd>↑↓</kbd> Navigate</span>
+            <span><kbd>↵</kbd> Select</span>
+            <span><kbd>esc</kbd> Dismiss</span>
           </div>
-          <div>Career Catalyst Spotlight</div>
         </div>
       </div>
     </div>

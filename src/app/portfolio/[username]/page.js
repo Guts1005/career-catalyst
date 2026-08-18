@@ -1,6 +1,14 @@
 import { getSupabase } from '@/lib/supabase';
 import styles from './page.module.css';
 import Link from 'next/link';
+import {
+  IconGitHub,
+  IconArrowUpRight,
+  IconCertifications,
+  IconProjects,
+  IconSkills,
+  IconResume,
+} from '@/components/Icons';
 
 export default async function PortfolioShowcasePage({ params }) {
   const { username } = await params;
@@ -69,42 +77,48 @@ export default async function PortfolioShowcasePage({ params }) {
       {/* Hero Header */}
       <div className={styles.hero}>
         <div>
-          <span className="tag" style={{ marginBottom: '8px' }}>Verified ML Engineer Portfolio</span>
+          <div style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', padding: '3px 9px', borderRadius: '9999px', background: 'var(--bg-tertiary)', border: '1px solid var(--border)', fontSize: '11px', color: 'var(--text-secondary)', marginBottom: '12px' }}>
+            <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: 'var(--success)' }} />
+            Verified Profile • @{username}
+          </div>
           <h1 className={styles.heroName}>{name}</h1>
           <div className={styles.heroRole}>Data Science & Machine Learning Specialist</div>
           <p className={styles.heroBio}>{summary}</p>
 
           <div className={styles.socialRow}>
             <a href="https://github.com/Guts1005" target="_blank" rel="noopener noreferrer" className={styles.socialBtn}>
-              🐙 GitHub
+              <IconGitHub size={14} /> GitHub
             </a>
             <a href="https://linkedin.com/in/sharvin-neve" target="_blank" rel="noopener noreferrer" className={styles.socialBtn}>
-              💼 LinkedIn
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z" /><rect width="4" height="12" x="2" y="9" /><circle cx="4" cy="4" r="2" /></svg> LinkedIn
             </a>
             <a href={`mailto:${email}`} className={styles.socialBtn}>
-              ✉️ Contact
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect width="20" height="16" x="2" y="4" rx="2" /><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7" /></svg> Contact
             </a>
           </div>
         </div>
 
         <div style={{ textAlign: 'right' }}>
-          <Link href="/resume-builder" className="btn btn-primary">
-            📄 View Full ATS Resume
+          <Link href="/resume-builder" className="btn btn-primary" style={{ display: 'inline-flex', alignItems: 'center', gap: '8px' }}>
+            <IconResume size={14} /> View ATS Resume
           </Link>
         </div>
       </div>
 
       {/* Featured Projects */}
       <div className={styles.section}>
-        <h2 className={styles.sectionTitle}>🚀 Featured Machine Learning Systems</h2>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '16px' }}>
+          <IconProjects size={18} style={{ color: 'var(--text-muted)' }} />
+          <h2 className={styles.sectionTitle} style={{ margin: 0 }}>Featured Machine Learning Systems</h2>
+        </div>
         <div className={styles.projectsGrid}>
           {projects.map((p) => (
             <div key={p.id} className={styles.projectCard}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
                 <h3 className={styles.projectName}>{p.name}</h3>
                 {p.github_url && (
-                  <a href={p.github_url} target="_blank" rel="noopener noreferrer" style={{ fontSize: '13px' }}>
-                    Code ↗
+                  <a href={p.github_url} target="_blank" rel="noopener noreferrer" style={{ fontSize: '12px', display: 'flex', alignItems: 'center', gap: '4px', color: 'var(--accent)' }}>
+                    Source <IconArrowUpRight size={12} />
                   </a>
                 )}
               </div>
@@ -126,12 +140,15 @@ export default async function PortfolioShowcasePage({ params }) {
 
       {/* Core Competencies */}
       <div className={styles.section}>
-        <h2 className={styles.sectionTitle}>🎯 Core Technical Competencies</h2>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '16px' }}>
+          <IconSkills size={18} style={{ color: 'var(--text-muted)' }} />
+          <h2 className={styles.sectionTitle} style={{ margin: 0 }}>Core Technical Competencies</h2>
+        </div>
         <div className={styles.skillsPills}>
           {skills.map((s) => (
             <div key={s.id} className={styles.skillPill}>
               <span>{s.name}</span>
-              <span className={styles.skillLevel}>{s.current_level}%</span>
+              <span className={styles.skillLevel} style={{ fontFamily: 'var(--font-mono)' }}>{s.current_level}%</span>
             </div>
           ))}
         </div>
@@ -139,22 +156,27 @@ export default async function PortfolioShowcasePage({ params }) {
 
       {/* Verified Certifications */}
       <div className={styles.section}>
-        <h2 className={styles.sectionTitle}>🏆 Verified Credentials & Certifications</h2>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '16px' }}>
+          <IconCertifications size={18} style={{ color: 'var(--text-muted)' }} />
+          <h2 className={styles.sectionTitle} style={{ margin: 0 }}>Verified Credentials & Certifications</h2>
+        </div>
         <div className={styles.certList}>
           {certs.map((c) => (
             <div key={c.id} className={styles.certBadge}>
-              <div className={styles.certIcon}>🏆</div>
+              <div className={styles.certIcon}>
+                <IconCertifications size={16} />
+              </div>
               <div>
-                <strong style={{ color: 'var(--text-primary)', fontSize: '14px' }}>{c.name}</strong>
-                <div style={{ fontSize: '12px', color: 'var(--text-muted)' }}>{c.provider} • Verified Credential</div>
+                <strong style={{ color: 'var(--text-primary)', fontSize: '13.5px' }}>{c.name}</strong>
+                <div style={{ fontSize: '11.5px', color: 'var(--text-muted)' }}>{c.provider} • Verified Credential</div>
               </div>
             </div>
           ))}
         </div>
       </div>
 
-      <div style={{ textAlign: 'center', marginTop: '48px', color: 'var(--text-muted)', fontSize: '12px' }}>
-        ⚡ Powered by Career Catalyst OS • Verified Profile: @{username}
+      <div style={{ textAlign: 'center', marginTop: '48px', color: 'var(--text-muted)', fontSize: '11.5px', fontFamily: 'var(--font-mono)' }}>
+        Catalyst OS • Verified Profile: @{username}
       </div>
     </div>
   );

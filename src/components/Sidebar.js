@@ -3,30 +3,51 @@
 import { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import {
+  IconDashboard,
+  IconAnalytics,
+  IconResume,
+  IconCoverLetter,
+  IconJobs,
+  IconInterview,
+  IconAssessment,
+  IconCertifications,
+  IconProjects,
+  IconBlueprints,
+  IconCoding,
+  IconSandbox,
+  IconSkills,
+  IconResources,
+  IconSalary,
+  IconATS,
+  IconGitHub,
+  IconPortfolio,
+  IconSearch,
+} from './Icons';
 
 const NAV_ITEMS = [
-  { section: 'Overview' },
-  { href: '/', label: 'Dashboard', icon: '📊' },
-  { href: '/analytics', label: 'Career Analytics', icon: '📈' },
+  { section: 'Platform' },
+  { href: '/', label: 'Overview', icon: IconDashboard },
+  { href: '/analytics', label: 'Analytics', icon: IconAnalytics },
   { section: 'Career Suite' },
-  { href: '/resume-builder', label: 'Resume Studio', icon: '📄' },
-  { href: '/cover-letter', label: 'Cover Letter & Pitch', icon: '📝' },
-  { href: '/job-tracker', label: 'Job Pipeline', icon: '📌' },
-  { href: '/interview-prep', label: 'Interview Prep Hub', icon: '🧠' },
-  { href: '/mock-interview', label: 'Mock Simulator', icon: '🎙️' },
-  { section: 'Skills & Innovation' },
-  { href: '/certifications', label: 'Certifications', icon: '🏆' },
-  { href: '/projects', label: 'Portfolio Projects', icon: '🚀' },
-  { href: '/project-generator', label: 'Project Blueprints', icon: '💡' },
-  { href: '/coding-tracker', label: 'Coding Arena', icon: '⚔️' },
-  { href: '/algorithm-sandbox', label: 'Algorithm Sandbox', icon: '🔬' },
-  { href: '/skills', label: 'Skill Map', icon: '🎯' },
-  { href: '/resources', label: 'Learning Hub', icon: '📚' },
-  { section: 'Intelligence & Market' },
-  { href: '/salary-insights', label: 'Salary Intelligence', icon: '💰' },
-  { href: '/ats-checker', label: 'ATS Checker', icon: '📋' },
-  { href: '/github', label: 'GitHub Analyzer', icon: '🐙' },
-  { href: '/portfolio/sharvin', label: 'Public Showcase', icon: '🌐' },
+  { href: '/resume-builder', label: 'Resume Builder', icon: IconResume },
+  { href: '/cover-letter', label: 'Cover Letter & Pitch', icon: IconCoverLetter },
+  { href: '/job-tracker', label: 'Applications', icon: IconJobs },
+  { href: '/interview-prep', label: 'Interview Bank', icon: IconInterview },
+  { href: '/mock-interview', label: 'Technical Assessment', icon: IconAssessment },
+  { section: 'Engineering & Skills' },
+  { href: '/certifications', label: 'Certifications', icon: IconCertifications },
+  { href: '/projects', label: 'Projects', icon: IconProjects },
+  { href: '/project-generator', label: 'Blueprints', icon: IconBlueprints },
+  { href: '/coding-tracker', label: 'Coding Tracker', icon: IconCoding },
+  { href: '/algorithm-sandbox', label: 'Math Sandbox', icon: IconSandbox },
+  { href: '/skills', label: 'Skill Map', icon: IconSkills },
+  { href: '/resources', label: 'Learning Hub', icon: IconResources },
+  { section: 'Market Intelligence' },
+  { href: '/salary-insights', label: 'Salary Benchmarks', icon: IconSalary },
+  { href: '/ats-checker', label: 'ATS Parser', icon: IconATS },
+  { href: '/github', label: 'GitHub Sync', icon: IconGitHub },
+  { href: '/portfolio/sharvin', label: 'Public Profile', icon: IconPortfolio },
 ];
 
 export default function Sidebar() {
@@ -39,9 +60,9 @@ export default function Sidebar() {
       const res = await fetch('/api/readiness');
       if (res.ok) {
         const data = await res.json();
-        setReadinessScore(data.score);
+        setReadinessScore(data.score || 0);
       }
-    } catch (e) {
+    } catch {
       /* ignore */
     }
   }, []);
@@ -75,34 +96,61 @@ export default function Sidebar() {
       <aside className={`sidebar ${isOpen ? 'open' : ''}`}>
         <div className="sidebar-header">
           <div className="sidebar-brand">
-            <div className="sidebar-brand-icon">⚡</div>
+            <div
+              style={{
+                width: '28px',
+                height: '28px',
+                borderRadius: '6px',
+                background: '#ffffff',
+                color: '#000000',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                fontWeight: 800,
+                fontSize: '14px',
+                letterSpacing: '-0.05em',
+                boxShadow: '0 1px 3px rgba(0,0,0,0.5)',
+              }}
+            >
+              C
+            </div>
             <div>
-              <div className="sidebar-brand-text">Career Catalyst</div>
-              <div className="sidebar-brand-subtitle">DS / ML / AI</div>
+              <div className="sidebar-brand-text" style={{ fontSize: '13.5px', fontWeight: 600, color: 'var(--text-primary)' }}>
+                Catalyst OS
+              </div>
+              <div className="sidebar-brand-subtitle" style={{ fontSize: '11px', color: 'var(--text-muted)', fontFamily: 'var(--font-mono)' }}>
+                ML & Data Systems
+              </div>
             </div>
           </div>
+
           <button
             className="sidebar-search-btn"
             style={{
               width: '100%',
-              marginTop: '12px',
-              padding: '8px 12px',
+              marginTop: '14px',
+              padding: '7px 10px',
               background: 'var(--bg-tertiary)',
               border: '1px solid var(--border)',
               borderRadius: 'var(--radius-sm)',
-              color: 'var(--text-muted)',
+              color: 'var(--text-secondary)',
               fontSize: '12px',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'space-between',
-              cursor: 'pointer'
+              cursor: 'pointer',
+              transition: 'var(--transition-fast)',
             }}
             onClick={() => {
               window.dispatchEvent(new KeyboardEvent('keydown', { key: 'k', ctrlKey: true }));
             }}
           >
-            <span>🔍 Search Tools...</span>
-            <span style={{ fontSize: '10px', background: 'var(--bg-secondary)', padding: '1px 5px', borderRadius: '3px', border: '1px solid var(--border)' }}>Ctrl+K</span>
+            <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+              <IconSearch size={13} /> Quick Search...
+            </span>
+            <kbd style={{ fontSize: '10px', background: 'var(--bg-secondary)', padding: '2px 5px', borderRadius: '3px', border: '1px solid var(--border)', fontFamily: 'var(--font-mono)' }}>
+              ⌘K
+            </kbd>
           </button>
         </div>
 
@@ -117,6 +165,8 @@ export default function Sidebar() {
             }
 
             const isActive = pathname === item.href;
+            const IconComponent = item.icon;
+
             return (
               <Link
                 key={item.href}
@@ -124,21 +174,29 @@ export default function Sidebar() {
                 className={`sidebar-link ${isActive ? 'active' : ''}`}
                 id={`nav-${item.href.replace('/', '') || 'dashboard'}`}
               >
-                <span className="sidebar-icon">{item.icon}</span>
-                {item.label}
+                <span className="sidebar-icon">
+                  <IconComponent size={15} />
+                </span>
+                <span>{item.label}</span>
               </Link>
             );
           })}
         </nav>
 
         <div className="sidebar-footer">
-          <div className="sidebar-readiness">
-            <div className="sidebar-readiness-label">Resume Readiness</div>
-            <div className="sidebar-readiness-score">{readinessScore}%</div>
-            <div className="sidebar-readiness-bar">
+          <div className="sidebar-readiness" style={{ background: 'var(--bg-tertiary)', border: '1px solid var(--border)', borderRadius: 'var(--radius-sm)', padding: '10px 12px' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
+              <span style={{ fontSize: '11px', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.04em', fontWeight: 600 }}>Profile Score</span>
+              <span style={{ fontSize: '13px', fontWeight: 700, color: 'var(--text-primary)', fontFamily: 'var(--font-mono)' }}>{readinessScore}%</span>
+            </div>
+            <div className="sidebar-readiness-bar" style={{ height: '4px', background: 'rgba(255,255,255,0.06)' }}>
               <div
                 className="sidebar-readiness-fill"
-                style={{ width: `${readinessScore}%` }}
+                style={{
+                  width: `${readinessScore}%`,
+                  background: readinessScore >= 75 ? 'var(--success)' : 'var(--accent)',
+                  transition: 'width 0.6s cubic-bezier(0.16, 1, 0.3, 1)',
+                }}
               />
             </div>
           </div>
