@@ -1,4 +1,4 @@
-import { getDb } from '@/lib/db';
+import { getSupabase } from '@/lib/supabase';
 import { NextResponse } from 'next/server';
 import { 
   sanitizeObject,
@@ -13,13 +13,17 @@ import {
 
 export async function GET() {
   try {
-    const db = getDb();
-    const jobs = db.prepare('SELECT * FROM job_applications ORDER BY updated_at DESC').all();
+    const supabase = getSupabase();
     
-    // Also fetch all user skills to calculate match scores dynamically
-    const userSkills = db.prepare('SELECT name, current_level FROM skills').all();
+    const [{ data: jobs, error: jobsError }, { data: userSkills, error: skillsError }] = await Promise.all([
+      supabase.from('job_applications').select('*').order('updated_at', { ascending: false }),
+      supabase.from('skills').select('name, current_level')
+    ]);
     
-    return NextResponse.json({ jobs, userSkills });
+    if (jobsError) throw jobsError;
+    if (skillsError) throw skillsError;
+    
+    return NextResponse.json({ jobs: jobs || [], userSkills: userSkills || [] });
   } catch (error) {
     console.error('Failed to fetch jobs:', error);
     return NextResponse.json({ error: error.message }, { status: 500 });
@@ -28,7 +32,7 @@ export async function GET() {
 
 export async function POST(request) {
   try {
-    const db = getDb();
+    const supabase = getSupabase();
     
     let body;
     try {
@@ -71,12 +75,11 @@ export async function POST(request) {
       notes
     } = body;
 
-    // Calculate match score based on user skills vs required skills
     let matchScore = 0;
     if (required_skills) {
       const skillsArray = required_skills.split(',').map(s => s.trim().toLowerCase());
-      const allUserSkills = db.prepare('SELECT LOWER(name) as name, current_level FROM skills').all();
-      const userSkillMap = new Map(allUserSkills.map(s => [s.name, s.current_level]));
+      const { data: allUserSkills } = await supabase.from('skills').select('name, current_level');
+      const userSkillMap = new Map((allUserSkills || []).map(s => [s.name.toLowerCase(), s.current_level]));
       
       let matchedCount = 0;
       for (const reqSkill of skillsArray) {
@@ -87,33 +90,28 @@ export async function POST(request) {
       matchScore = skillsArray.length > 0 ? Math.round((matchedCount / skillsArray.length) * 100) : 50;
     }
 
-    const stmt = db.prepare(`
-      INSERT INTO job_applications (
-        company, role, location, work_model, salary, status,
-        applied_date, job_url, recruiter_contact, required_skills, match_score, notes
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-    `);
-
-    const result = stmt.run(
+    const { data: result, error: insertError } = await supabase.from('job_applications').insert([{
       company,
       role,
-      location || '',
-      work_model || 'remote',
-      salary || '',
-      status || 'wishlist',
-      applied_date || null,
-      job_url || '',
-      recruiter_contact || '',
-      required_skills || '',
-      matchScore,
-      notes || ''
-    );
+      location: location || '',
+      work_model: work_model || 'remote',
+      salary: salary || '',
+      status: status || 'wishlist',
+      applied_date: applied_date || null,
+      job_url: job_url || '',
+      recruiter_contact: recruiter_contact || '',
+      required_skills: required_skills || '',
+      match_score: matchScore,
+      notes: notes || ''
+    }]).select().single();
 
-    db.prepare('INSERT INTO activity_log (action, entity_type, entity_id, entity_name) VALUES (?, ?, ?, ?)').run(
-      'created', 'job_application', result.lastInsertRowid, `${role} at ${company}`
-    );
+    if (insertError) throw insertError;
 
-    return NextResponse.json({ id: result.lastInsertRowid, message: 'Application created successfully' });
+    await supabase.from('activity_log').insert([{
+      action: 'created', entity_type: 'job_application', entity_id: result.id, entity_name: `${role} at ${company}`
+    }]);
+
+    return NextResponse.json({ id: result.id, message: 'Application created successfully' });
   } catch (error) {
     console.error('Failed to create job application:', error);
     return NextResponse.json({ error: error.message }, { status: 500 });

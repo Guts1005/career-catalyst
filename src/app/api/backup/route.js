@@ -1,20 +1,21 @@
-import { getDb } from '@/lib/db';
+import { getSupabase } from '@/lib/supabase';
 import { NextResponse } from 'next/server';
 
 export async function GET(request) {
   try {
-    const db = getDb();
+    const supabase = getSupabase();
     const { searchParams } = new URL(request.url);
     const format = searchParams.get('format');
 
     if (format === 'jsonresume') {
-      const resume = db.prepare('SELECT * FROM resumes ORDER BY id DESC LIMIT 1').get();
-      const certs = db.prepare("SELECT * FROM certifications WHERE status = 'completed'").all();
-      const projects = db.prepare("SELECT * FROM projects WHERE status = 'completed'").all();
-      const skills = db.prepare('SELECT * FROM skills ORDER BY current_level DESC').all();
+      const { data: resumes } = await supabase.from('resumes').select('*').order('id', { ascending: false }).limit(1);
+      const resume = resumes && resumes.length > 0 ? resumes[0] : null;
+      const { data: certs } = await supabase.from('certifications').select('*').eq('status', 'completed');
+      const { data: projects } = await supabase.from('projects').select('*').eq('status', 'completed');
+      const { data: skills } = await supabase.from('skills').select('*').order('current_level', { ascending: false });
 
-      const education = resume?.education_json ? JSON.parse(resume.education_json) : [];
-      const experience = resume?.experience_json ? JSON.parse(resume.experience_json) : [];
+      const education = resume?.education_json ? (typeof resume.education_json === 'string' ? JSON.parse(resume.education_json) : resume.education_json) : [];
+      const experience = resume?.experience_json ? (typeof resume.experience_json === 'string' ? JSON.parse(resume.experience_json) : resume.experience_json) : [];
 
       const jsonResume = {
         $schema: 'https://raw.githubusercontent.com/jsonresume/resume-schema/v1.0.0/schema.json',
@@ -80,18 +81,18 @@ export async function GET(request) {
       export_version: '2.0',
       exported_at: new Date().toISOString(),
       data: {
-        certifications: db.prepare('SELECT * FROM certifications').all(),
-        projects: db.prepare('SELECT * FROM projects').all(),
-        project_milestones: db.prepare('SELECT * FROM project_milestones').all(),
-        skills: db.prepare('SELECT * FROM skills').all(),
-        resources: db.prepare('SELECT * FROM resources').all(),
-        job_applications: db.prepare('SELECT * FROM job_applications').all(),
-        interview_questions: db.prepare('SELECT * FROM interview_questions').all(),
-        user_question_progress: db.prepare('SELECT * FROM user_question_progress').all(),
-        coding_profiles: db.prepare('SELECT * FROM coding_profiles').all(),
-        coding_problems: db.prepare('SELECT * FROM coding_problems').all(),
-        resumes: db.prepare('SELECT * FROM resumes').all(),
-        activity_log: db.prepare('SELECT * FROM activity_log ORDER BY id DESC LIMIT 100').all()
+        certifications: (await supabase.from('certifications').select('*')).data || [],
+        projects: (await supabase.from('projects').select('*')).data || [],
+        project_milestones: (await supabase.from('project_milestones').select('*')).data || [],
+        skills: (await supabase.from('skills').select('*')).data || [],
+        resources: (await supabase.from('resources').select('*')).data || [],
+        job_applications: (await supabase.from('job_applications').select('*')).data || [],
+        interview_questions: (await supabase.from('interview_questions').select('*')).data || [],
+        user_question_progress: (await supabase.from('user_question_progress').select('*')).data || [],
+        coding_profiles: (await supabase.from('coding_profiles').select('*')).data || [],
+        coding_problems: (await supabase.from('coding_problems').select('*')).data || [],
+        resumes: (await supabase.from('resumes').select('*')).data || [],
+        activity_log: (await supabase.from('activity_log').select('*').order('id', { ascending: false }).limit(100)).data || []
       }
     };
 
@@ -110,7 +111,7 @@ export async function GET(request) {
 
 export async function POST(request) {
   try {
-    const db = getDb();
+    const supabase = getSupabase();
     const body = await request.json();
 
     if (!body || !body.data) {
@@ -119,59 +120,37 @@ export async function POST(request) {
 
     const { data } = body;
 
-    // Restore inside transaction
-    const restoreTx = db.transaction(() => {
-      if (Array.isArray(data.certifications)) {
-        db.prepare('DELETE FROM certifications').run();
-        const insert = db.prepare(`
-          INSERT INTO certifications (id, name, provider, url, status, progress, priority, deadline, notes, category, estimated_hours)
-          VALUES (@id, @name, @provider, @url, @status, @progress, @priority, @deadline, @notes, @category, @estimated_hours)
-        `);
-        for (const row of data.certifications) insert.run(row);
-      }
+    // Restore sequentially
+    if (Array.isArray(data.certifications)) {
+      await supabase.from('certifications').delete().not('id', 'is', null);
+      if (data.certifications.length > 0) await supabase.from('certifications').insert(data.certifications);
+    }
 
-      if (Array.isArray(data.projects)) {
-        db.prepare('DELETE FROM projects').run();
-        const insert = db.prepare(`
-          INSERT INTO projects (id, name, description, status, github_url, live_url, tech_stack, category, impact, start_date, end_date)
-          VALUES (@id, @name, @description, @status, @github_url, @live_url, @tech_stack, @category, @impact, @start_date, @end_date)
-        `);
-        for (const row of data.projects) insert.run(row);
-      }
+    if (Array.isArray(data.projects)) {
+      await supabase.from('projects').delete().not('id', 'is', null);
+      if (data.projects.length > 0) await supabase.from('projects').insert(data.projects);
+    }
 
-      if (Array.isArray(data.skills)) {
-        db.prepare('DELETE FROM skills').run();
-        const insert = db.prepare(`
-          INSERT INTO skills (id, name, category, current_level, target_level, importance)
-          VALUES (@id, @name, @category, @current_level, @target_level, @importance)
-        `);
-        for (const row of data.skills) insert.run(row);
-      }
+    if (Array.isArray(data.skills)) {
+      await supabase.from('skills').delete().not('id', 'is', null);
+      if (data.skills.length > 0) await supabase.from('skills').insert(data.skills);
+    }
 
-      if (Array.isArray(data.job_applications)) {
-        db.prepare('DELETE FROM job_applications').run();
-        const insert = db.prepare(`
-          INSERT INTO job_applications (id, company, role, location, work_model, salary, status, applied_date, job_url, recruiter_contact, required_skills, match_score, notes)
-          VALUES (@id, @company, @role, @location, @work_model, @salary, @status, @applied_date, @job_url, @recruiter_contact, @required_skills, @match_score, @notes)
-        `);
-        for (const row of data.job_applications) insert.run(row);
-      }
+    if (Array.isArray(data.job_applications)) {
+      await supabase.from('job_applications').delete().not('id', 'is', null);
+      if (data.job_applications.length > 0) await supabase.from('job_applications').insert(data.job_applications);
+    }
 
-      if (Array.isArray(data.coding_problems)) {
-        db.prepare('DELETE FROM coding_problems').run();
-        const insert = db.prepare(`
-          INSERT INTO coding_problems (id, title, platform, category, difficulty, status, url, solution_notes, completed_at)
-          VALUES (@id, @title, @platform, @category, @difficulty, @status, @url, @solution_notes, @completed_at)
-        `);
-        for (const row of data.coding_problems) insert.run(row);
-      }
+    if (Array.isArray(data.coding_problems)) {
+      await supabase.from('coding_problems').delete().not('id', 'is', null);
+      if (data.coding_problems.length > 0) await supabase.from('coding_problems').insert(data.coding_problems);
+    }
 
-      db.prepare('INSERT INTO activity_log (action, entity_type, entity_name) VALUES (?, ?, ?)').run(
-        'Restored database backup', 'system', `Restored ${new Date().toLocaleTimeString()}`
-      );
-    });
-
-    restoreTx();
+    await supabase.from('activity_log').insert([{
+      action: 'Restored database backup',
+      entity_type: 'system',
+      entity_name: `Restored ${new Date().toLocaleTimeString()}`
+    }]);
 
     return NextResponse.json({ success: true, message: 'Database backup successfully restored!' });
   } catch (error) {

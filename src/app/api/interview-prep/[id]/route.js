@@ -1,33 +1,48 @@
-import { getDb } from '@/lib/db';
+import { getSupabase } from '@/lib/supabase';
 import { NextResponse } from 'next/server';
 
 export async function PUT(request, { params }) {
   try {
-    const db = getDb();
+    const supabase = getSupabase();
     const { id } = await params;
     const body = await request.json();
     const { status, notes } = body;
 
-    const existing = db.prepare('SELECT id FROM user_question_progress WHERE question_id = ?').get(id);
+    const { data: existing, error: fetchError } = await supabase
+      .from('user_question_progress')
+      .select('id, status, notes')
+      .eq('question_id', id)
+      .single();
 
     if (existing) {
-      db.prepare(`
-        UPDATE user_question_progress
-        SET status = COALESCE(?, status), notes = COALESCE(?, notes), last_reviewed_at = CURRENT_TIMESTAMP
-        WHERE question_id = ?
-      `).run(status, notes, id);
+      await supabase
+        .from('user_question_progress')
+        .update({
+          status: status !== undefined ? status : existing.status,
+          notes: notes !== undefined ? notes : existing.notes,
+          last_reviewed_at: new Date().toISOString()
+        })
+        .eq('question_id', id);
     } else {
-      db.prepare(`
-        INSERT INTO user_question_progress (question_id, status, notes, last_reviewed_at)
-        VALUES (?, ?, ?, CURRENT_TIMESTAMP)
-      `).run(id, status || 'unprepared', notes || '');
+      await supabase
+        .from('user_question_progress')
+        .insert([{
+          question_id: id,
+          status: status || 'unprepared',
+          notes: notes || '',
+          last_reviewed_at: new Date().toISOString()
+        }]);
     }
 
     if (status === 'mastered') {
-      const q = db.prepare('SELECT question FROM interview_questions WHERE id = ?').get(id);
-      db.prepare('INSERT INTO activity_log (action, entity_type, entity_id, entity_name) VALUES (?, ?, ?, ?)').run(
-        'Mastered interview question', 'interview_prep', id, q ? q.question.substring(0, 40) + '...' : 'Question'
-      );
+      const { data: q } = await supabase.from('interview_questions').select('question').eq('id', id).single();
+      
+      await supabase.from('activity_log').insert([{
+        action: 'Mastered interview question',
+        entity_type: 'interview_prep',
+        entity_id: id,
+        entity_name: q ? q.question.substring(0, 40) + '...' : 'Question'
+      }]);
     }
 
     return NextResponse.json({ success: true });

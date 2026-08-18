@@ -1,4 +1,4 @@
-import { getDb } from '@/lib/db';
+import { getSupabase } from '@/lib/supabase';
 import { NextResponse } from 'next/server';
 import { 
   sanitizeObject,
@@ -12,17 +12,17 @@ import {
 
 export async function GET(request, { params }) {
   try {
-    const db = getDb();
+    const supabase = getSupabase();
     const { id } = await params;
     
-    const project = db.prepare('SELECT * FROM projects WHERE id = ?').get(id);
+    const { data: project, error: projError } = await supabase.from('projects').select('*').eq('id', id).single();
     
-    if (!project) {
+    if (projError || !project) {
       return NextResponse.json({ error: 'Project not found' }, { status: 404 });
     }
     
-    const milestones = db.prepare('SELECT * FROM project_milestones WHERE project_id = ?').all(id);
-    project.milestones = milestones;
+    const { data: milestones } = await supabase.from('project_milestones').select('*').eq('project_id', id);
+    project.milestones = milestones || [];
     
     return NextResponse.json(project);
   } catch (error) {
@@ -32,7 +32,7 @@ export async function GET(request, { params }) {
 
 export async function PUT(request, { params }) {
   try {
-    const db = getDb();
+    const supabase = getSupabase();
     const { id } = await params;
     
     let body;
@@ -54,19 +54,15 @@ export async function PUT(request, { params }) {
 
     const { name, description, status, github_url, live_url, tech_stack, category, impact, start_date, end_date } = body;
     
-    const update = db.prepare(`
-      UPDATE projects 
-      SET name = ?, description = ?, status = ?, github_url = ?, live_url = ?, tech_stack = ?, category = ?, impact = ?, start_date = ?, end_date = ?, updated_at = CURRENT_TIMESTAMP
-      WHERE id = ?
-    `);
+    const { error: updateError } = await supabase.from('projects').update({
+      name, description, status, github_url: github_url || null, live_url: live_url || null, 
+      tech_stack: tech_stack || null, category: category || null, impact: impact || null, start_date: start_date || null, end_date: end_date || null, updated_at: new Date().toISOString()
+    }).eq('id', id);
     
-    update.run(
-      name, description, status, github_url || null, live_url || null, 
-      tech_stack || null, category || null, impact || null, start_date || null, end_date || null, id
-    );
+    if (updateError) throw updateError;
     
     try {
-      db.prepare('INSERT INTO activity_log (action, entity_type, entity_id, entity_name) VALUES (?, ?, ?, ?)').run('updated', 'project', id, name);
+      await supabase.from('activity_log').insert([{ action: 'updated', entity_type: 'project', entity_id: id, entity_name: name }]);
     } catch (e) {
       console.error("Activity log error:", e);
     }
@@ -79,15 +75,15 @@ export async function PUT(request, { params }) {
 
 export async function DELETE(request, { params }) {
   try {
-    const db = getDb();
+    const supabase = getSupabase();
     const { id } = await params;
     
-    const project = db.prepare('SELECT name FROM projects WHERE id = ?').get(id);
+    const { data: project } = await supabase.from('projects').select('name').eq('id', id).single();
     
     if (project) {
-      db.prepare('DELETE FROM projects WHERE id = ?').run(id);
+      await supabase.from('projects').delete().eq('id', id);
       try {
-        db.prepare('INSERT INTO activity_log (action, entity_type, entity_id, entity_name) VALUES (?, ?, ?, ?)').run('deleted', 'project', id, project.name);
+        await supabase.from('activity_log').insert([{ action: 'deleted', entity_type: 'project', entity_id: id, entity_name: project.name }]);
       } catch (e) {
         console.error("Activity log error:", e);
       }

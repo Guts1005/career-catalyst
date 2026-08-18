@@ -1,4 +1,4 @@
-import { getDb } from '@/lib/db';
+import { getSupabase } from '@/lib/supabase';
 import { NextResponse } from 'next/server';
 import {
   sanitizeObject,
@@ -15,31 +15,27 @@ import {
 
 export async function GET(request) {
   try {
-    const db = getDb();
+    const supabase = getSupabase();
     const { searchParams } = new URL(request.url);
     const type = searchParams.get('type');
     const topic = searchParams.get('topic');
     const completed = searchParams.get('completed');
     
-    let query = 'SELECT * FROM resources WHERE 1=1';
-    const params = [];
+    let query = supabase.from('resources').select('*');
     
     if (type) {
-      query += ' AND type = ?';
-      params.push(type);
+      query = query.eq('type', type);
     }
     if (topic) {
-      query += ' AND topic LIKE ?';
-      params.push(`%${topic}%`);
+      query = query.ilike('topic', `%${topic}%`);
     }
     if (completed !== null) {
-      query += ' AND completed = ?';
-      params.push(parseInt(completed, 10));
+      query = query.eq('completed', parseInt(completed, 10));
     }
     
-    query += ' ORDER BY created_at DESC';
+    const { data: resources, error: queryError } = await query.order('created_at', { ascending: false });
+    if (queryError) throw queryError;
     
-    const resources = db.prepare(query).all(...params);
     return NextResponse.json(resources);
   } catch (error) {
     console.error('Failed to fetch resources:', error);
@@ -49,7 +45,7 @@ export async function GET(request) {
 
 export async function POST(request) {
   try {
-    const db = getDb();
+    const supabase = getSupabase();
     
     let body;
     try {
@@ -76,28 +72,27 @@ export async function POST(request) {
 
     const { title, url, type, topic, completed = 0, rating, notes } = body;
     
-    const result = db.prepare(`
-      INSERT INTO resources (title, url, type, topic, completed, rating, notes)
-      VALUES (?, ?, ?, ?, ?, ?, ?)
-    `).run(
+    const { data: newResource, error: insertError } = await supabase.from('resources').insert([{
       title,
-      url || null,
-      type || 'course',
-      topic || null,
-      completed ? 1 : 0,
-      rating || null,
-      notes || null
-    );
+      url: url || null,
+      type: type || 'course',
+      topic: topic || null,
+      completed: completed ? 1 : 0,
+      rating: rating || null,
+      notes: notes || null
+    }]).select().single();
     
-    const insertedId = result.lastInsertRowid;
+    if (insertError) throw insertError;
+    
+    const insertedId = newResource.id;
     
     // Log activity
-    db.prepare(`
-      INSERT INTO activity_log (action, entity_type, entity_id, entity_name) 
-      VALUES (?, ?, ?, ?)
-    `).run('added', 'resource', insertedId, title);
-    
-    const newResource = db.prepare('SELECT * FROM resources WHERE id = ?').get(insertedId);
+    await supabase.from('activity_log').insert([{
+      action: 'added',
+      entity_type: 'resource',
+      entity_id: insertedId,
+      entity_name: title
+    }]);
     
     return NextResponse.json(newResource, { status: 201 });
   } catch (error) {

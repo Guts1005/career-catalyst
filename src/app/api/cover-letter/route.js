@@ -1,4 +1,4 @@
-import { getDb } from '@/lib/db';
+import { getSupabase } from '@/lib/supabase';
 import { NextResponse } from 'next/server';
 import {
   sanitizeObject,
@@ -15,7 +15,7 @@ import {
 
 export async function POST(request) {
   try {
-    const db = getDb();
+    const supabase = getSupabase();
     let body;
     try {
       body = await parseAndValidateBody(request);
@@ -37,10 +37,17 @@ export async function POST(request) {
     const { company, role, job_description, required_skills } = body;
 
     // Fetch user context from database
-    const resume = db.prepare('SELECT * FROM resumes ORDER BY id DESC LIMIT 1').get();
-    const certs = db.prepare("SELECT name, provider FROM certifications WHERE status = 'completed'").all();
-    const projects = db.prepare('SELECT name, tech_stack, impact FROM projects ORDER BY id DESC LIMIT 2').all();
-    const topSkills = db.prepare('SELECT name FROM skills ORDER BY current_level DESC LIMIT 6').all().map(s => s.name).join(', ');
+    const { data: resumes } = await supabase.from('resumes').select('*').order('id', { ascending: false }).limit(1);
+    const resume = resumes && resumes.length > 0 ? resumes[0] : null;
+
+    const { data: certsData } = await supabase.from('certifications').select('name, provider').eq('status', 'completed');
+    const certs = certsData || [];
+
+    const { data: projectsData } = await supabase.from('projects').select('name, tech_stack, impact').order('id', { ascending: false }).limit(2);
+    const projects = projectsData || [];
+
+    const { data: skillsData } = await supabase.from('skills').select('name').order('current_level', { ascending: false }).limit(6);
+    const topSkills = (skillsData || []).map(s => s.name).join(', ');
 
     const fullName = resume?.full_name || 'Sharvin Neve';
     const email = resume?.email || 'sharvinneve67@gmail.com';
@@ -80,14 +87,20 @@ Best,
 ${fullName}`;
 
     // Store in database
-    const insert = db.prepare(`
-      INSERT INTO cover_letters (company, role, cover_letter_text, recruiter_pitch_text)
-      VALUES (?, ?, ?, ?)
-    `).run(company, role, coverLetterText, recruiterPitchText);
+    const { data: insert, error: insertError } = await supabase.from('cover_letters').insert([{
+      company,
+      role,
+      cover_letter_text: coverLetterText,
+      recruiter_pitch_text: recruiterPitchText
+    }]).select().single();
+    if (insertError) throw insertError;
 
-    db.prepare('INSERT INTO activity_log (action, entity_type, entity_id, entity_name) VALUES (?, ?, ?, ?)').run(
-      'Generated Tailored Cover Letter', 'cover_letter', insert.lastInsertRowid, `${role} at ${company}`
-    );
+    await supabase.from('activity_log').insert([{
+      action: 'Generated Tailored Cover Letter',
+      entity_type: 'cover_letter',
+      entity_id: insert.id,
+      entity_name: `${role} at ${company}`
+    }]);
 
     return NextResponse.json({
       success: true,

@@ -1,10 +1,11 @@
-import { getDb } from '@/lib/db';
+import { getSupabase } from '@/lib/supabase';
 import { NextResponse } from 'next/server';
 
 export async function GET() {
   try {
-    const db = getDb();
-    const analyses = db.prepare('SELECT id, username, analyzed_at FROM github_analyses ORDER BY analyzed_at DESC LIMIT 50').all();
+    const supabase = getSupabase();
+    const { data: analyses, error } = await supabase.from('github_analyses').select('id, username, analyzed_at').order('analyzed_at', { ascending: false }).limit(50);
+    if (error) throw error;
     return NextResponse.json(analyses);
   } catch (error) {
     console.error('Error fetching analyses:', error);
@@ -98,23 +99,25 @@ export async function POST(request) {
         score
     };
 
-    const db = getDb();
-    const result = db.prepare(`
-        INSERT INTO github_analyses (
-            username, profile_data, repo_data, language_stats, contribution_stats, recommendations
-        ) VALUES (?, ?, ?, ?, ?, ?)
-    `).run(
-        username,
-        JSON.stringify(profileData),
-        JSON.stringify(repoData),
-        JSON.stringify(languages),
-        JSON.stringify(contributionStats),
-        JSON.stringify(recommendations)
-    );
+    const supabase = getSupabase();
+    const { data: insert, error: insertError } = await supabase.from('github_analyses').insert([{
+      username,
+      profile_data: JSON.stringify(profileData),
+      repo_data: JSON.stringify(repoData),
+      language_stats: JSON.stringify(languages),
+      contribution_stats: JSON.stringify(contributionStats),
+      recommendations: JSON.stringify(recommendations)
+    }]).select().single();
+    if (insertError) throw insertError;
 
-    db.prepare('INSERT INTO activity_log (action, entity_type, entity_id, entity_name) VALUES (?, ?, ?, ?)').run('analyzed_github', 'github_analysis', result.lastInsertRowid, username);
+    await supabase.from('activity_log').insert([{
+      action: 'analyzed_github',
+      entity_type: 'github_analysis',
+      entity_id: insert.id,
+      entity_name: username
+    }]);
 
-    return NextResponse.json({ id: result.lastInsertRowid });
+    return NextResponse.json({ id: insert.id });
   } catch (error) {
     console.error('Error analyzing github:', error);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });

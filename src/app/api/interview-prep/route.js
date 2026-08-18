@@ -1,4 +1,4 @@
-import { getDb } from '@/lib/db';
+import { getSupabase } from '@/lib/supabase';
 import { NextResponse } from 'next/server';
 import {
   sanitizeObject,
@@ -15,47 +15,56 @@ import {
 
 export async function GET(request) {
   try {
-    const db = getDb();
+    const supabase = getSupabase();
     const { searchParams } = new URL(request.url);
     const category = searchParams.get('category');
     const difficulty = searchParams.get('difficulty');
 
-    let query = `
-      SELECT 
-        q.*,
-        COALESCE(p.status, 'unprepared') as user_status,
-        p.notes as user_notes,
-        p.last_reviewed_at
-      FROM interview_questions q
-      LEFT JOIN user_question_progress p ON q.id = p.question_id
-      WHERE 1=1
-    `;
-    const params = [];
+    let query = supabase.from('interview_questions').select('*, user_question_progress(status, notes, last_reviewed_at)');
 
     if (category && category !== 'All') {
-      query += ` AND q.category = ?`;
-      params.push(category);
+      query = query.eq('category', category);
     }
 
     if (difficulty && difficulty !== 'All') {
-      query += ` AND q.difficulty = ?`;
-      params.push(difficulty.toLowerCase());
+      query = query.eq('difficulty', difficulty.toLowerCase());
     }
 
-    query += ` ORDER BY q.id ASC`;
+    const { data: rawQuestions, error: questionsError } = await query.order('id', { ascending: true });
+    if (questionsError) throw questionsError;
 
-    const questions = db.prepare(query).all(...params);
+    const questions = rawQuestions.map(q => {
+      const progress = Array.isArray(q.user_question_progress) ? q.user_question_progress[0] : q.user_question_progress;
+      const { user_question_progress, ...rest } = q;
+      return {
+        ...rest,
+        user_status: progress?.status || 'unprepared',
+        user_notes: progress?.notes || null,
+        last_reviewed_at: progress?.last_reviewed_at || null
+      };
+    });
 
     // Compute stats
-    const stats = db.prepare(`
-      SELECT 
-        COUNT(*) as total_questions,
-        SUM(CASE WHEN p.status = 'mastered' THEN 1 ELSE 0 END) as mastered_count,
-        SUM(CASE WHEN p.status = 'reviewing' THEN 1 ELSE 0 END) as reviewing_count,
-        SUM(CASE WHEN p.status = 'unprepared' OR p.status IS NULL THEN 1 ELSE 0 END) as unprepared_count
-      FROM interview_questions q
-      LEFT JOIN user_question_progress p ON q.id = p.question_id
-    `).get();
+    const { data: allQuestionsForStats, error: statsError } = await supabase
+      .from('interview_questions')
+      .select('id, user_question_progress(status)');
+    
+    if (statsError) throw statsError;
+
+    const stats = {
+      total_questions: allQuestionsForStats.length,
+      mastered_count: 0,
+      reviewing_count: 0,
+      unprepared_count: 0
+    };
+
+    allQuestionsForStats.forEach(q => {
+      const p = Array.isArray(q.user_question_progress) ? q.user_question_progress[0] : q.user_question_progress;
+      const status = p?.status || 'unprepared';
+      if (status === 'mastered') stats.mastered_count++;
+      else if (status === 'reviewing') stats.reviewing_count++;
+      else stats.unprepared_count++;
+    });
 
     return NextResponse.json({ questions, stats });
   } catch (error) {
@@ -66,7 +75,7 @@ export async function GET(request) {
 
 export async function POST(request) {
   try {
-    const db = getDb();
+    const supabase = getSupabase();
     let body;
     try {
       body = await parseAndValidateBody(request);
@@ -92,24 +101,24 @@ export async function POST(request) {
 
     const { category, difficulty, question, answer, key_takeaways, code_snippet, tags } = body;
 
-    const result = db.prepare(`
-      INSERT INTO interview_questions (category, difficulty, question, answer, key_takeaways, code_snippet, tags)
-      VALUES (?, ?, ?, ?, ?, ?, ?)
-    `).run(
-      category || 'Machine Learning',
-      difficulty || 'medium',
+    const { data: newQuestion, error: insertError } = await supabase.from('interview_questions').insert([{
+      category: category || 'Machine Learning',
+      difficulty: difficulty || 'medium',
       question,
       answer,
-      key_takeaways || '',
-      code_snippet || '',
-      tags || ''
-    );
+      key_takeaways: key_takeaways || '',
+      code_snippet: code_snippet || '',
+      tags: tags || ''
+    }]).select().single();
+    
+    if (insertError) throw insertError;
 
-    db.prepare('INSERT INTO user_question_progress (question_id, status) VALUES (?, ?)').run(
-      result.lastInsertRowid, 'unprepared'
-    );
+    await supabase.from('user_question_progress').insert([{
+      question_id: newQuestion.id,
+      status: 'unprepared'
+    }]);
 
-    return NextResponse.json({ id: result.lastInsertRowid, message: 'Question created' }, { status: 201 });
+    return NextResponse.json({ id: newQuestion.id, message: 'Question created' }, { status: 201 });
   } catch (error) {
     console.error('Failed to create question:', error);
     return NextResponse.json({ error: error.message }, { status: 500 });

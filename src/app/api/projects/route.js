@@ -1,4 +1,4 @@
-import { getDb } from '@/lib/db';
+import { getSupabase } from '@/lib/supabase';
 import { NextResponse } from 'next/server';
 import { 
   sanitizeObject,
@@ -13,26 +13,27 @@ import {
 
 export async function GET(request) {
   try {
-    const db = getDb();
+    const supabase = getSupabase();
     const { searchParams } = new URL(request.url);
     const status = searchParams.get('status');
     
-    let query = 'SELECT * FROM projects';
-    let params = [];
+    let query = supabase.from('projects').select('*').order('created_at', { ascending: false });
     
     if (status && status !== 'all') {
-      query += ' WHERE status = ?';
-      params.push(status);
+      query = query.eq('status', status);
     }
     
-    query += ' ORDER BY created_at DESC';
+    const [{ data: projects, error: projError }, { data: milestones, error: milesError }] = await Promise.all([
+      query,
+      supabase.from('project_milestones').select('*')
+    ]);
+
+    if (projError) throw projError;
+    if (milesError) throw milesError;
     
-    const projects = db.prepare(query).all(...params);
-    const milestones = db.prepare('SELECT * FROM project_milestones').all();
-    
-    const projectsWithMilestones = projects.map(p => ({
+    const projectsWithMilestones = (projects || []).map(p => ({
       ...p,
-      milestones: milestones.filter(m => m.project_id === p.id)
+      milestones: (milestones || []).filter(m => m.project_id === p.id)
     }));
     
     return NextResponse.json(projectsWithMilestones);
@@ -43,7 +44,7 @@ export async function GET(request) {
 
 export async function POST(request) {
   try {
-    const db = getDb();
+    const supabase = getSupabase();
     
     let body;
     try {
@@ -70,38 +71,28 @@ export async function POST(request) {
 
     const { name, description, status, github_url, live_url, tech_stack, category, impact, start_date, end_date, milestones } = body;
     
-    const insertProject = db.prepare(`
-      INSERT INTO projects (name, description, status, github_url, live_url, tech_stack, category, impact, start_date, end_date)
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-    `);
+    const { data: result, error: insertError } = await supabase.from('projects').insert([{
+      name, description, status: status || 'planned', github_url: github_url || null, live_url: live_url || null, 
+      tech_stack: tech_stack || null, category: category || null, impact: impact || null, start_date: start_date || null, end_date: end_date || null
+    }]).select().single();
     
-    const result = insertProject.run(
-      name, description, status || 'planned', github_url || null, live_url || null, 
-      tech_stack || null, category || null, impact || null, start_date || null, end_date || null
-    );
-    const projectId = result.lastInsertRowid;
+    if (insertError) throw insertError;
+    
+    const projectId = result.id;
     
     if (milestones && milestones.length > 0) {
-      const insertMilestone = db.prepare(`
-        INSERT INTO project_milestones (project_id, name, due_date)
-        VALUES (?, ?, ?)
-      `);
+      const milestoneInserts = milestones
+        .filter(m => m.name.trim() !== '')
+        .map(m => ({ project_id: projectId, name: m.name, due_date: m.due_date || null }));
       
-      const insertMany = db.transaction((miles) => {
-        for (const m of miles) {
-          if (m.name.trim() !== '') {
-            insertMilestone.run(projectId, m.name, m.due_date || null);
-          }
-        }
-      });
-      
-      insertMany(milestones);
+      if (milestoneInserts.length > 0) {
+        await supabase.from('project_milestones').insert(milestoneInserts);
+      }
     }
     
     try {
-      db.prepare('INSERT INTO activity_log (action, entity_type, entity_id, entity_name) VALUES (?, ?, ?, ?)').run('created', 'project', projectId, name);
+      await supabase.from('activity_log').insert([{ action: 'created', entity_type: 'project', entity_id: projectId, entity_name: name }]);
     } catch (e) {
-      // Activity log table might not exist or other issues, ignore to not fail project creation
       console.error("Activity log error:", e);
     }
     

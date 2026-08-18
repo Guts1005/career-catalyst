@@ -1,4 +1,4 @@
-import { getDb } from '@/lib/db';
+import { getSupabase } from '@/lib/supabase';
 import { NextResponse } from 'next/server';
 import {
   sanitizeObject,
@@ -15,42 +15,54 @@ import {
 
 export async function GET() {
   try {
-    const db = getDb();
+    const supabase = getSupabase();
 
     // Fetch primary resume record or fallback
-    let resume = db.prepare('SELECT * FROM resumes ORDER BY id ASC LIMIT 1').get();
+    let { data: resumes } = await supabase.from('resumes').select('*').order('id', { ascending: true }).limit(1);
+    let resume = resumes && resumes.length > 0 ? resumes[0] : null;
+    
     if (!resume) {
-      db.prepare(`
-        INSERT INTO resumes (title, full_name, email, summary)
-        VALUES ('Data Science Resume', 'Sharvin Neve', 'sharvinneve67@gmail.com', 'Aspiring Machine Learning Engineer')
-      `).run();
-      resume = db.prepare('SELECT * FROM resumes ORDER BY id ASC LIMIT 1').get();
+      await supabase.from('resumes').insert([{
+        title: 'Data Science Resume',
+        full_name: 'Sharvin Neve',
+        email: 'sharvinneve67@gmail.com',
+        summary: 'Aspiring Machine Learning Engineer'
+      }]);
+      const { data: newResumes } = await supabase.from('resumes').select('*').order('id', { ascending: true }).limit(1);
+      resume = newResumes ? newResumes[0] : null;
     }
 
     // Pull completed/in-progress certifications from database
-    const certifications = db.prepare(`
-      SELECT id, name, provider, status, progress, url, category 
-      FROM certifications 
-      WHERE status IN ('completed', 'in_progress')
-      ORDER BY status DESC, progress DESC
-    `).all();
+    const { data: certsData } = await supabase.from('certifications')
+      .select('id, name, provider, status, progress, url, category')
+      .in('status', ['completed', 'in_progress'])
+      .order('status', { ascending: false })
+      .order('progress', { ascending: false });
+    const certifications = certsData || [];
 
     // Pull projects with completed milestones
-    const projects = db.prepare(`
-      SELECT p.*, 
-        (SELECT COUNT(*) FROM project_milestones pm WHERE pm.project_id = p.id AND pm.completed = 1) as completed_milestones,
-        (SELECT COUNT(*) FROM project_milestones pm WHERE pm.project_id = p.id) as total_milestones
-      FROM projects p
-      ORDER BY p.status DESC, p.created_at DESC
-    `).all();
+    const { data: rawProjects } = await supabase.from('projects')
+      .select('*, project_milestones(completed)')
+      .order('status', { ascending: false })
+      .order('created_at', { ascending: false });
+    
+    const projects = (rawProjects || []).map(p => {
+      const ms = p.project_milestones || [];
+      const { project_milestones, ...rest } = p;
+      return {
+        ...rest,
+        completed_milestones: ms.filter(m => m.completed).length,
+        total_milestones: ms.length
+      };
+    });
 
     // Pull skills grouped by category
-    const skills = db.prepare(`
-      SELECT name, category, current_level, target_level, importance
-      FROM skills
-      WHERE current_level > 20
-      ORDER BY category ASC, current_level DESC
-    `).all();
+    const { data: skillsData } = await supabase.from('skills')
+      .select('name, category, current_level, target_level, importance')
+      .gt('current_level', 20)
+      .order('category', { ascending: true })
+      .order('current_level', { ascending: false });
+    const skills = skillsData || [];
 
     // Format skills grouped by category
     const skillsByCategory = {};
@@ -81,7 +93,7 @@ export async function GET() {
 
 export async function PUT(request) {
   try {
-    const db = getDb();
+    const supabase = getSupabase();
     let body;
     try {
       body = await parseAndValidateBody(request);
@@ -120,36 +132,36 @@ export async function PUT(request) {
       experience
     } = body;
 
-    const current = db.prepare('SELECT id FROM resumes ORDER BY id ASC LIMIT 1').get();
+    const { data: resumes } = await supabase.from('resumes').select('id').order('id', { ascending: true }).limit(1);
+    const current = resumes && resumes.length > 0 ? resumes[0] : null;
     if (!current) {
       return NextResponse.json({ error: 'No resume record found' }, { status: 404 });
     }
 
-    db.prepare(`
-      UPDATE resumes
-      SET title = ?, full_name = ?, email = ?, phone = ?, location = ?,
-          linkedin_url = ?, github_url = ?, portfolio_url = ?, summary = ?,
-          template_name = ?, education_json = ?, experience_json = ?, updated_at = CURRENT_TIMESTAMP
-      WHERE id = ?
-    `).run(
-      title || 'Primary Resume',
-      full_name || '',
-      email || '',
-      phone || '',
-      location || '',
-      linkedin_url || '',
-      github_url || '',
-      portfolio_url || '',
-      summary || '',
-      template_name || 'modern-ats',
-      JSON.stringify(education || []),
-      JSON.stringify(experience || []),
-      current.id
-    );
+    const { error: updateError } = await supabase.from('resumes').update({
+      title: title || 'Primary Resume',
+      full_name: full_name || '',
+      email: email || '',
+      phone: phone || '',
+      location: location || '',
+      linkedin_url: linkedin_url || '',
+      github_url: github_url || '',
+      portfolio_url: portfolio_url || '',
+      summary: summary || '',
+      template_name: template_name || 'modern-ats',
+      education_json: JSON.stringify(education || []),
+      experience_json: JSON.stringify(experience || []),
+      updated_at: new Date().toISOString()
+    }).eq('id', current.id);
+    
+    if (updateError) throw updateError;
 
-    db.prepare('INSERT INTO activity_log (action, entity_type, entity_id, entity_name) VALUES (?, ?, ?, ?)').run(
-      'updated', 'resume', current.id, title || 'Resume'
-    );
+    await supabase.from('activity_log').insert([{
+      action: 'updated',
+      entity_type: 'resume',
+      entity_id: current.id,
+      entity_name: title || 'Resume'
+    }]);
 
     return NextResponse.json({ success: true, message: 'Resume saved successfully' });
   } catch (error) {

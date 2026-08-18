@@ -1,4 +1,4 @@
-import { getDb } from '@/lib/db';
+import { getSupabase } from '@/lib/supabase';
 import { NextResponse } from 'next/server';
 import {
   sanitizeObject,
@@ -15,7 +15,7 @@ import {
 
 export async function PUT(request, { params }) {
   try {
-    const db = getDb();
+    const supabase = getSupabase();
     const { id } = await params;
     
     let body;
@@ -35,8 +35,8 @@ export async function PUT(request, { params }) {
       return NextResponse.json({ error: 'Invalid type enum' }, { status: 400 });
     }
     
-    const existing = db.prepare('SELECT * FROM resources WHERE id = ?').get(id);
-    if (!existing) {
+    const { data: existing, error: fetchError } = await supabase.from('resources').select('*').eq('id', id).single();
+    if (fetchError || !existing) {
       return NextResponse.json({ error: 'Resource not found' }, { status: 404 });
     }
     
@@ -48,11 +48,11 @@ export async function PUT(request, { params }) {
     const rating = body.rating !== undefined ? body.rating : existing.rating;
     const notes = body.notes !== undefined ? body.notes : existing.notes;
     
-    db.prepare(`
-      UPDATE resources
-      SET title = ?, url = ?, type = ?, topic = ?, completed = ?, rating = ?, notes = ?
-      WHERE id = ?
-    `).run(title, url, type, topic, completed, rating, notes, id);
+    const { data: updated, error: updateError } = await supabase.from('resources').update({
+      title, url, type, topic, completed, rating, notes
+    }).eq('id', id).select().single();
+    
+    if (updateError) throw updateError;
     
     let action = 'updated';
     if (existing.completed === 0 && completed === 1) {
@@ -60,12 +60,13 @@ export async function PUT(request, { params }) {
     }
     
     // Log activity
-    db.prepare(`
-      INSERT INTO activity_log (action, entity_type, entity_id, entity_name) 
-      VALUES (?, ?, ?, ?)
-    `).run(action, 'resource', id, title);
+    await supabase.from('activity_log').insert([{
+      action,
+      entity_type: 'resource',
+      entity_id: id,
+      entity_name: title
+    }]);
     
-    const updated = db.prepare('SELECT * FROM resources WHERE id = ?').get(id);
     return NextResponse.json(updated);
   } catch (error) {
     console.error('Failed to update resource:', error);
@@ -75,21 +76,24 @@ export async function PUT(request, { params }) {
 
 export async function DELETE(request, { params }) {
   try {
-    const db = getDb();
+    const supabase = getSupabase();
     const { id } = await params;
     
-    const existing = db.prepare('SELECT * FROM resources WHERE id = ?').get(id);
-    if (!existing) {
+    const { data: existing, error: fetchError } = await supabase.from('resources').select('*').eq('id', id).single();
+    if (fetchError || !existing) {
       return NextResponse.json({ error: 'Resource not found' }, { status: 404 });
     }
     
-    db.prepare('DELETE FROM resources WHERE id = ?').run(id);
+    const { error: deleteError } = await supabase.from('resources').delete().eq('id', id);
+    if (deleteError) throw deleteError;
     
     // Log activity
-    db.prepare(`
-      INSERT INTO activity_log (action, entity_type, entity_id, entity_name) 
-      VALUES (?, ?, ?, ?)
-    `).run('deleted', 'resource', id, existing.title);
+    await supabase.from('activity_log').insert([{
+      action: 'deleted',
+      entity_type: 'resource',
+      entity_id: id,
+      entity_name: existing.title
+    }]);
     
     return NextResponse.json({ success: true });
   } catch (error) {

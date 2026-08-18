@@ -1,13 +1,13 @@
-import { getDb } from '@/lib/db';
+import { getSupabase } from '@/lib/supabase';
 import { NextResponse } from 'next/server';
 
 export async function GET(request, { params }) {
   try {
-    const db = getDb();
+    const supabase = getSupabase();
     const { id } = await params;
-    const analysis = db.prepare('SELECT * FROM github_analyses WHERE id = ?').get(id);
+    const { data: analysis, error: fetchError } = await supabase.from('github_analyses').select('*').eq('id', id).single();
     
-    if (!analysis) {
+    if (fetchError || !analysis) {
       return NextResponse.json({ error: 'Analysis not found' }, { status: 404 });
     }
 
@@ -27,9 +27,9 @@ export async function GET(request, { params }) {
 
 export async function DELETE(request, { params }) {
   try {
-    const db = getDb();
+    const supabase = getSupabase();
     const { id } = await params;
-    db.prepare('DELETE FROM github_analyses WHERE id = ?').run(id);
+    await supabase.from('github_analyses').delete().eq('id', id);
     return NextResponse.json({ success: true });
   } catch (error) {
     console.error('Error deleting analysis:', error);

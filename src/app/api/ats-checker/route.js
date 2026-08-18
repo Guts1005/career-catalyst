@@ -1,4 +1,4 @@
-import { getDb } from '@/lib/db';
+import { getSupabase } from '@/lib/supabase';
 import { NextResponse } from 'next/server';
 
 const keywords = [
@@ -96,7 +96,7 @@ function analyzeResume(content, jd) {
 
 export async function POST(request) {
   try {
-    const db = getDb();
+    const supabase = getSupabase();
     const body = await request.json();
     const { content, jd } = body;
     
@@ -106,28 +106,26 @@ export async function POST(request) {
     
     const analysis = analyzeResume(content, jd);
     
-    const stmt = db.prepare(`
-      INSERT INTO resume_checks 
-      (content, score, feedback, keyword_matches, missing_keywords, format_issues) 
-      VALUES (?, ?, ?, ?, ?, ?)
-    `);
-    
-    const info = stmt.run(
-      content, 
-      analysis.score, 
-      analysis.feedback, 
-      analysis.keyword_matches, 
-      analysis.missing_keywords, 
-      analysis.format_issues
-    );
+    const { data: info, error: insertError } = await supabase.from('resume_checks').insert([{
+      content,
+      score: analysis.score,
+      feedback: analysis.feedback,
+      keyword_matches: analysis.keyword_matches,
+      missing_keywords: analysis.missing_keywords,
+      format_issues: analysis.format_issues
+    }]).select().single();
+    if (insertError) throw insertError;
     
     // Log activity
-    db.prepare('INSERT INTO activity_log (action, entity_type, entity_id, entity_name) VALUES (?, ?, ?, ?)').run(
-      'analyzed_resume', 'ats_check', info.lastInsertRowid, 'Resume Check'
-    );
+    await supabase.from('activity_log').insert([{
+      action: 'analyzed_resume',
+      entity_type: 'ats_check',
+      entity_id: info.id,
+      entity_name: 'Resume Check'
+    }]);
     
     return NextResponse.json({
-      id: info.lastInsertRowid,
+      id: info.id,
       ...analysis
     });
   } catch (error) {
@@ -138,8 +136,9 @@ export async function POST(request) {
 
 export async function GET(request) {
   try {
-    const db = getDb();
-    const checks = db.prepare('SELECT * FROM resume_checks ORDER BY created_at DESC').all();
+    const supabase = getSupabase();
+    const { data: checks, error: fetchError } = await supabase.from('resume_checks').select('*').order('created_at', { ascending: false });
+    if (fetchError) throw fetchError;
     
     return NextResponse.json(checks);
   } catch (error) {

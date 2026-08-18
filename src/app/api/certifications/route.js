@@ -1,4 +1,4 @@
-import { getDb } from '@/lib/db';
+import { getSupabase } from '@/lib/supabase';
 import { NextResponse } from 'next/server';
 import { 
   sanitizeObject,
@@ -14,34 +14,27 @@ import {
 
 export async function GET(request) {
   try {
-    const db = getDb();
+    const supabase = getSupabase();
     const { searchParams } = new URL(request.url);
     const status = searchParams.get('status');
     const search = searchParams.get('search');
     
-    let query = 'SELECT * FROM certifications';
-    const params = [];
+    let query = supabase.from('certifications').select('*');
     
-    const conditions = [];
     if (status && status !== 'all') {
-      conditions.push('status = ?');
-      params.push(status);
+      query = query.eq('status', status);
     }
     
     if (search) {
-      conditions.push('(name LIKE ? OR provider LIKE ?)');
-      params.push(`%${search}%`);
-      params.push(`%${search}%`);
+      query = query.or(`name.ilike.%${search}%,provider.ilike.%${search}%`);
     }
     
-    if (conditions.length > 0) {
-      query += ' WHERE ' + conditions.join(' AND ');
-    }
+    query = query.order('created_at', { ascending: false });
     
-    query += ' ORDER BY created_at DESC';
+    const { data: certifications, error } = await query;
+    if (error) throw error;
     
-    const certifications = db.prepare(query).all(...params);
-    return NextResponse.json(certifications);
+    return NextResponse.json(certifications || []);
   } catch (error) {
     console.error('Failed to fetch certifications:', error);
     return NextResponse.json({ error: 'Failed to fetch certifications' }, { status: 500 });
@@ -50,7 +43,7 @@ export async function GET(request) {
 
 export async function POST(request) {
   try {
-    const db = getDb();
+    const supabase = getSupabase();
     let body;
     try {
       body = await parseAndValidateBody(request);
@@ -95,24 +88,18 @@ export async function POST(request) {
       estimated_hours
     } = body;
 
-    const stmt = db.prepare(`
-      INSERT INTO certifications (
-        name, provider, url, status, progress, priority, deadline, notes, category, estimated_hours
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-    `);
-
-    const result = stmt.run(
+    const { data: result, error: insertError } = await supabase.from('certifications').insert([{
       name, provider, url, status, progress, priority, deadline, notes, category, estimated_hours
-    );
+    }]).select().single();
+
+    if (insertError) throw insertError;
 
     const action = 'Created certification';
-    db.prepare('INSERT INTO activity_log (action, entity_type, entity_id, entity_name) VALUES (?, ?, ?, ?)').run(
-      action, 'certification', result.lastInsertRowid, name
-    );
+    await supabase.from('activity_log').insert([{
+      action, entity_type: 'certification', entity_id: result.id, entity_name: name
+    }]);
 
-    const newCert = db.prepare('SELECT * FROM certifications WHERE id = ?').get(result.lastInsertRowid);
-    
-    return NextResponse.json(newCert, { status: 201 });
+    return NextResponse.json(result, { status: 201 });
   } catch (error) {
     console.error('Failed to create certification:', error);
     return NextResponse.json({ error: 'Failed to create certification' }, { status: 500 });

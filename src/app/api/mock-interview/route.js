@@ -1,4 +1,4 @@
-import { getDb } from '@/lib/db';
+import { getSupabase } from '@/lib/supabase';
 import { NextResponse } from 'next/server';
 import {
   sanitizeObject,
@@ -59,12 +59,13 @@ const MOCK_QUESTION_SETS = {
 
 export async function GET(request) {
   try {
-    const db = getDb();
+    const supabase = getSupabase();
     const { searchParams } = new URL(request.url);
     const track = searchParams.get('track') || 'ml_system_design';
 
     const questions = MOCK_QUESTION_SETS[track] || MOCK_QUESTION_SETS.ml_system_design;
-    const history = db.prepare('SELECT * FROM mock_interview_sessions ORDER BY completed_at DESC LIMIT 10').all();
+    const { data: history, error } = await supabase.from('mock_interview_sessions').select('*').order('completed_at', { ascending: false }).limit(10);
+    if (error) throw error;
 
     return NextResponse.json({ questions, history });
   } catch (error) {
@@ -75,7 +76,7 @@ export async function GET(request) {
 
 export async function POST(request) {
   try {
-    const db = getDb();
+    const supabase = getSupabase();
     let body;
     try {
       body = await parseAndValidateBody(request);
@@ -137,20 +138,21 @@ export async function POST(request) {
 
     const finalScore = answers?.length ? Math.round(totalScore / answers.length) : 75;
 
-    const result = db.prepare(`
-      INSERT INTO mock_interview_sessions (track, duration_minutes, score, feedback_json, questions_answered)
-      VALUES (?, ?, ?, ?, ?)
-    `).run(
-      track || 'ML System Design',
-      duration_minutes || 15,
-      finalScore,
-      JSON.stringify(feedback),
-      answers?.length || 1
-    );
+    const { data: insert, error: insertError } = await supabase.from('mock_interview_sessions').insert([{
+      track: track || 'ML System Design',
+      duration_minutes: duration_minutes || 15,
+      score: finalScore,
+      feedback_json: JSON.stringify(feedback),
+      questions_answered: answers?.length || 1
+    }]).select().single();
+    if (insertError) throw insertError;
 
-    db.prepare('INSERT INTO activity_log (action, entity_type, entity_id, entity_name) VALUES (?, ?, ?, ?)').run(
-      'Completed Mock Interview', 'mock_interview', result.lastInsertRowid, `${track} (${finalScore}% score)`
-    );
+    await supabase.from('activity_log').insert([{
+      action: 'Completed Mock Interview',
+      entity_type: 'mock_interview',
+      entity_id: insert.id,
+      entity_name: `${track} (${finalScore}% score)`
+    }]);
 
     return NextResponse.json({ success: true, score: finalScore, feedback });
   } catch (error) {

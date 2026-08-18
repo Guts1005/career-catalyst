@@ -1,4 +1,4 @@
-import { getDb } from '@/lib/db';
+import { getSupabase } from '@/lib/supabase';
 import { NextResponse } from 'next/server';
 import { 
   sanitizeObject,
@@ -14,20 +14,20 @@ import {
 
 export async function GET(request) {
   try {
-    const db = getDb();
+    const supabase = getSupabase();
     const { searchParams } = new URL(request.url);
     const category = searchParams.get('category');
     
-    let query = 'SELECT * FROM skills ORDER BY category, name';
-    let params = [];
+    let query = supabase.from('skills').select('*').order('category').order('name');
     
     if (category) {
-      query = 'SELECT * FROM skills WHERE category = ? ORDER BY name';
-      params = [category];
+      query = supabase.from('skills').select('*').eq('category', category).order('name');
     }
     
-    const skills = db.prepare(query).all(...params);
-    return NextResponse.json(skills);
+    const { data: skills, error } = await query;
+    if (error) throw error;
+    
+    return NextResponse.json(skills || []);
   } catch (error) {
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
@@ -35,7 +35,7 @@ export async function GET(request) {
 
 export async function POST(request) {
   try {
-    const db = getDb();
+    const supabase = getSupabase();
     
     let body;
     try {
@@ -70,17 +70,17 @@ export async function POST(request) {
 
     const { name, category, current_level, target_level, importance } = body;
     
-    const result = db.prepare(`
-      INSERT INTO skills (name, category, current_level, target_level, importance)
-      VALUES (?, ?, ?, ?, ?)
-    `).run(name, category, current_level || 0, target_level || 100, importance || 'medium');
+    const { data: result, error: insertError } = await supabase.from('skills').insert([{
+      name, category, current_level: current_level || 0, target_level: target_level || 100, importance: importance || 'medium'
+    }]).select().single();
     
-    db.prepare(`
-      INSERT INTO activity_log (action, entity_type, entity_id, entity_name) 
-      VALUES (?, ?, ?, ?)
-    `).run('Create Skill', 'skill', result.lastInsertRowid, name);
+    if (insertError) throw insertError;
+
+    await supabase.from('activity_log').insert([{
+      action: 'Create Skill', entity_type: 'skill', entity_id: result.id, entity_name: name
+    }]);
     
-    return NextResponse.json({ id: result.lastInsertRowid, ...body }, { status: 201 });
+    return NextResponse.json({ id: result.id, ...body }, { status: 201 });
   } catch (error) {
     return NextResponse.json({ error: error.message }, { status: 500 });
   }

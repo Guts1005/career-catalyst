@@ -1,4 +1,4 @@
-import { getDb } from '@/lib/db';
+import { getSupabase } from '@/lib/supabase';
 import { NextResponse } from 'next/server';
 
 const PROJECT_BLUEPRINTS = {
@@ -134,7 +134,7 @@ export async function GET(request) {
 
 export async function POST(request) {
   try {
-    const db = getDb();
+    const supabase = getSupabase();
     const body = await request.json();
     const { name, category, summary, tech_stack, impact, milestones } = body;
 
@@ -142,34 +142,34 @@ export async function POST(request) {
       return NextResponse.json({ error: 'Project name is required' }, { status: 400 });
     }
 
-    const insertProject = db.prepare(`
-      INSERT INTO projects (name, description, status, tech_stack, category, impact)
-      VALUES (?, ?, 'in_progress', ?, ?, ?)
-    `);
-
-    const result = insertProject.run(
+    const { data: result, error: insertError } = await supabase.from('projects').insert([{
       name,
-      summary || '',
-      tech_stack || '',
-      category || 'Data Science',
-      impact || ''
-    );
+      description: summary || '',
+      status: 'in_progress',
+      tech_stack: tech_stack || '',
+      category: category || 'Data Science',
+      impact: impact || ''
+    }]).select().single();
+    
+    if (insertError) throw insertError;
 
-    const projectId = result.lastInsertRowid;
+    const projectId = result.id;
 
     if (Array.isArray(milestones) && milestones.length > 0) {
-      const insertMilestone = db.prepare(`
-        INSERT INTO project_milestones (project_id, name, completed)
-        VALUES (?, ?, 0)
-      `);
-      for (const m of milestones) {
-        insertMilestone.run(projectId, m);
-      }
+      const milestoneInserts = milestones.map(m => ({
+        project_id: projectId,
+        name: m,
+        completed: 0
+      }));
+      await supabase.from('project_milestones').insert(milestoneInserts);
     }
 
-    db.prepare('INSERT INTO activity_log (action, entity_type, entity_id, entity_name) VALUES (?, ?, ?, ?)').run(
-      'created', 'project', projectId, name
-    );
+    await supabase.from('activity_log').insert([{
+      action: 'created',
+      entity_type: 'project',
+      entity_id: projectId,
+      entity_name: name
+    }]);
 
     return NextResponse.json({ success: true, projectId, message: 'Project added to your portfolio!' });
   } catch (error) {

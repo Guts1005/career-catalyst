@@ -1,14 +1,14 @@
-import { getDb } from '@/lib/db';
+import { getSupabase } from '@/lib/supabase';
 import { NextResponse } from 'next/server';
 
 export async function GET(request, { params }) {
   try {
     const { id } = await params;
-    const db = getDb();
+    const supabase = getSupabase();
     
-    const check = db.prepare('SELECT * FROM resume_checks WHERE id = ?').get(id);
+    const { data: check, error: fetchError } = await supabase.from('resume_checks').select('*').eq('id', id).single();
     
-    if (!check) {
+    if (fetchError || !check) {
       return NextResponse.json({ error: 'Check not found' }, { status: 404 });
     }
     
@@ -21,9 +21,9 @@ export async function GET(request, { params }) {
 export async function DELETE(request, { params }) {
   try {
     const { id } = await params;
-    const db = getDb();
+    const supabase = getSupabase();
     
-    db.prepare('DELETE FROM resume_checks WHERE id = ?').run(id);
+    await supabase.from('resume_checks').delete().eq('id', id);
     
     return NextResponse.json({ success: true });
   } catch (error) {

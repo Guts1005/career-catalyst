@@ -1,17 +1,24 @@
-import { getDb } from '@/lib/db';
+import { getSupabase } from '@/lib/supabase';
 import { NextResponse } from 'next/server';
 
 export async function GET(request) {
   try {
-    const db = getDb();
+    const supabase = getSupabase();
 
     // Fetch all needed data
-    const certifications = db.prepare('SELECT * FROM certifications').all();
-    const projects = db.prepare('SELECT * FROM projects').all();
-    const skills = db.prepare('SELECT * FROM skills').all();
-    const resources = db.prepare('SELECT * FROM resources').all();
-    const resumeChecks = db.prepare('SELECT * FROM resume_checks ORDER BY created_at ASC').all();
-    const activityLog = db.prepare('SELECT * FROM activity_log ORDER BY created_at DESC LIMIT 10').all();
+    const { data: certsData } = await supabase.from('certifications').select('*');
+    const { data: projData } = await supabase.from('projects').select('*');
+    const { data: skillsData } = await supabase.from('skills').select('*');
+    const { data: resData } = await supabase.from('resources').select('*');
+    const { data: checksData } = await supabase.from('resume_checks').select('*').order('created_at', { ascending: true });
+    const { data: logData } = await supabase.from('activity_log').select('*').order('created_at', { ascending: false }).limit(10);
+    
+    const certifications = certsData || [];
+    const projects = projData || [];
+    const skills = skillsData || [];
+    const resources = resData || [];
+    const resumeChecks = checksData || [];
+    const activityLog = logData || [];
 
     // Aggregations
     

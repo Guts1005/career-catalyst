@@ -1,4 +1,4 @@
-import { getDb } from '@/lib/db';
+import { getSupabase } from '@/lib/supabase';
 import { NextResponse } from 'next/server';
 import {
   sanitizeObject,
@@ -15,8 +15,9 @@ import {
 
 export async function GET(request) {
   try {
-    const db = getDb();
-    const benchmarks = db.prepare('SELECT * FROM salary_benchmarks ORDER BY total_comp_median DESC').all();
+    const supabase = getSupabase();
+    const { data: benchmarks, error } = await supabase.from('salary_benchmarks').select('*').order('total_comp_median', { ascending: false });
+    if (error) throw error;
     return NextResponse.json({ benchmarks });
   } catch (error) {
     console.error('Failed to get salary benchmarks:', error);

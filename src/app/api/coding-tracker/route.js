@@ -1,4 +1,4 @@
-import { getDb } from '@/lib/db';
+import { getSupabase } from '@/lib/supabase';
 import { NextResponse } from 'next/server';
 import {
   sanitizeObject,
@@ -15,40 +15,41 @@ import {
 
 export async function GET(request) {
   try {
-    const db = getDb();
+    const supabase = getSupabase();
     const { searchParams } = new URL(request.url);
     const platform = searchParams.get('platform');
     const category = searchParams.get('category');
 
-    const profiles = db.prepare('SELECT * FROM coding_profiles ORDER BY id ASC').all();
+    const { data: profiles, error: profError } = await supabase.from('coding_profiles').select('*').order('id', { ascending: true });
+    if (profError) throw profError;
 
-    let problemQuery = `SELECT * FROM coding_problems WHERE 1=1`;
-    const params = [];
+    let probQuery = supabase.from('coding_problems').select('*');
+    if (platform && platform !== 'All') probQuery = probQuery.eq('platform', platform);
+    if (category && category !== 'All') probQuery = probQuery.eq('category', category);
+    
+    const { data: problems, error: probError } = await probQuery.order('completed_at', { ascending: false }).order('id', { ascending: false });
+    if (probError) throw probError;
 
-    if (platform && platform !== 'All') {
-      problemQuery += ` AND platform = ?`;
-      params.push(platform);
-    }
+    // stats
+    const { data: allProblems, error: statsError } = await supabase.from('coding_problems').select('status, difficulty');
+    if (statsError) throw statsError;
 
-    if (category && category !== 'All') {
-      problemQuery += ` AND category = ?`;
-      params.push(category);
-    }
+    const stats = {
+      total_logged: allProblems.length,
+      total_solved: 0,
+      easy_solved: 0,
+      medium_solved: 0,
+      hard_solved: 0
+    };
 
-    problemQuery += ` ORDER BY completed_at DESC, id DESC`;
-
-    const problems = db.prepare(problemQuery).all(...params);
-
-    // Compute stats
-    const stats = db.prepare(`
-      SELECT 
-        COUNT(*) as total_logged,
-        SUM(CASE WHEN status = 'solved' THEN 1 ELSE 0 END) as total_solved,
-        SUM(CASE WHEN difficulty = 'easy' AND status = 'solved' THEN 1 ELSE 0 END) as easy_solved,
-        SUM(CASE WHEN difficulty = 'medium' AND status = 'solved' THEN 1 ELSE 0 END) as medium_solved,
-        SUM(CASE WHEN difficulty = 'hard' AND status = 'solved' THEN 1 ELSE 0 END) as hard_solved
-      FROM coding_problems
-    `).get();
+    allProblems.forEach(p => {
+      if (p.status === 'solved') {
+        stats.total_solved++;
+        if (p.difficulty === 'easy') stats.easy_solved++;
+        else if (p.difficulty === 'medium') stats.medium_solved++;
+        else if (p.difficulty === 'hard') stats.hard_solved++;
+      }
+    });
 
     return NextResponse.json({ profiles, problems, stats });
   } catch (error) {
@@ -59,7 +60,7 @@ export async function GET(request) {
 
 export async function POST(request) {
   try {
-    const db = getDb();
+    const supabase = getSupabase();
     let body;
     try {
       body = await parseAndValidateBody(request);
@@ -90,33 +91,33 @@ export async function POST(request) {
 
     const { title, platform, category, difficulty, status, url, solution_notes } = body;
 
-    const result = db.prepare(`
-      INSERT INTO coding_problems (title, platform, category, difficulty, status, url, solution_notes)
-      VALUES (?, ?, ?, ?, ?, ?, ?)
-    `).run(
+    const { data: newProb, error: insertError } = await supabase.from('coding_problems').insert([{
       title,
-      platform || 'LeetCode',
-      category || 'Machine Learning Math',
-      difficulty || 'medium',
-      status || 'solved',
-      url || '',
-      solution_notes || ''
-    );
+      platform: platform || 'LeetCode',
+      category: category || 'Machine Learning Math',
+      difficulty: difficulty || 'medium',
+      status: status || 'solved',
+      url: url || '',
+      solution_notes: solution_notes || ''
+    }]).select().single();
+    if (insertError) throw insertError;
 
     // Increment profile solved count if solved
     if (status === 'solved') {
-      db.prepare(`
-        UPDATE coding_profiles 
-        SET solved_count = solved_count + 1, updated_at = CURRENT_TIMESTAMP 
-        WHERE platform = ?
-      `).run(platform);
+      const { data: prof } = await supabase.from('coding_profiles').select('solved_count').eq('platform', platform).single();
+      if (prof) {
+         await supabase.from('coding_profiles').update({ solved_count: prof.solved_count + 1, updated_at: new Date().toISOString() }).eq('platform', platform);
+      }
     }
 
-    db.prepare('INSERT INTO activity_log (action, entity_type, entity_id, entity_name) VALUES (?, ?, ?, ?)').run(
-      'Solved problem', 'coding_problem', result.lastInsertRowid, `${title} (${platform})`
-    );
+    await supabase.from('activity_log').insert([{
+      action: 'Solved problem',
+      entity_type: 'coding_problem',
+      entity_id: newProb.id,
+      entity_name: `${title} (${platform})`
+    }]);
 
-    return NextResponse.json({ id: result.lastInsertRowid, message: 'Problem logged successfully' }, { status: 201 });
+    return NextResponse.json({ id: newProb.id, message: 'Problem logged successfully' }, { status: 201 });
   } catch (error) {
     console.error('Failed to log problem:', error);
     return NextResponse.json({ error: error.message }, { status: 500 });

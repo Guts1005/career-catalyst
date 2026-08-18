@@ -1,4 +1,4 @@
-import { getDb } from '@/lib/db';
+import { getSupabase } from '@/lib/supabase';
 import { NextResponse } from 'next/server';
 import { 
   sanitizeObject,
@@ -12,7 +12,7 @@ import {
 
 export async function PUT(request, { params }) {
   try {
-    const db = getDb();
+    const supabase = getSupabase();
     const { id } = await params;
     
     let body;
@@ -36,8 +36,8 @@ export async function PUT(request, { params }) {
       return NextResponse.json({ error: 'Invalid work_model' }, { status: 400 });
     }
 
-    const current = db.prepare('SELECT * FROM job_applications WHERE id = ?').get(id);
-    if (!current) {
+    const { data: current, error: fetchError } = await supabase.from('job_applications').select('*').eq('id', id).single();
+    if (fetchError || !current) {
       return NextResponse.json({ error: 'Job application not found' }, { status: 404 });
     }
 
@@ -55,13 +55,12 @@ export async function PUT(request, { params }) {
       notes
     } = body;
 
-    // Recalculate match score if required_skills changed
     let matchScore = current.match_score;
     if (required_skills !== undefined) {
       const skillsArray = required_skills ? required_skills.split(',').map(s => s.trim().toLowerCase()) : [];
       if (skillsArray.length > 0) {
-        const allUserSkills = db.prepare('SELECT LOWER(name) as name, current_level FROM skills').all();
-        const userSkillMap = new Map(allUserSkills.map(s => [s.name, s.current_level]));
+        const { data: allUserSkills } = await supabase.from('skills').select('name, current_level');
+        const userSkillMap = new Map((allUserSkills || []).map(s => [s.name.toLowerCase(), s.current_level]));
         let matchedCount = 0;
         for (const reqSkill of skillsArray) {
           if (userSkillMap.has(reqSkill) && (userSkillMap.get(reqSkill) > 20)) {
@@ -74,32 +73,28 @@ export async function PUT(request, { params }) {
 
     const newStatus = status !== undefined ? status : current.status;
 
-    db.prepare(`
-      UPDATE job_applications
-      SET company = ?, role = ?, location = ?, work_model = ?, salary = ?, status = ?,
-          applied_date = ?, job_url = ?, recruiter_contact = ?, required_skills = ?,
-          match_score = ?, notes = ?, updated_at = CURRENT_TIMESTAMP
-      WHERE id = ?
-    `).run(
-      company !== undefined ? company : current.company,
-      role !== undefined ? role : current.role,
-      location !== undefined ? location : current.location,
-      work_model !== undefined ? work_model : current.work_model,
-      salary !== undefined ? salary : current.salary,
-      newStatus,
-      applied_date !== undefined ? applied_date : current.applied_date,
-      job_url !== undefined ? job_url : current.job_url,
-      recruiter_contact !== undefined ? recruiter_contact : current.recruiter_contact,
-      required_skills !== undefined ? required_skills : current.required_skills,
-      matchScore,
-      notes !== undefined ? notes : current.notes,
-      id
-    );
+    const { error: updateError } = await supabase.from('job_applications').update({
+      company: company !== undefined ? company : current.company,
+      role: role !== undefined ? role : current.role,
+      location: location !== undefined ? location : current.location,
+      work_model: work_model !== undefined ? work_model : current.work_model,
+      salary: salary !== undefined ? salary : current.salary,
+      status: newStatus,
+      applied_date: applied_date !== undefined ? applied_date : current.applied_date,
+      job_url: job_url !== undefined ? job_url : current.job_url,
+      recruiter_contact: recruiter_contact !== undefined ? recruiter_contact : current.recruiter_contact,
+      required_skills: required_skills !== undefined ? required_skills : current.required_skills,
+      match_score: matchScore,
+      notes: notes !== undefined ? notes : current.notes,
+      updated_at: new Date().toISOString()
+    }).eq('id', id);
+
+    if (updateError) throw updateError;
 
     if (newStatus !== current.status) {
-      db.prepare('INSERT INTO activity_log (action, entity_type, entity_id, entity_name) VALUES (?, ?, ?, ?)').run(
-        `Stage moved to ${newStatus.toUpperCase()}`, 'job_application', id, `${current.role} at ${current.company}`
-      );
+      await supabase.from('activity_log').insert([{
+        action: `Stage moved to ${newStatus.toUpperCase()}`, entity_type: 'job_application', entity_id: id, entity_name: `${current.role} at ${current.company}`
+      }]);
     }
 
     return NextResponse.json({ success: true, message: 'Application updated' });
@@ -111,18 +106,21 @@ export async function PUT(request, { params }) {
 
 export async function DELETE(request, { params }) {
   try {
-    const db = getDb();
+    const supabase = getSupabase();
     const { id } = await params;
-    const current = db.prepare('SELECT company, role FROM job_applications WHERE id = ?').get(id);
+    
+    const { data: current } = await supabase.from('job_applications').select('company, role').eq('id', id).single();
 
     if (!current) {
       return NextResponse.json({ error: 'Job not found' }, { status: 404 });
     }
 
-    db.prepare('DELETE FROM job_applications WHERE id = ?').run(id);
-    db.prepare('INSERT INTO activity_log (action, entity_type, entity_id, entity_name) VALUES (?, ?, ?, ?)').run(
-      'deleted', 'job_application', id, `${current.role} at ${current.company}`
-    );
+    const { error: deleteError } = await supabase.from('job_applications').delete().eq('id', id);
+    if (deleteError) throw deleteError;
+
+    await supabase.from('activity_log').insert([{
+      action: 'deleted', entity_type: 'job_application', entity_id: id, entity_name: `${current.role} at ${current.company}`
+    }]);
 
     return NextResponse.json({ success: true, message: 'Job application deleted' });
   } catch (error) {

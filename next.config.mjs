@@ -1,9 +1,5 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  // ── Request Size Limits ──────────────────────────────────────────
-  // Cap incoming request bodies to 1MB to prevent payload abuse
-  serverExternalPackages: ['better-sqlite3'],
-
   // ── Security Headers ─────────────────────────────────────────────
   async headers() {
     return [

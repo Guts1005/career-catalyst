@@ -1,4 +1,4 @@
-import { getDb } from '@/lib/db';
+import { getSupabase } from '@/lib/supabase';
 import { NextResponse } from 'next/server';
 import { 
   sanitizeObject,
@@ -14,7 +14,7 @@ import {
 export async function PUT(request, { params }) {
   try {
     const { id } = await params;
-    const db = getDb();
+    const supabase = getSupabase();
     
     let body;
     try {
@@ -43,32 +43,21 @@ export async function PUT(request, { params }) {
 
     const { current_level, target_level, importance } = body;
     
-    const skill = db.prepare('SELECT name FROM skills WHERE id = ?').get(id);
+    const { data: skill } = await supabase.from('skills').select('name').eq('id', id).single();
     if (!skill) return NextResponse.json({ error: 'Not found' }, { status: 404 });
     
-    const updates = [];
-    const vals = [];
-    if (current_level !== undefined) {
-      updates.push('current_level = ?');
-      vals.push(current_level);
-    }
-    if (target_level !== undefined) {
-      updates.push('target_level = ?');
-      vals.push(target_level);
-    }
-    if (importance !== undefined) {
-      updates.push('importance = ?');
-      vals.push(importance);
-    }
+    const updates = {};
+    if (current_level !== undefined) updates.current_level = current_level;
+    if (target_level !== undefined) updates.target_level = target_level;
+    if (importance !== undefined) updates.importance = importance;
     
-    if (updates.length > 0) {
-      vals.push(id);
-      db.prepare(`UPDATE skills SET ${updates.join(', ')} WHERE id = ?`).run(...vals);
+    if (Object.keys(updates).length > 0) {
+      const { error: updateError } = await supabase.from('skills').update(updates).eq('id', id);
+      if (updateError) throw updateError;
       
-      db.prepare(`
-        INSERT INTO activity_log (action, entity_type, entity_id, entity_name) 
-        VALUES (?, ?, ?, ?)
-      `).run('Update Skill', 'skill', id, skill.name);
+      await supabase.from('activity_log').insert([{
+        action: 'Update Skill', entity_type: 'skill', entity_id: id, entity_name: skill.name
+      }]);
     }
     
     return NextResponse.json({ success: true });
@@ -80,17 +69,17 @@ export async function PUT(request, { params }) {
 export async function DELETE(request, { params }) {
   try {
     const { id } = await params;
-    const db = getDb();
+    const supabase = getSupabase();
     
-    const skill = db.prepare('SELECT name FROM skills WHERE id = ?').get(id);
+    const { data: skill } = await supabase.from('skills').select('name').eq('id', id).single();
     if (!skill) return NextResponse.json({ error: 'Not found' }, { status: 404 });
     
-    db.prepare('DELETE FROM skills WHERE id = ?').run(id);
+    const { error: deleteError } = await supabase.from('skills').delete().eq('id', id);
+    if (deleteError) throw deleteError;
     
-    db.prepare(`
-      INSERT INTO activity_log (action, entity_type, entity_id, entity_name) 
-      VALUES (?, ?, ?, ?)
-    `).run('Delete Skill', 'skill', id, skill.name);
+    await supabase.from('activity_log').insert([{
+      action: 'Delete Skill', entity_type: 'skill', entity_id: id, entity_name: skill.name
+    }]);
     
     return NextResponse.json({ success: true });
   } catch (error) {

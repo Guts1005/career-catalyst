@@ -1,38 +1,38 @@
-import { getDb } from '@/lib/db';
+import { getSupabase } from '@/lib/supabase';
 import { NextResponse } from 'next/server';
 
 export async function GET() {
-  const db = getDb();
+  const supabase = getSupabase();
 
-  // Calculate readiness score based on multiple factors
-  const certStats = db.prepare(`
-    SELECT 
-      COUNT(*) as total,
-      SUM(CASE WHEN status = 'completed' THEN 1 ELSE 0 END) as completed,
-      SUM(CASE WHEN status = 'in_progress' THEN 1 ELSE 0 END) as in_progress
-    FROM certifications
-  `).get();
+  const [{ data: certs }, { data: projects }, { data: skills }, { data: resources }] = await Promise.all([
+    supabase.from('certifications').select('status'),
+    supabase.from('projects').select('status'),
+    supabase.from('skills').select('current_level, target_level'),
+    supabase.from('resources').select('completed')
+  ]);
 
-  const projectStats = db.prepare(`
-    SELECT 
-      COUNT(*) as total,
-      SUM(CASE WHEN status = 'completed' THEN 1 ELSE 0 END) as completed
-    FROM projects
-  `).get();
+  const certStats = {
+    total: certs?.length || 0,
+    completed: certs?.filter(c => c.status === 'completed').length || 0,
+    in_progress: certs?.filter(c => c.status === 'in_progress').length || 0
+  };
 
-  const skillStats = db.prepare(`
-    SELECT 
-      COUNT(*) as total,
-      AVG(CASE WHEN target_level > 0 THEN (current_level * 1.0 / target_level) * 100 ELSE 0 END) as avg_progress
-    FROM skills
-  `).get();
+  const projectStats = {
+    total: projects?.length || 0,
+    completed: projects?.filter(p => p.status === 'completed').length || 0
+  };
 
-  const resourceStats = db.prepare(`
-    SELECT 
-      COUNT(*) as total,
-      SUM(CASE WHEN completed = 1 THEN 1 ELSE 0 END) as completed
-    FROM resources
-  `).get();
+  const skillStats = {
+    total: skills?.length || 0,
+    avg_progress: skills?.length 
+      ? skills.reduce((sum, s) => sum + (s.target_level > 0 ? (s.current_level * 1.0 / s.target_level) * 100 : 0), 0) / skills.length 
+      : 0
+  };
+
+  const resourceStats = {
+    total: resources?.length || 0,
+    completed: resources?.filter(r => r.completed === 1 || r.completed === true).length || 0
+  };
 
   // Weighted score calculation
   const weights = {

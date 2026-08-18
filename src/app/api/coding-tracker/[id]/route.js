@@ -1,23 +1,23 @@
-import { getDb } from '@/lib/db';
+import { getSupabase } from '@/lib/supabase';
 import { NextResponse } from 'next/server';
 
 export async function PUT(request, { params }) {
   try {
-    const db = getDb();
+    const supabase = getSupabase();
     const { id } = await params;
     const body = await request.json();
     const { status, solution_notes } = body;
 
-    const existing = db.prepare('SELECT * FROM coding_problems WHERE id = ?').get(id);
-    if (!existing) {
+    const { data: existing, error: fetchError } = await supabase.from('coding_problems').select('*').eq('id', id).single();
+    if (fetchError || !existing) {
       return NextResponse.json({ error: 'Problem not found' }, { status: 404 });
     }
 
-    db.prepare(`
-      UPDATE coding_problems
-      SET status = COALESCE(?, status), solution_notes = COALESCE(?, solution_notes)
-      WHERE id = ?
-    `).run(status, solution_notes, id);
+    const { error: updateError } = await supabase.from('coding_problems').update({
+      status: status !== undefined ? status : existing.status,
+      solution_notes: solution_notes !== undefined ? solution_notes : existing.solution_notes
+    }).eq('id', id);
+    if (updateError) throw updateError;
 
     return NextResponse.json({ success: true });
   } catch (error) {
@@ -28,15 +28,16 @@ export async function PUT(request, { params }) {
 
 export async function DELETE(request, { params }) {
   try {
-    const db = getDb();
+    const supabase = getSupabase();
     const { id } = await params;
 
-    const existing = db.prepare('SELECT title FROM coding_problems WHERE id = ?').get(id);
-    if (!existing) {
+    const { data: existing, error: fetchError } = await supabase.from('coding_problems').select('title').eq('id', id).single();
+    if (fetchError || !existing) {
       return NextResponse.json({ error: 'Problem not found' }, { status: 404 });
     }
 
-    db.prepare('DELETE FROM coding_problems WHERE id = ?').run(id);
+    const { error: deleteError } = await supabase.from('coding_problems').delete().eq('id', id);
+    if (deleteError) throw deleteError;
 
     return NextResponse.json({ success: true });
   } catch (error) {

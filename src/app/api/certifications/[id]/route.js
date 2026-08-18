@@ -1,4 +1,4 @@
-import { getDb } from '@/lib/db';
+import { getSupabase } from '@/lib/supabase';
 import { NextResponse } from 'next/server';
 import { 
   sanitizeObject,
@@ -14,7 +14,7 @@ import {
 export async function PUT(request, { params }) {
   try {
     const { id } = await params;
-    const db = getDb();
+    const supabase = getSupabase();
     
     let body;
     try {
@@ -54,58 +54,56 @@ export async function PUT(request, { params }) {
       estimated_hours
     } = body;
 
-    const currentCert = db.prepare('SELECT * FROM certifications WHERE id = ?').get(id);
-    if (!currentCert) {
+    const { data: currentCert, error: fetchError } = await supabase.from('certifications').select('*').eq('id', id).single();
+    if (fetchError || !currentCert) {
       return NextResponse.json({ error: 'Certification not found' }, { status: 404 });
     }
 
-    const stmt = db.prepare(`
-      UPDATE certifications 
-      SET name = ?, provider = ?, url = ?, status = ?, progress = ?, priority = ?, deadline = ?, notes = ?, category = ?, estimated_hours = ?, updated_at = CURRENT_TIMESTAMP
-      WHERE id = ?
-    `);
+    const { data: updatedCert, error: updateError } = await supabase.from('certifications').update({
+      name: name ?? currentCert.name,
+      provider: provider ?? currentCert.provider,
+      url: url ?? currentCert.url,
+      status: status ?? currentCert.status,
+      progress: progress ?? currentCert.progress,
+      priority: priority ?? currentCert.priority,
+      deadline: deadline ?? currentCert.deadline,
+      notes: notes ?? currentCert.notes,
+      category: category ?? currentCert.category,
+      estimated_hours: estimated_hours ?? currentCert.estimated_hours,
+      updated_at: new Date().toISOString()
+    }).eq('id', id).select().single();
 
-    stmt.run(
-      name ?? currentCert.name,
-      provider ?? currentCert.provider,
-      url ?? currentCert.url,
-      status ?? currentCert.status,
-      progress ?? currentCert.progress,
-      priority ?? currentCert.priority,
-      deadline ?? currentCert.deadline,
-      notes ?? currentCert.notes,
-      category ?? currentCert.category,
-      estimated_hours ?? currentCert.estimated_hours,
-      id
-    );
+    if (updateError) throw updateError;
 
     if (status === 'completed' && currentCert.status !== 'completed') {
       const certTitle = (name ?? currentCert.name).toLowerCase();
 
       // Intelligent Skill Auto-Leveling
-      if (certTitle.includes('tensorflow')) {
-        db.prepare(`UPDATE skills SET current_level = MAX(current_level, 80) WHERE LOWER(name) LIKE '%tensorflow%' OR LOWER(name) LIKE '%deep learning%'`).run();
+      if (certTitle.includes('tensorflow') || certTitle.includes('deep learning')) {
+        await supabase.rpc('auto_level_skill', { keyword: 'tensorflow', min_level: 80 });
+        await supabase.rpc('auto_level_skill', { keyword: 'deep learning', min_level: 80 });
       }
       if (certTitle.includes('aws') || certTitle.includes('cloud') || certTitle.includes('azure')) {
-        db.prepare(`UPDATE skills SET current_level = MAX(current_level, 80) WHERE LOWER(name) LIKE '%cloud%' OR LOWER(name) LIKE '%aws%'`).run();
+        await supabase.rpc('auto_level_skill', { keyword: 'cloud', min_level: 80 });
+        await supabase.rpc('auto_level_skill', { keyword: 'aws', min_level: 80 });
       }
       if (certTitle.includes('databricks') || certTitle.includes('data engineer')) {
-        db.prepare(`UPDATE skills SET current_level = MAX(current_level, 80) WHERE LOWER(name) LIKE '%sql%' OR LOWER(name) LIKE '%spark%'`).run();
+        await supabase.rpc('auto_level_skill', { keyword: 'sql', min_level: 80 });
+        await supabase.rpc('auto_level_skill', { keyword: 'spark', min_level: 80 });
       }
       if (certTitle.includes('pytorch')) {
-        db.prepare(`UPDATE skills SET current_level = MAX(current_level, 85) WHERE LOWER(name) LIKE '%pytorch%'`).run();
+        await supabase.rpc('auto_level_skill', { keyword: 'pytorch', min_level: 85 });
       }
 
-      db.prepare('INSERT INTO activity_log (action, entity_type, entity_id, entity_name) VALUES (?, ?, ?, ?)').run(
-        'Completed certification (Auto-boosted related skills 🎯)', 'certification', id, name ?? currentCert.name
-      );
+      await supabase.from('activity_log').insert([{
+        action: 'Completed certification (Auto-boosted related skills 🎯)', entity_type: 'certification', entity_id: id, entity_name: name ?? currentCert.name
+      }]);
     } else if (progress !== currentCert.progress || status !== currentCert.status) {
-       db.prepare('INSERT INTO activity_log (action, entity_type, entity_id, entity_name) VALUES (?, ?, ?, ?)').run(
-        'Updated certification progress', 'certification', id, name ?? currentCert.name
-      );
+       await supabase.from('activity_log').insert([{
+        action: 'Updated certification progress', entity_type: 'certification', entity_id: id, entity_name: name ?? currentCert.name
+      }]);
     }
 
-    const updatedCert = db.prepare('SELECT * FROM certifications WHERE id = ?').get(id);
     return NextResponse.json(updatedCert);
   } catch (error) {
     console.error('Failed to update certification:', error);
@@ -116,18 +114,19 @@ export async function PUT(request, { params }) {
 export async function DELETE(request, { params }) {
   try {
     const { id } = await params;
-    const db = getDb();
+    const supabase = getSupabase();
     
-    const cert = db.prepare('SELECT name FROM certifications WHERE id = ?').get(id);
+    const { data: cert } = await supabase.from('certifications').select('name').eq('id', id).single();
     if (!cert) {
       return NextResponse.json({ error: 'Certification not found' }, { status: 404 });
     }
 
-    db.prepare('DELETE FROM certifications WHERE id = ?').run(id);
+    const { error: deleteError } = await supabase.from('certifications').delete().eq('id', id);
+    if (deleteError) throw deleteError;
     
-    db.prepare('INSERT INTO activity_log (action, entity_type, entity_id, entity_name) VALUES (?, ?, ?, ?)').run(
-      'Deleted certification', 'certification', id, cert.name
-    );
+    await supabase.from('activity_log').insert([{
+      action: 'Deleted certification', entity_type: 'certification', entity_id: id, entity_name: cert.name
+    }]);
 
     return NextResponse.json({ success: true });
   } catch (error) {

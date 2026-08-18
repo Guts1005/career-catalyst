@@ -1,9 +1,9 @@
-import { getDb } from '@/lib/db';
+import { getSupabase } from '@/lib/supabase';
 import { NextResponse } from 'next/server';
 
 export async function POST(request) {
   try {
-    const db = getDb();
+    const supabase = getSupabase();
     const body = await request.json();
     const { name, description, html_url, language, stargazers_count } = body;
 
@@ -12,49 +12,51 @@ export async function POST(request) {
     }
 
     // Check if project already exists
-    const existing = db.prepare('SELECT id FROM projects WHERE github_url = ? OR name = ?').get(html_url, name);
-    if (existing) {
+    const { data: existingUrl } = html_url ? await supabase.from('projects').select('id').eq('github_url', html_url).maybeSingle() : { data: null };
+    const { data: existingName } = await supabase.from('projects').select('id').eq('name', name).maybeSingle();
+    
+    if (existingUrl || existingName) {
       return NextResponse.json({ success: true, alreadyExists: true, message: 'Project already in portfolio!' });
     }
 
     const techStack = language ? `${language}, Git, GitHub` : 'Python, Git';
     const impact = stargazers_count > 0 ? `Open-source repository with ${stargazers_count} GitHub stars.` : 'Production-ready codebase with full unit test coverage and documentation.';
 
-    const result = db.prepare(`
-      INSERT INTO projects (name, description, status, github_url, tech_stack, category, impact)
-      VALUES (?, ?, 'in_progress', ?, ?, 'Open Source', ?)
-    `).run(
+    const { data: newProject, error: insertError } = await supabase.from('projects').insert([{
       name,
-      description || 'Repository imported from GitHub',
-      html_url || '',
-      techStack,
+      description: description || 'Repository imported from GitHub',
+      status: 'in_progress',
+      github_url: html_url || '',
+      tech_stack: techStack,
+      category: 'Open Source',
       impact
-    );
+    }]).select().single();
+    
+    if (insertError) throw insertError;
 
-    const projectId = result.lastInsertRowid;
+    const projectId = newProject.id;
 
     // Add initial milestones
-    const insertMilestone = db.prepare(`
-      INSERT INTO project_milestones (project_id, name, completed)
-      VALUES (?, ?, ?)
-    `);
-
-    insertMilestone.run(projectId, 'Initial code commit & architecture setup', 1);
-    insertMilestone.run(projectId, 'Comprehensive documentation & README polish', 0);
-    insertMilestone.run(projectId, 'Production deployment & performance benchmarking', 0);
+    await supabase.from('project_milestones').insert([
+      { project_id: projectId, name: 'Initial code commit & architecture setup', completed: 1 },
+      { project_id: projectId, name: 'Comprehensive documentation & README polish', completed: 0 },
+      { project_id: projectId, name: 'Production deployment & performance benchmarking', completed: 0 }
+    ]);
 
     // Cross-system skill harvest: If language is known, ensure skill level in Skill Map is boosted!
     if (language) {
-      const skillName = language;
-      const skill = db.prepare('SELECT id, current_level FROM skills WHERE LOWER(name) = LOWER(?)').get(skillName);
+      const { data: skill } = await supabase.from('skills').select('id, current_level').ilike('name', language).maybeSingle();
       if (skill) {
-        db.prepare('UPDATE skills SET current_level = MIN(100, current_level + 10) WHERE id = ?').run(skill.id);
+        await supabase.from('skills').update({ current_level: Math.min(100, skill.current_level + 10) }).eq('id', skill.id);
       }
     }
 
-    db.prepare('INSERT INTO activity_log (action, entity_type, entity_id, entity_name) VALUES (?, ?, ?, ?)').run(
-      'Imported GitHub project', 'project', projectId, name
-    );
+    await supabase.from('activity_log').insert([{
+      action: 'Imported GitHub project',
+      entity_type: 'project',
+      entity_id: projectId,
+      entity_name: name
+    }]);
 
     return NextResponse.json({ success: true, projectId, message: 'Successfully imported to portfolio!' });
   } catch (error) {
