@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import ThemeToggle from '@/components/ThemeToggle';
 import {
   IconDashboard,
   IconAnalytics,
@@ -101,12 +102,13 @@ export default function Sidebar() {
           top: '12px',
           left: '12px',
           zIndex: 110,
-          background: 'var(--white)',
-          border: '1px solid var(--gray-200)',
+          background: 'var(--bg-surface)',
+          border: '1px solid var(--border)',
           borderRadius: '4px',
           padding: '6px 10px',
           fontFamily: 'var(--font-mono)',
           fontSize: '12px',
+          color: 'var(--text-primary)',
           cursor: 'pointer',
           display: 'none',
         }}
@@ -122,7 +124,7 @@ export default function Sidebar() {
           style={{
             position: 'fixed',
             inset: 0,
-            background: 'rgba(10,10,10,0.4)',
+            background: 'rgba(10,10,10,0.6)',
             zIndex: 99,
           }}
         />
@@ -136,8 +138,8 @@ export default function Sidebar() {
           height: '100vh',
           position: 'sticky',
           top: 0,
-          background: 'var(--white)',
-          borderRight: '1px solid var(--gray-100)',
+          background: 'var(--bg-surface)',
+          borderRight: '1px solid var(--border)',
           display: 'flex',
           flexDirection: 'column',
           justifyContent: 'space-between',
@@ -165,7 +167,7 @@ export default function Sidebar() {
                 fontWeight: 900,
                 fontSize: '15px',
                 letterSpacing: '-0.03em',
-                color: 'var(--black)',
+                color: 'var(--text-primary)',
                 textTransform: 'uppercase',
               }}
             >
@@ -175,7 +177,7 @@ export default function Sidebar() {
               style={{
                 fontFamily: 'var(--font-mono)',
                 fontSize: '10px',
-                color: 'var(--gray-400)',
+                color: 'var(--text-muted)',
               }}
             >
               v2.5
@@ -193,7 +195,7 @@ export default function Sidebar() {
                     fontWeight: 600,
                     textTransform: 'uppercase',
                     letterSpacing: '0.08em',
-                    color: 'var(--gray-400)',
+                    color: 'var(--text-muted)',
                     marginBottom: '6px',
                     paddingLeft: '6px',
                   }}
@@ -218,8 +220,8 @@ export default function Sidebar() {
                           textDecoration: 'none',
                           fontSize: '12.5px',
                           fontWeight: isActive ? 600 : 400,
-                          color: isActive ? 'var(--black)' : 'var(--gray-600)',
-                          background: isActive ? 'var(--off-white)' : 'transparent',
+                          color: isActive ? 'var(--text-primary)' : 'var(--text-secondary)',
+                          background: isActive ? 'var(--bg-subtle)' : 'transparent',
                           transition: 'all 0.12s ease',
                         }}
                       >
@@ -233,7 +235,7 @@ export default function Sidebar() {
                               width: '4px',
                               height: '4px',
                               borderRadius: '50%',
-                              background: 'var(--black)',
+                              background: 'var(--accent)',
                             }}
                           />
                         )}
@@ -246,27 +248,29 @@ export default function Sidebar() {
           </nav>
         </div>
 
-        {/* Readiness Status Ledger */}
+        {/* Readiness Status Ledger + Theme Switcher */}
         <div
           style={{
-            padding: '12px 10px',
-            borderTop: '1px solid var(--gray-100)',
+            padding: '14px 6px 0 6px',
+            borderTop: '1px solid var(--border)',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'space-between',
           }}
         >
           <div>
-            <div style={{ fontSize: '10px', fontFamily: 'var(--font-mono)', color: 'var(--gray-500)', textTransform: 'uppercase' }}>
-              Readiness Score
+            <div style={{ fontSize: '10px', fontFamily: 'var(--font-mono)', color: 'var(--text-muted)', textTransform: 'uppercase' }}>
+              Readiness
             </div>
-            <div style={{ fontSize: '16px', fontWeight: 800, fontFamily: 'var(--font-mono)', color: 'var(--black)' }}>
+            <div style={{ fontSize: '15px', fontWeight: 800, fontFamily: 'var(--font-mono)', color: 'var(--text-primary)' }}>
               {readinessScore}%
             </div>
           </div>
-          <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: 'var(--green)' }} />
+          
+          <ThemeToggle />
         </div>
       </aside>
     </>
   );
 }
+

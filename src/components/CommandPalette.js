@@ -43,6 +43,7 @@ const COMMANDS = [
   { section: 'Market Intelligence', icon: IconGitHub, label: 'GitHub Sync', desc: 'Analyze repositories & language metrics', href: '/github' },
   { section: 'Market Intelligence', icon: IconPortfolio, label: 'Public Profile', desc: 'Recruiter-facing verified showcase', href: '/portfolio/sharvin' },
   { section: 'Market Intelligence', icon: IconAnalytics, label: 'Career Analytics', desc: 'Data visualization & pipeline funnel', href: '/analytics' },
+  { section: 'Interface & Atmosphere', icon: IconSandbox, label: 'Toggle Atmosphere (Day / Night Mode)', desc: 'Switch between Day (Light) and Night (Dark) mode', action: 'toggle-theme' },
   { section: 'Data & Portability', icon: IconResume, label: 'Download JSON Snapshot', desc: 'Export full career data JSON archive', action: 'backup' },
   { section: 'Data & Portability', icon: IconResume, label: 'Export JSON Resume Schema', desc: 'Official jsonresume.org standard export', action: 'jsonresume' },
 ];
@@ -92,6 +93,17 @@ export default function CommandPalette() {
     setIsOpen(false);
     if (cmd.href) {
       router.push(cmd.href);
+    } else if (cmd.action === 'toggle-theme') {
+      const current = document.documentElement.getAttribute('data-theme') || 'light';
+      const nextTheme = current === 'dark' ? 'light' : 'dark';
+      document.documentElement.classList.add('theme-transitioning');
+      document.documentElement.setAttribute('data-theme', nextTheme);
+      try {
+        localStorage.setItem('catalyst-theme', nextTheme);
+      } catch {}
+      setTimeout(() => {
+        document.documentElement.classList.remove('theme-transitioning');
+      }, 550);
     } else if (cmd.action === 'backup') {
       window.open('/api/backup', '_blank');
     } else if (cmd.action === 'jsonresume') {

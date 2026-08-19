@@ -1,0 +1,46 @@
+.toggleBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--bg-subtle);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 5px 9px;
+  color: var(--text-primary);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  cursor: pointer;
+  outline: none;
+  transition: background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+}
+
+.toggleBtn:hover {
+  background: var(--bg-hover);
+  border-color: var(--border-strong);
+}
+
+.iconContainer {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 14px;
+  height: 14px;
+  transition: transform 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.isDark .iconContainer {
+  transform: rotate(180deg);
+}
+
+.sunIcon, .moonIcon {
+  display: block;
+  color: var(--text-primary);
+}
+
+.label {
+  line-height: 1;
+  text-transform: uppercase;
+  color: var(--text-secondary);
+}

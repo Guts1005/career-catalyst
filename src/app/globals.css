@@ -1,34 +1,31 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700&display=swap');
 
-:root {
-  /* ─── Core Editorial Monochrome Palette ───────────────────────── */
-  --black: #0A0A0A;
-  --black-soft: #141414;
-  --black-surface: #1A1A1A;
+/* ─── LIGHT THEME FOUNDATION (DAY) ──────────────────────────────── */
+:root, [data-theme="light"] {
+  --theme: light;
 
-  --white: #FFFFFF;
-  --off-white: #F5F5F2;
+  /* Surfaces */
+  --bg-primary: #F5F5F2;      /* Main page canvas */
+  --bg-surface: #FFFFFF;      /* Cards, sidebar, modals, panels */
+  --bg-subtle: #EDEDE9;       /* Input backgrounds, subtle wells */
+  --bg-hover: #E7E7E4;        /* Row hover, secondary hover */
+  --bg-active: #D5D5D1;       /* Selected tabs, active controls */
+  --bg-inverse: #0A0A0A;      /* Inverted surface */
 
-  --gray-100: #E7E7E4;
-  --gray-200: #D5D5D1;
-  --gray-300: #B5B5B1;
-  --gray-400: #8C8C88;
-  --gray-500: #6F6F6B;
-  --gray-600: #4A4A47;
-  --gray-700: #30302E;
+  /* Text */
+  --text-primary: #0A0A0A;    /* Headings, primary content */
+  --text-secondary: #4A4A47;  /* Descriptions, body text */
+  --text-muted: #6F6F6B;      /* Timestamps, labels, placeholders */
+  --text-disabled: #B5B5B1;   /* Inactive elements */
+  --text-inverse: #FFFFFF;    /* Text on inverse backgrounds */
 
-  /* ─── Mapping to Standard Surface & Text Variables ────────────── */
-  --bg-primary: var(--off-white);
-  --bg-surface: var(--white);
-  --bg-subtle: #EDEDE9;
-  --bg-inverse: var(--black);
+  /* Architectural Borders */
+  --border: #E7E7E4;
+  --border-strong: #D5D5D1;
+  --border-subtle: #F0F0ED;
+  --border-dark: #30302E;
 
-  --text-primary: var(--black);
-  --text-secondary: var(--gray-600);
-  --text-muted: var(--gray-500);
-  --text-inverse: var(--white);
-
-  /* ─── Functional Semantic Accents (Used Sparingly as Dots/Highlights) */
+  /* Restrained Semantic Accents */
   --blue: #2563EB;
   --blue-subtle: #EFF6FF;
   --blue-border: #BFDBFE;
@@ -53,20 +50,20 @@
   --orange-subtle: #FFF7ED;
   --orange-border: #FED7AA;
 
-  /* Semantic Aliases */
-  --accent: var(--black);
-  --accent-hover: var(--gray-700);
+  /* Aliases */
+  --accent: var(--text-primary);
+  --accent-hover: var(--text-secondary);
   --success: var(--green);
   --warning: var(--amber);
   --danger: var(--red);
   --info: var(--blue);
 
-  /* ─── Architectural Structural Borders ────────────────────────── */
-  --border: var(--gray-100);
-  --border-strong: var(--gray-200);
-  --border-dark: var(--gray-700);
+  /* Shadows */
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.03);
+  --shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+  --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.06);
 
-  /* ─── Restrained Radii (0px - 10px) ───────────────────────────── */
+  /* Radii */
   --radius-none: 0px;
   --radius-xs: 4px;
   --radius-sm: 6px;
@@ -74,12 +71,7 @@
   --radius-lg: 10px;
   --radius-full: 9999px;
 
-  /* ─── Restrained Shadow System (No Glows) ─────────────────────── */
-  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.03);
-  --shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
-  --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.06);
-
-  /* ─── Spacing System ──────────────────────────────────────────── */
+  /* Spacing */
   --space-xs: 4px;
   --space-sm: 8px;
   --space-md: 16px;
@@ -89,16 +81,93 @@
   --space-3xl: 64px;
   --space-4xl: 96px;
 
-  /* ─── Typography Families ─────────────────────────────────────── */
+  /* Typography */
   --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   --font-mono: 'JetBrains Mono', 'SF Mono', monospace;
 
-  /* ─── Sidebar Metric ──────────────────────────────────────────── */
+  /* Layout Metrics */
   --sidebar-width: 240px;
 }
 
-/* ─── Global Reset & Clean Canvas ───────────────────────────────── */
+/* ─── DARK THEME FOUNDATION (NIGHT) ─────────────────────────────── */
+[data-theme="dark"] {
+  --theme: dark;
 
+  /* Surfaces */
+  --bg-primary: #09090B;      /* Main page canvas */
+  --bg-surface: #111113;      /* Cards, panels, sidebar, elevated surfaces */
+  --bg-subtle: #18181B;       /* Inputs, table headers, code blocks, wells */
+  --bg-hover: #202024;        /* Row hover, interactive element hover */
+  --bg-active: #27272A;       /* Pressed states, active tabs */
+  --bg-inverse: #FAFAFA;      /* Inverted surface */
+
+  /* Text */
+  --text-primary: #FAFAFA;    /* Headings, primary text */
+  --text-secondary: #A1A1AA;  /* Descriptions, body text */
+  --text-muted: #71717A;      /* Timestamps, labels, placeholders */
+  --text-disabled: #52525B;   /* Inactive elements */
+  --text-inverse: #09090B;    /* Text on inverse backgrounds */
+
+  /* Architectural Borders */
+  --border: rgba(255, 255, 255, 0.08);
+  --border-strong: rgba(255, 255, 255, 0.12);
+  --border-subtle: rgba(255, 255, 255, 0.05);
+  --border-dark: rgba(255, 255, 255, 0.16);
+
+  /* Restrained Semantic Accents (Calibrated for dark background contrast) */
+  --blue: #60A5FA;
+  --blue-subtle: rgba(96, 165, 250, 0.10);
+  --blue-border: rgba(96, 165, 250, 0.25);
+
+  --green: #34D399;
+  --green-subtle: rgba(52, 211, 153, 0.10);
+  --green-border: rgba(52, 211, 153, 0.25);
+
+  --amber: #FBBF24;
+  --amber-subtle: rgba(251, 191, 36, 0.10);
+  --amber-border: rgba(251, 191, 36, 0.25);
+
+  --red: #F87171;
+  --red-subtle: rgba(248, 113, 113, 0.10);
+  --red-border: rgba(248, 113, 113, 0.25);
+
+  --purple: #A78BFA;
+  --purple-subtle: rgba(167, 139, 250, 0.10);
+  --purple-border: rgba(167, 139, 250, 0.25);
+
+  --orange: #FB923C;
+  --orange-subtle: rgba(251, 146, 60, 0.10);
+  --orange-border: rgba(251, 146, 60, 0.25);
+
+  /* Aliases */
+  --accent: var(--text-primary);
+  --accent-hover: var(--text-secondary);
+  --success: var(--green);
+  --warning: var(--amber);
+  --danger: var(--red);
+  --info: var(--blue);
+
+  /* Shadows */
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.3);
+  --shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+  --shadow-lg: 0 16px 48px rgba(0, 0, 0, 0.6);
+}
+
+/* ─── Global Coordinated Theme Transition (500ms Ease) ──────────── */
+html.theme-transitioning,
+html.theme-transitioning *,
+html.theme-transitioning *::before,
+html.theme-transitioning *::after {
+  transition: background-color 500ms cubic-bezier(0.22, 1, 0.36, 1),
+              border-color 500ms cubic-bezier(0.22, 1, 0.36, 1),
+              color 500ms cubic-bezier(0.22, 1, 0.36, 1),
+              fill 500ms cubic-bezier(0.22, 1, 0.36, 1),
+              stroke 500ms cubic-bezier(0.22, 1, 0.36, 1),
+              box-shadow 500ms cubic-bezier(0.22, 1, 0.36, 1) !important;
+  transition-delay: 0s !important;
+}
+
+/* ─── Global Reset & Clean Canvas ───────────────────────────────── */
 *, *::before, *::after {
   box-sizing: border-box;
   margin: 0;
@@ -110,24 +179,24 @@ html {
   scroll-behavior: smooth;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  background: var(--off-white);
-  color: var(--black);
+  background: var(--bg-primary);
+  color: var(--text-primary);
 }
 
 body {
   font-family: var(--font-sans);
-  background: var(--off-white);
-  color: var(--black);
+  background: var(--bg-primary);
+  color: var(--text-primary);
   line-height: 1.55;
   min-height: 100vh;
   overflow-x: hidden;
 }
 
 /* ─── Editorial Layout Structure ────────────────────────────────── */
-
 .app-layout {
   display: flex;
   min-height: 100vh;
+  background: var(--bg-primary);
 }
 
 .app-sidebar {
@@ -136,11 +205,11 @@ body {
   height: 100vh;
   position: sticky;
   top: 0;
-  background: var(--white);
-  border-right: 1px solid var(--gray-100);
+  background: var(--bg-surface);
+  border-right: 1px solid var(--border);
   overflow-y: auto;
   scrollbar-width: thin;
-  scrollbar-color: var(--gray-200) transparent;
+  scrollbar-color: var(--border-strong) transparent;
 }
 
 .app-sidebar::-webkit-scrollbar {
@@ -148,30 +217,31 @@ body {
 }
 
 .app-sidebar::-webkit-scrollbar-thumb {
-  background: var(--gray-200);
+  background: var(--border-strong);
   border-radius: 2px;
 }
 
 .app-sidebar::-webkit-scrollbar-thumb:hover {
-  background: var(--gray-300);
+  background: var(--text-muted);
 }
 
 .main-content {
   flex: 1;
   min-width: 0;
-  background: var(--off-white);
+  background: var(--bg-primary);
   padding: 0;
+  display: flex;
+  flex-direction: column;
 }
 
 /* ─── Editorial Typography Utilities ────────────────────────────── */
-
 .display-title {
   font-size: clamp(48px, 7vw, 110px);
   font-weight: 900;
   line-height: 0.95;
   letter-spacing: -0.04em;
   text-transform: uppercase;
-  color: var(--black);
+  color: var(--text-primary);
 }
 
 .section-label {
@@ -179,7 +249,7 @@ body {
   font-size: 11px;
   text-transform: uppercase;
   letter-spacing: 0.08em;
-  color: var(--gray-500);
+  color: var(--text-muted);
 }
 
 .tabular-num {
@@ -188,23 +258,21 @@ body {
 }
 
 /* ─── Architectural Dividers ────────────────────────────────────── */
-
 .hr-structural {
   border: none;
   height: 1px;
-  background: var(--gray-100);
+  background: var(--border);
   margin: var(--space-xl) 0;
 }
 
 .hr-dark {
   border: none;
   height: 1px;
-  background: var(--gray-700);
+  background: var(--border-strong);
   margin: var(--space-xl) 0;
 }
 
 /* ─── Standard Restrained Buttons ───────────────────────────────── */
-
 .btn {
   display: inline-flex;
   align-items: center;
@@ -219,31 +287,35 @@ body {
   border: 1px solid transparent;
   cursor: pointer;
   text-decoration: none;
-  transition: all 0.15s ease;
+  transition: background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease, transform 0.1s ease;
   line-height: 1;
   white-space: nowrap;
 }
 
+.btn:active {
+  transform: translateY(1px);
+}
+
 .btn-primary {
-  background: var(--black);
-  color: var(--white);
-  border-color: var(--black);
+  background: var(--bg-inverse);
+  color: var(--text-inverse);
+  border-color: var(--bg-inverse);
 }
 
 .btn-primary:hover {
-  background: var(--gray-700);
-  border-color: var(--gray-700);
+  background: var(--text-secondary);
+  border-color: var(--text-secondary);
 }
 
 .btn-secondary {
-  background: var(--white);
-  color: var(--black);
-  border-color: var(--gray-200);
+  background: var(--bg-surface);
+  color: var(--text-primary);
+  border-color: var(--border-strong);
 }
 
 .btn-secondary:hover {
   background: var(--bg-subtle);
-  border-color: var(--gray-300);
+  border-color: var(--text-muted);
 }
 
 .btn-ghost {
@@ -253,18 +325,18 @@ body {
 }
 
 .btn-ghost:hover {
-  color: var(--black);
+  color: var(--text-primary);
   background: var(--bg-subtle);
 }
 
 .btn-dark {
-  background: var(--white);
-  color: var(--black);
-  border-color: var(--white);
+  background: var(--bg-inverse);
+  color: var(--text-inverse);
+  border-color: var(--bg-inverse);
 }
 
 .btn-dark:hover {
-  background: var(--gray-100);
+  background: var(--text-secondary);
 }
 
 .btn-sm {
@@ -273,40 +345,46 @@ body {
 }
 
 /* ─── Clean Structural Containers ───────────────────────────────── */
-
-.editorial-card {
-  background: var(--white);
-  border: 1px solid var(--gray-100);
+.card, .editorial-card {
+  background: var(--bg-surface);
+  border: 1px solid var(--border);
   border-radius: var(--radius-lg);
   padding: 24px;
   box-shadow: var(--shadow);
+  color: var(--text-primary);
+}
+
+.card-title {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--text-primary);
+  letter-spacing: -0.01em;
 }
 
 .editorial-card-dark {
-  background: var(--black-soft);
-  border: 1px solid var(--gray-700);
+  background: var(--bg-surface);
+  border: 1px solid var(--border-strong);
   border-radius: var(--radius-lg);
   padding: 24px;
-  color: var(--white);
+  color: var(--text-primary);
 }
 
-/* ─── Form Inputs ───────────────────────────────────────────────── */
-
+/* ─── Form Inputs & Textareas ───────────────────────────────────── */
 .input, .select, textarea.input {
   width: 100%;
   padding: 8px 12px;
   font-family: var(--font-sans);
   font-size: 13px;
-  color: var(--black);
-  background: var(--white);
-  border: 1px solid var(--gray-200);
+  color: var(--text-primary);
+  background: var(--bg-surface);
+  border: 1px solid var(--border-strong);
   border-radius: var(--radius-sm);
   outline: none;
-  transition: border-color 0.15s ease;
+  transition: border-color 0.15s ease, background-color 0.15s ease;
 }
 
 .input:focus, .select:focus, textarea.input:focus {
-  border-color: var(--black);
+  border-color: var(--text-primary);
 }
 
 .form-group {
@@ -319,12 +397,11 @@ body {
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.04em;
-  color: var(--gray-600);
+  color: var(--text-secondary);
   margin-bottom: 6px;
 }
 
 /* ─── Clean Editorial Tables ────────────────────────────────────── */
-
 .editorial-table {
   width: 100%;
   border-collapse: collapse;
@@ -337,16 +414,16 @@ body {
   font-size: 11px;
   text-transform: uppercase;
   letter-spacing: 0.05em;
-  color: var(--gray-500);
-  border-bottom: 1px solid var(--gray-200);
+  color: var(--text-muted);
+  border-bottom: 1px solid var(--border-strong);
   font-weight: 600;
 }
 
 .editorial-table td {
   padding: 14px 16px;
   font-size: 13px;
-  color: var(--black);
-  border-bottom: 1px solid var(--gray-100);
+  color: var(--text-primary);
+  border-bottom: 1px solid var(--border);
 }
 
 .editorial-table tr:last-child td {
@@ -354,11 +431,10 @@ body {
 }
 
 .editorial-table tr:hover td {
-  background: rgba(0, 0, 0, 0.015);
+  background: var(--bg-hover);
 }
 
 /* ─── Semantic Status Dots ──────────────────────────────────────── */
-
 .status-dot {
   display: inline-block;
   width: 6px;
@@ -373,26 +449,71 @@ body {
 .status-dot-red { background: var(--red); }
 .status-dot-purple { background: var(--purple); }
 .status-dot-orange { background: var(--orange); }
-.status-dot-gray { background: var(--gray-400); }
+.status-dot-gray { background: var(--text-muted); }
 
 /* ─── Thin Progress Bars ────────────────────────────────────────── */
-
 .progress-track {
   width: 100%;
   height: 3px;
-  background: var(--gray-100);
+  background: var(--bg-subtle);
   position: relative;
   overflow: hidden;
+  border-radius: 2px;
 }
 
 .progress-fill {
   height: 100%;
-  background: var(--black);
+  background: var(--text-primary);
   transition: width 0.3s ease;
 }
 
-/* ─── Grid Systems ──────────────────────────────────────────────── */
+/* ─── Tag & Pill Primitives ─────────────────────────────────────── */
+.tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  padding: 2px 8px;
+  border-radius: var(--radius-xs);
+  background: var(--bg-subtle);
+  border: 1px solid var(--border);
+  color: var(--text-secondary);
+}
 
+/* ─── Tabs Primitive ────────────────────────────────────────────── */
+.tabs {
+  display: flex;
+  gap: 4px;
+  border-bottom: 1px solid var(--border);
+  padding-bottom: 8px;
+}
+
+.tab {
+  background: transparent;
+  border: none;
+  padding: 6px 12px;
+  border-radius: var(--radius-sm);
+  font-family: var(--font-sans);
+  font-size: 12.5px;
+  font-weight: 500;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.tab:hover {
+  color: var(--text-primary);
+  background: var(--bg-hover);
+}
+
+.tab.active {
+  color: var(--text-primary);
+  background: var(--bg-subtle);
+  font-weight: 600;
+}
+
+/* ─── Grid Systems ──────────────────────────────────────────────── */
 .grid-2 {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
@@ -418,11 +539,10 @@ body {
 }
 
 /* ─── Modal Overlay ─────────────────────────────────────────────── */
-
 .modal-overlay {
   position: fixed;
   inset: 0;
-  background: rgba(10, 10, 10, 0.6);
+  background: rgba(0, 0, 0, 0.65);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -432,27 +552,29 @@ body {
 }
 
 .modal {
-  background: var(--white);
-  border: 1px solid var(--gray-200);
+  background: var(--bg-surface);
+  border: 1px solid var(--border-strong);
   border-radius: var(--radius-lg);
   max-width: 540px;
   width: 100%;
   box-shadow: var(--shadow-lg);
   overflow: hidden;
+  color: var(--text-primary);
 }
 
 .modal-header {
   padding: 16px 20px;
-  border-bottom: 1px solid var(--gray-100);
+  border-bottom: 1px solid var(--border);
   display: flex;
   align-items: center;
   justify-content: space-between;
+  background: var(--bg-surface);
 }
 
 .modal-title {
   font-size: 14px;
   font-weight: 700;
-  color: var(--black);
+  color: var(--text-primary);
 }
 
 .modal-close {
@@ -460,26 +582,31 @@ body {
   border: none;
   font-size: 18px;
   cursor: pointer;
-  color: var(--gray-500);
+  color: var(--text-muted);
+  transition: color 0.15s ease;
+}
+
+.modal-close:hover {
+  color: var(--text-primary);
 }
 
 .modal-body {
   padding: 20px;
   max-height: 75vh;
   overflow-y: auto;
+  background: var(--bg-surface);
 }
 
 .modal-footer {
   padding: 14px 20px;
-  border-top: 1px solid var(--gray-100);
+  border-top: 1px solid var(--border);
   display: flex;
   justify-content: flex-end;
   gap: 8px;
-  background: var(--off-white);
+  background: var(--bg-primary);
 }
 
 /* ─── Keyframe Animations ───────────────────────────────────────── */
-
 @keyframes fadeIn {
   from { opacity: 0; transform: translateY(4px); }
   to { opacity: 1; transform: translateY(0); }

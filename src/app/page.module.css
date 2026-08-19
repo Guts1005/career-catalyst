@@ -1,37 +1,37 @@
 /* ──────────────────────────────────────────────────────────────────
-   EDITORIAL × MINIMAL × BRUTALIST LANDING PAGE STYLESHEET
+   EDITORIAL × MINIMAL LANDING PAGE STYLESHEET (LIGHT & DARK AWARE)
    ────────────────────────────────────────────────────────────────── */
 
 .landingRoot {
   width: 100%;
   min-height: 100vh;
-  background: var(--off-white);
-  color: var(--black);
+  background: var(--bg-primary);
+  color: var(--text-primary);
   overflow-x: hidden;
 }
 
-/* ─── Hero Section (Off-White Canvas) ────────────────────────────── */
-
+/* ─── Hero Section ───────────────────────────────────────────────── */
 .heroSection {
   min-height: 90vh;
   padding: 40px clamp(24px, 5vw, 80px);
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  border-bottom: 1px solid var(--gray-100);
+  border-bottom: 1px solid var(--border);
+  background: var(--bg-primary);
 }
 
 .heroMetaTop {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  border-bottom: 1px solid var(--gray-100);
+  border-bottom: 1px solid var(--border);
   padding-bottom: 16px;
   font-family: var(--font-mono);
   font-size: 11px;
   text-transform: uppercase;
   letter-spacing: 0.08em;
-  color: var(--gray-500);
+  color: var(--text-muted);
 }
 
 .heroMain {
@@ -54,7 +54,7 @@
   line-height: 0.92;
   letter-spacing: -0.04em;
   text-transform: uppercase;
-  color: var(--black);
+  color: var(--text-primary);
 }
 
 .heroSubtitleBlock {
@@ -64,7 +64,7 @@
 .heroDescription {
   font-size: 15px;
   line-height: 1.6;
-  color: var(--gray-600);
+  color: var(--text-secondary);
   margin-bottom: 24px;
 }
 
@@ -78,25 +78,25 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  border-top: 1px solid var(--gray-100);
+  border-top: 1px solid var(--border);
   padding-top: 16px;
   font-family: var(--font-mono);
   font-size: 11px;
-  color: var(--gray-500);
+  color: var(--text-muted);
 }
 
-/* ─── Generic Section Structure ──────────────────────────────────── */
-
+/* ─── Alternating Editorial Section Structure ───────────────────── */
 .narrativeSection {
   padding: 90px clamp(24px, 5vw, 80px);
-  border-bottom: 1px solid var(--gray-100);
+  border-bottom: 1px solid var(--border);
+  background: var(--bg-primary);
 }
 
 .narrativeSectionDark {
   padding: 90px clamp(24px, 5vw, 80px);
-  background: var(--black);
-  color: var(--white);
-  border-bottom: 1px solid var(--gray-700);
+  background: var(--bg-surface);
+  color: var(--text-primary);
+  border-bottom: 1px solid var(--border-strong);
 }
 
 .sectionHeaderRow {
@@ -118,7 +118,7 @@
   font-size: 12px;
   text-transform: uppercase;
   letter-spacing: 0.1em;
-  color: var(--gray-500);
+  color: var(--text-muted);
   margin-bottom: 12px;
 }
 
@@ -127,7 +127,7 @@
   font-size: 12px;
   text-transform: uppercase;
   letter-spacing: 0.1em;
-  color: var(--gray-400);
+  color: var(--text-muted);
   margin-bottom: 12px;
 }
 
@@ -137,24 +137,24 @@
   line-height: 0.96;
   letter-spacing: -0.035em;
   text-transform: uppercase;
+  color: var(--text-primary);
 }
 
 .chapterDescription {
   font-size: 15px;
   line-height: 1.6;
-  color: var(--gray-600);
+  color: var(--text-secondary);
   max-width: 440px;
 }
 
 .chapterDescriptionDark {
   font-size: 15px;
   line-height: 1.6;
-  color: var(--gray-300);
+  color: var(--text-secondary);
   max-width: 440px;
 }
 
-/* ─── Chapter 01: KNOW (Readiness & Profile) ─────────────────────── */
-
+/* ─── Chapter 01: KNOW ──────────────────────────────────────────── */
 .knowGrid {
   display: grid;
   grid-template-columns: 1.2fr 0.8fr;
@@ -169,7 +169,7 @@
 }
 
 .bigStatBlock {
-  border-left: 2px solid var(--black);
+  border-left: 2px solid var(--text-primary);
   padding-left: 24px;
 }
 
@@ -179,7 +179,7 @@
   line-height: 0.9;
   letter-spacing: -0.05em;
   font-family: var(--font-mono);
-  color: var(--black);
+  color: var(--text-primary);
 }
 
 .statHugeLabel {
@@ -187,7 +187,7 @@
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.08em;
-  color: var(--gray-500);
+  color: var(--text-muted);
   margin-top: 8px;
 }
 
@@ -199,87 +199,79 @@
 
 .strengthRow {
   display: flex;
-  align-items: center;
   justify-content: space-between;
-  padding: 12px 0;
-  border-bottom: 1px solid var(--gray-100);
+  align-items: center;
+  padding: 12px 16px;
+  border: 1px solid var(--border);
+  background: var(--bg-surface);
   font-size: 13.5px;
 }
 
-/* ─── Chapter 02: IDENTIFY (Skill Gaps on Black) ─────────────────── */
+/* ─── Chapter 02: PRACTICE ──────────────────────────────────────── */
+.interactiveLab {
+  border: 1px solid var(--border-strong);
+  background: var(--bg-surface);
+  padding: 24px;
+}
 
-.gapListDark {
+.labTabs {
   display: flex;
-  flex-direction: column;
-  gap: 20px;
+  gap: 8px;
+  border-bottom: 1px solid var(--border);
+  padding-bottom: 12px;
+  margin-bottom: 20px;
 }
 
-.gapRowDark {
-  padding: 16px 0;
-  border-bottom: 1px solid var(--gray-700);
-  display: grid;
-  grid-template-columns: 200px 1fr 80px;
-  gap: 20px;
-  align-items: center;
-}
-
-@media (max-width: 640px) {
-  .gapRowDark {
-    grid-template-columns: 1fr auto;
-  }
-}
-
-.gapNameDark {
-  font-size: 14px;
-  font-weight: 700;
-  letter-spacing: -0.01em;
-}
-
-.gapTrackDark {
-  width: 100%;
-  height: 2px;
-  background: var(--gray-700);
-  position: relative;
-}
-
-.gapFillDark {
-  height: 100%;
-  background: var(--white);
-}
-
-.gapPercentDark {
+.labTabBtn {
+  background: transparent;
+  border: none;
   font-family: var(--font-mono);
-  font-size: 13px;
-  text-align: right;
-  color: var(--gray-300);
+  font-size: 12px;
+  color: var(--text-muted);
+  cursor: pointer;
+  padding: 6px 12px;
+  text-transform: uppercase;
+  border-radius: 4px;
+  transition: all 0.15s ease;
 }
 
-/* ─── Chapter 03: BUILD (Portfolio & Sandbox) ────────────────────── */
+.labTabBtn:hover {
+  color: var(--text-primary);
+  background: var(--bg-hover);
+}
 
+.labTabActive {
+  color: var(--text-primary);
+  background: var(--bg-subtle);
+  font-weight: 700;
+}
+
+.ragResultBox {
+  margin-top: 20px;
+  padding: 16px;
+  background: var(--bg-subtle);
+  border: 1px solid var(--border);
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+/* ─── Chapter 03: BUILD ─────────────────────────────────────────── */
 .projectLedger {
   display: flex;
   flex-direction: column;
-  border-top: 1px solid var(--gray-100);
 }
 
 .projectLedgerItem {
-  padding: 28px 0;
-  border-bottom: 1px solid var(--gray-100);
   display: grid;
-  grid-template-columns: 80px 1.5fr 1fr 120px;
-  gap: 20px;
+  grid-template-columns: 40px 1.4fr 2fr auto;
   align-items: center;
-  text-decoration: none;
-  color: inherit;
-  transition: padding-left 0.15s ease;
+  gap: 20px;
+  padding: 24px 0;
+  border-bottom: 1px solid var(--border);
+  transition: background 0.12s ease;
 }
 
-.projectLedgerItem:hover {
-  padding-left: 10px;
-  background: rgba(0, 0, 0, 0.015);
-}
-
-@media (max-width: 860px) {
+@media (max-width: 900px) {
   .projectLedgerItem {
     grid-template-columns: 1fr;
     gap: 8px;
@@ -289,44 +281,43 @@
 .projectIndex {
   font-family: var(--font-mono);
   font-size: 13px;
-  color: var(--gray-400);
+  color: var(--text-muted);
 }
 
 .projectTitleText {
-  font-size: 18px;
-  font-weight: 800;
-  letter-spacing: -0.02em;
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--text-primary);
 }
 
 .projectSummaryText {
-  font-size: 13px;
-  color: var(--gray-600);
+  font-size: 13.5px;
+  color: var(--text-secondary);
 }
 
-/* ─── Chapter 04: DISCOVER (Job Matches on Black) ────────────────── */
-
+/* ─── Chapter 04: DISCOVER ──────────────────────────────────────── */
 .jobLedgerDark {
-  border-top: 1px solid var(--gray-700);
+  display: flex;
+  flex-direction: column;
 }
 
 .jobLedgerRowDark {
-  padding: 20px 0;
-  border-bottom: 1px solid var(--gray-700);
   display: grid;
-  grid-template-columns: 1fr 1fr 120px 140px;
-  gap: 20px;
+  grid-template-columns: 1.4fr 1.2fr 120px 140px;
   align-items: center;
+  gap: 20px;
+  padding: 20px 0;
+  border-bottom: 1px solid var(--border);
 }
 
-@media (max-width: 768px) {
+@media (max-width: 900px) {
   .jobLedgerRowDark {
     grid-template-columns: 1fr;
     gap: 6px;
   }
 }
 
-/* ─── Chapter 05: PREPARE (Interview Hub) ────────────────────────── */
-
+/* ─── Chapter 05: PREPARE ───────────────────────────────────────── */
 .prepGrid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
@@ -334,16 +325,15 @@
 }
 
 .prepCard {
-  border: 1px solid var(--gray-100);
-  background: var(--white);
+  border: 1px solid var(--border);
+  background: var(--bg-surface);
   padding: 24px;
-  border-radius: var(--radius-none);
 }
 
 .prepCardCategory {
   font-family: var(--font-mono);
   font-size: 11px;
-  color: var(--gray-500);
+  color: var(--text-muted);
   text-transform: uppercase;
   margin-bottom: 8px;
 }
@@ -353,24 +343,25 @@
   font-weight: 700;
   line-height: 1.4;
   margin-bottom: 14px;
+  color: var(--text-primary);
 }
 
 .prepCardAnswer {
   font-size: 12.5px;
-  color: var(--gray-600);
+  color: var(--text-secondary);
   line-height: 1.6;
 }
 
-/* ─── Chapter 06: ACT (High-Impact CTA on Black) ─────────────────── */
-
+/* ─── Chapter 06: ACT ───────────────────────────────────────────── */
 .actSection {
   padding: 120px clamp(24px, 5vw, 80px);
-  background: var(--black);
-  color: var(--white);
+  background: var(--bg-surface);
+  color: var(--text-primary);
   display: flex;
   flex-direction: column;
   align-items: flex-start;
   justify-content: center;
+  border-top: 1px solid var(--border-strong);
 }
 
 .actDisplayTitle {
@@ -380,6 +371,7 @@
   letter-spacing: -0.04em;
   text-transform: uppercase;
   margin-bottom: 30px;
+  color: var(--text-primary);
 }
 
 .actButtonGroup {

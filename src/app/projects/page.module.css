@@ -2,6 +2,7 @@
   padding: 32px clamp(16px, 3vw, 40px);
   max-width: 1400px;
   margin: 0 auto;
+  color: var(--text-primary);
 }
 
 .header {
@@ -9,7 +10,7 @@
   justify-content: space-between;
   align-items: flex-end;
   margin-bottom: 32px;
-  border-bottom: 1px solid var(--gray-100);
+  border-bottom: 1px solid var(--border);
   padding-bottom: 24px;
   gap: 16px;
   flex-wrap: wrap;
@@ -20,29 +21,30 @@
   font-weight: 900;
   letter-spacing: -0.03em;
   text-transform: uppercase;
-  color: var(--black);
+  color: var(--text-primary);
   margin: 0 0 4px 0;
 }
 
 .subtitle {
-  color: var(--gray-600);
+  color: var(--text-secondary);
   font-size: 14px;
   margin: 0;
 }
 
 .primaryBtn {
-  background: var(--black);
-  color: var(--white);
-  border: 1px solid var(--black);
+  background: var(--bg-inverse);
+  color: var(--text-inverse);
+  border: 1px solid var(--bg-inverse);
   border-radius: var(--radius-sm);
   padding: 8px 16px;
   font-weight: 600;
   font-size: 13px;
   cursor: pointer;
+  transition: background-color 0.15s ease;
 }
 
 .primaryBtn:hover {
-  background: var(--gray-700);
+  background: var(--text-secondary);
 }
 
 .filters {
@@ -54,8 +56,8 @@
 
 .filterBtn {
   background: transparent;
-  color: var(--gray-600);
-  border: 1px solid var(--gray-200);
+  color: var(--text-secondary);
+  border: 1px solid var(--border-strong);
   border-radius: 4px;
   padding: 6px 12px;
   font-size: 11.5px;
@@ -63,20 +65,27 @@
   font-weight: 600;
   cursor: pointer;
   white-space: nowrap;
+  transition: all 0.15s ease;
+}
+
+.filterBtn:hover {
+  background: var(--bg-hover);
+  color: var(--text-primary);
 }
 
 .activeFilter {
-  background: var(--black);
-  color: var(--white);
-  border-color: var(--black);
+  background: var(--bg-inverse);
+  color: var(--text-inverse);
+  border-color: var(--bg-inverse);
 }
 
 .emptyState {
   text-align: center;
   padding: 60px 20px;
-  background: var(--white);
+  background: var(--bg-surface);
   border-radius: 4px;
-  border: 1px solid var(--gray-100);
+  border: 1px solid var(--border);
+  color: var(--text-muted);
 }
 
 .emptyIcon {
@@ -90,232 +99,73 @@
 }
 
 .card {
-  background: var(--white);
-  border: 1px solid var(--gray-100);
+  background: var(--bg-surface);
+  border: 1px solid var(--border);
   border-radius: 6px;
   padding: 24px;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
+  color: var(--text-primary);
+  transition: border-color 0.15s ease;
 }
 
-.cardHeader {
+.card:hover {
+  border-color: var(--border-strong);
+}
+
+.cardTop {
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
+  gap: 12px;
   margin-bottom: 12px;
-}
-
-.cardTitleGroup {
-  display: flex;
-  align-items: center;
-  gap: 8px;
 }
 
 .cardTitle {
   font-size: 16px;
-  font-weight: 800;
-  color: var(--black);
-}
-
-.statusBadge {
-  font-size: 10px;
-  font-family: var(--font-mono);
-  text-transform: uppercase;
   font-weight: 700;
-  padding: 2px 6px;
-  border-radius: 3px;
+  color: var(--text-primary);
+  margin: 0;
 }
 
-.statusCompleted {
-  background: var(--green-subtle);
-  color: var(--green);
-}
-
-.statusInProgress {
-  background: var(--amber-subtle);
-  color: var(--amber);
-}
-
-.statusPlanned {
-  background: var(--gray-100);
-  color: var(--gray-500);
-}
-
-.statusPaused {
-  background: var(--gray-100);
-  color: var(--gray-500);
-}
-
-.cardActions {
-  display: flex;
-  gap: 4px;
-}
-
-.iconBtn {
-  background: transparent;
-  border: none;
-  font-size: 14px;
-  color: var(--gray-400);
-  cursor: pointer;
-  padding: 4px;
-}
-
-.iconBtn:hover {
-  color: var(--black);
-}
-
-.description {
+.cardDesc {
   font-size: 13px;
-  color: var(--gray-600);
+  color: var(--text-secondary);
   line-height: 1.55;
   margin-bottom: 16px;
 }
 
-.tags {
+.cardMeta {
   display: flex;
   flex-wrap: wrap;
-  gap: 4px;
+  gap: 6px;
   margin-bottom: 16px;
 }
 
-.tag {
+.metaBadge {
   font-size: 11px;
   font-family: var(--font-mono);
-  background: var(--off-white);
-  color: var(--gray-600);
+  background: var(--bg-subtle);
+  color: var(--text-muted);
   padding: 2px 6px;
   border-radius: 3px;
-  border: 1px solid var(--gray-100);
+  border: 1px solid var(--border);
 }
 
-.links {
-  display: flex;
-  gap: 12px;
-  font-size: 12px;
-  font-family: var(--font-mono);
-  margin-bottom: 16px;
-}
-
-.link {
-  color: var(--black);
-  text-decoration: none;
-  font-weight: 600;
-}
-
-.progressSection {
-  margin-top: 12px;
-  padding-top: 12px;
-  border-top: 1px solid var(--gray-100);
-}
-
-.progressInfo {
+.cardBottom {
   display: flex;
   justify-content: space-between;
+  align-items: center;
+  padding-top: 14px;
+  border-top: 1px solid var(--border);
+}
+
+.statusBadge {
   font-size: 11px;
   font-family: var(--font-mono);
-  color: var(--gray-500);
-  margin-bottom: 4px;
-}
-
-.progressBarTrack {
-  height: 2px;
-  background: var(--gray-100);
-}
-
-.progressBarFill {
-  height: 100%;
-  background: var(--black);
-}
-
-.milestonesSection {
-  margin-top: 16px;
-  padding-top: 16px;
-  border-top: 1px solid var(--gray-100);
-}
-
-.milestoneList {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  margin-top: 8px;
-}
-
-.milestoneItem {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  font-size: 12px;
-  padding: 4px 0;
-}
-
-.modalOverlay {
-  position: fixed;
-  inset: 0;
-  background: rgba(10, 10, 10, 0.5);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 1000;
-  padding: 20px;
-}
-
-.modal {
-  background: var(--white);
-  border: 1px solid var(--gray-200);
-  border-radius: 8px;
-  max-width: 540px;
-  width: 100%;
-  max-height: 85vh;
-  overflow-y: auto;
-}
-
-.modalHeader {
-  padding: 16px 20px;
-  border-bottom: 1px solid var(--gray-100);
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.modalHeader h2 {
-  font-size: 14px;
-  font-weight: 800;
-  text-transform: uppercase;
-}
-
-.form {
-  padding: 20px;
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-}
-
-.formGroup {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-}
-
-.formGroup label {
-  font-size: 11px;
   font-weight: 600;
-  text-transform: uppercase;
-  color: var(--gray-500);
-  font-family: var(--font-mono);
-}
-
-.formRow {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 12px;
-}
-
-.modalFooter {
-  padding: 14px 20px;
-  border-top: 1px solid var(--gray-100);
   display: flex;
-  justify-content: flex-end;
-  gap: 8px;
-  background: var(--off-white);
+  align-items: center;
+  gap: 5px;
 }

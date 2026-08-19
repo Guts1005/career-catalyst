@@ -5,11 +5,11 @@
   display: flex;
   flex-direction: column;
   gap: 32px;
-  color: var(--black);
+  color: var(--text-primary);
 }
 
 .header {
-  border-bottom: 1px solid var(--gray-100);
+  border-bottom: 1px solid var(--border);
   padding-bottom: 24px;
 }
 
@@ -18,12 +18,12 @@
   font-weight: 900;
   letter-spacing: -0.03em;
   text-transform: uppercase;
-  color: var(--black);
+  color: var(--text-primary);
   margin: 0 0 4px 0;
 }
 
 .header p {
-  color: var(--gray-600);
+  color: var(--text-secondary);
   font-size: 14px;
   margin: 0;
 }
@@ -84,20 +84,21 @@
 }
 
 .card {
-  background-color: var(--white);
-  border: 1px solid var(--gray-100);
+  background-color: var(--bg-surface);
+  border: 1px solid var(--border);
   border-radius: 6px;
   padding: 24px;
   display: flex;
   flex-direction: column;
   gap: 16px;
+  color: var(--text-primary);
 }
 
 .cardHeader {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  border-bottom: 1px solid var(--gray-100);
+  border-bottom: 1px solid var(--border);
   padding-bottom: 12px;
 }
 
@@ -106,7 +107,7 @@
   font-weight: 800;
   text-transform: uppercase;
   letter-spacing: -0.01em;
-  color: var(--black);
+  color: var(--text-primary);
   margin: 0;
 }
 
@@ -120,7 +121,7 @@
   font-size: 40px;
   font-weight: 900;
   font-family: var(--font-mono);
-  color: var(--black);
+  color: var(--text-primary);
   line-height: 1;
 }
 
@@ -128,13 +129,13 @@
   display: flex;
   flex-direction: column;
   font-size: 12px;
-  color: var(--gray-500);
+  color: var(--text-muted);
 }
 
 .statLabel span {
   font-weight: 700;
   font-size: 13px;
-  color: var(--black);
+  color: var(--text-primary);
 }
 
 .barChart {
@@ -143,13 +144,13 @@
 
 .barTrack {
   height: 3px;
-  background: var(--gray-100);
+  background: var(--bg-subtle);
   width: 100%;
 }
 
 .barFill {
   height: 100%;
-  background: var(--black);
+  background: var(--text-primary);
 }
 
 .chartContainer {
@@ -171,7 +172,7 @@
   gap: 6px;
   font-size: 11.5px;
   font-family: var(--font-mono);
-  color: var(--gray-600);
+  color: var(--text-secondary);
 }
 
 .legendColor {
@@ -183,9 +184,10 @@
 .emptyState {
   padding: 60px 20px;
   text-align: center;
-  background: var(--white);
-  border: 1px solid var(--gray-100);
+  background: var(--bg-surface);
+  border: 1px solid var(--border);
   border-radius: 4px;
+  color: var(--text-muted);
 }
 
 .loading {
@@ -195,7 +197,7 @@
   justify-content: center;
   min-height: 60vh;
   gap: 12px;
-  color: var(--gray-500);
+  color: var(--text-muted);
   font-family: var(--font-mono);
   font-size: 13px;
 }
@@ -203,8 +205,8 @@
 .spinner {
   width: 24px;
   height: 24px;
-  border: 2px solid var(--gray-200);
-  border-top-color: var(--black);
+  border: 2px solid var(--border-strong);
+  border-top-color: var(--text-primary);
   border-radius: 50%;
   animation: spin 0.6s linear infinite;
 }

@@ -1,7 +1,7 @@
 .backdrop {
   position: fixed;
   inset: 0;
-  background: rgba(10, 10, 10, 0.5);
+  background: rgba(0, 0, 0, 0.65);
   z-index: 1000;
   display: flex;
   align-items: flex-start;
@@ -13,8 +13,8 @@
 .palette {
   width: 100%;
   max-width: 560px;
-  background: var(--white);
-  border: 1px solid var(--gray-200);
+  background: var(--bg-surface);
+  border: 1px solid var(--border-strong);
   border-radius: 8px;
   box-shadow: var(--shadow-lg);
   overflow: hidden;
@@ -24,12 +24,12 @@
   display: flex;
   align-items: center;
   padding: 14px 18px;
-  border-bottom: 1px solid var(--gray-100);
+  border-bottom: 1px solid var(--border);
   gap: 12px;
 }
 
 .searchIcon {
-  color: var(--black);
+  color: var(--text-primary);
   display: flex;
   align-items: center;
 }
@@ -39,22 +39,22 @@
   background: transparent;
   border: none;
   font-size: 14px;
-  color: var(--black);
+  color: var(--text-primary);
   font-family: inherit;
   outline: none;
 }
 
 .searchInput::placeholder {
-  color: var(--gray-400);
+  color: var(--text-muted);
 }
 
 .shortcutBadge {
   font-size: 10.5px;
-  background: var(--off-white);
-  color: var(--gray-500);
+  background: var(--bg-subtle);
+  color: var(--text-muted);
   padding: 2px 6px;
   border-radius: 3px;
-  border: 1px solid var(--gray-200);
+  border: 1px solid var(--border);
   font-family: var(--font-mono);
 }
 
@@ -74,7 +74,7 @@
   font-family: var(--font-mono);
   text-transform: uppercase;
   letter-spacing: 0.08em;
-  color: var(--gray-400);
+  color: var(--text-muted);
   padding: 6px 12px;
 }
 
@@ -84,14 +84,15 @@
   justify-content: space-between;
   padding: 8px 12px;
   border-radius: 4px;
-  color: var(--gray-600);
+  color: var(--text-secondary);
   text-decoration: none;
   cursor: pointer;
+  transition: background 0.1s ease, color 0.1s ease;
 }
 
 .item:hover, .selected {
-  background: var(--off-white);
-  color: var(--black);
+  background: var(--bg-subtle);
+  color: var(--text-primary);
 }
 
 .itemLeft {
@@ -100,30 +101,36 @@
   gap: 10px;
 }
 
-.itemIcon {
-  display: flex;
-  align-items: center;
-  color: var(--gray-500);
-}
-
-.itemTitle {
+.itemLabel {
   font-size: 13px;
-  font-weight: 600;
+  font-weight: 500;
 }
 
 .itemDesc {
   font-size: 11.5px;
-  color: var(--gray-400);
-  margin-top: 1px;
+  color: var(--text-muted);
+  margin-left: 8px;
 }
 
-.footer {
-  padding: 8px 16px;
-  background: var(--off-white);
-  border-top: 1px solid var(--gray-100);
-  display: flex;
-  justify-content: space-between;
+.itemEnter {
   font-size: 11px;
   font-family: var(--font-mono);
-  color: var(--gray-400);
+  color: var(--text-muted);
+}
+
+.paletteFooter {
+  padding: 8px 18px;
+  background: var(--bg-primary);
+  border-top: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 11px;
+  color: var(--text-muted);
+  font-family: var(--font-mono);
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: scale(0.98); }
+  to { opacity: 1; transform: scale(1); }
 }

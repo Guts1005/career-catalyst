@@ -1,7 +1,6 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { IconCheck } from './Icons';
 
 let toastDispatch = null;
 
@@ -51,11 +50,11 @@ export default function ToastContainer() {
             alignItems: 'center',
             gap: '10px',
             padding: '10px 16px',
-            background: 'var(--black)',
-            border: '1px solid var(--gray-700)',
-            boxShadow: '0 4px 16px rgba(0, 0, 0, 0.2)',
+            background: 'var(--bg-surface)',
+            border: '1px solid var(--border-strong)',
+            boxShadow: 'var(--shadow-lg)',
             borderRadius: '4px',
-            color: 'var(--white)',
+            color: 'var(--text-primary)',
             fontSize: '12.5px',
             fontFamily: 'var(--font-sans)',
             fontWeight: 500,

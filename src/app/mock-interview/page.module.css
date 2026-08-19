@@ -2,6 +2,7 @@
   padding: 32px clamp(16px, 3vw, 40px);
   max-width: 1300px;
   margin: 0 auto;
+  color: var(--text-primary);
 }
 
 .header {
@@ -9,7 +10,7 @@
   justify-content: space-between;
   align-items: flex-end;
   margin-bottom: 32px;
-  border-bottom: 1px solid var(--gray-100);
+  border-bottom: 1px solid var(--border);
   padding-bottom: 24px;
   gap: 16px;
   flex-wrap: wrap;
@@ -20,12 +21,12 @@
   font-weight: 900;
   letter-spacing: -0.03em;
   text-transform: uppercase;
-  color: var(--black);
+  color: var(--text-primary);
 }
 
 .subtitle {
   font-size: 14px;
-  color: var(--gray-600);
+  color: var(--text-secondary);
   margin-top: 4px;
 }
 
@@ -37,43 +38,46 @@
 }
 
 .trackCard {
-  background: var(--white);
-  border: 1px solid var(--gray-100);
+  background: var(--bg-surface);
+  border: 1px solid var(--border);
   border-radius: 6px;
   padding: 20px;
   cursor: pointer;
   display: flex;
   flex-direction: column;
   gap: 6px;
+  color: var(--text-primary);
+  transition: border-color 0.15s ease;
 }
 
 .trackCard:hover {
-  border-color: var(--gray-300);
+  border-color: var(--border-strong);
 }
 
 .trackActive {
-  background: var(--off-white);
-  border-color: var(--black);
+  background: var(--bg-subtle);
+  border-color: var(--text-primary);
 }
 
 .trackName {
   font-size: 15px;
   font-weight: 800;
-  color: var(--black);
+  color: var(--text-primary);
 }
 
 .trackDesc {
   font-size: 12.5px;
-  color: var(--gray-600);
+  color: var(--text-secondary);
   line-height: 1.45;
 }
 
 .simArena {
-  background: var(--white);
-  border: 1px solid var(--gray-100);
+  background: var(--bg-surface);
+  border: 1px solid var(--border);
   border-radius: 6px;
   padding: 28px;
   margin-bottom: 32px;
+  color: var(--text-primary);
 }
 
 .arenaTop {
@@ -81,7 +85,7 @@
   justify-content: space-between;
   align-items: center;
   margin-bottom: 20px;
-  border-bottom: 1px solid var(--gray-100);
+  border-bottom: 1px solid var(--border);
   padding-bottom: 16px;
 }
 
@@ -89,83 +93,33 @@
   font-family: var(--font-mono);
   font-size: 13px;
   font-weight: 700;
-  color: var(--black);
-  background: var(--off-white);
+  color: var(--text-primary);
+  background: var(--bg-subtle);
   padding: 4px 10px;
   border-radius: 4px;
-  border: 1px solid var(--gray-200);
+  border: 1px solid var(--border-strong);
 }
 
 .questionSection {
   margin-bottom: 20px;
 }
 
-.questionCategory {
-  font-size: 11px;
-  font-family: var(--font-mono);
-  color: var(--gray-500);
-  text-transform: uppercase;
-  margin-bottom: 6px;
-}
-
-.questionText {
-  font-size: 17px;
-  font-weight: 800;
-  line-height: 1.4;
-  color: var(--black);
-}
-
-.editorArea {
+.simTextarea {
   width: 100%;
-  height: 220px;
-  background: var(--off-white);
-  border: 1px solid var(--gray-200);
+  min-height: 240px;
+  background: var(--bg-subtle);
+  border: 1px solid var(--border-strong);
   border-radius: 4px;
   padding: 14px;
   font-family: var(--font-mono);
   font-size: 13px;
+  color: var(--text-primary);
   line-height: 1.5;
-  color: var(--black);
-  margin-bottom: 16px;
+  resize: vertical;
+  margin-bottom: 20px;
+}
+
+.simTextarea:focus {
   outline: none;
-}
-
-.editorArea:focus {
-  border-color: var(--black);
-}
-
-.arenaActions {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.scoreCard {
-  background: var(--off-white);
-  border: 1px solid var(--gray-200);
-  border-radius: 6px;
-  padding: 24px;
-  margin-top: 24px;
-}
-
-.scoreTitle {
-  font-size: 15px;
-  font-weight: 800;
-  text-transform: uppercase;
-  margin-bottom: 14px;
-}
-
-.rubricList {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-}
-
-.rubricItem {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  font-size: 13px;
-  padding: 8px 0;
-  border-bottom: 1px solid var(--gray-200);
+  border-color: var(--text-primary);
 }

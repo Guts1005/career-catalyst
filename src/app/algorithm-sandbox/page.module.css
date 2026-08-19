@@ -2,6 +2,7 @@
   padding: 32px clamp(16px, 3vw, 40px);
   max-width: 1400px;
   margin: 0 auto;
+  color: var(--text-primary);
 }
 
 .header {
@@ -9,7 +10,7 @@
   justify-content: space-between;
   align-items: flex-end;
   margin-bottom: 32px;
-  border-bottom: 1px solid var(--gray-100);
+  border-bottom: 1px solid var(--border);
   padding-bottom: 24px;
   gap: 16px;
   flex-wrap: wrap;
@@ -20,12 +21,12 @@
   font-weight: 900;
   letter-spacing: -0.03em;
   text-transform: uppercase;
-  color: var(--black);
+  color: var(--text-primary);
 }
 
 .subtitle {
   font-size: 14px;
-  color: var(--gray-600);
+  color: var(--text-secondary);
   margin-top: 4px;
 }
 
@@ -36,21 +37,23 @@
 }
 
 .sandboxCard {
-  background: var(--white);
-  border: 1px solid var(--gray-100);
+  background: var(--bg-surface);
+  border: 1px solid var(--border);
   border-radius: 6px;
   padding: 24px;
+  color: var(--text-primary);
 }
 
 .controlsRow {
   display: flex;
   gap: 20px;
   align-items: center;
-  background: var(--off-white);
+  background: var(--bg-subtle);
   padding: 16px;
   border-radius: 4px;
   margin-bottom: 24px;
   flex-wrap: wrap;
+  border: 1px solid var(--border);
 }
 
 .controlItem {
@@ -63,14 +66,14 @@
 .controlLabel {
   font-size: 11px;
   font-weight: 700;
-  color: var(--gray-500);
+  color: var(--text-muted);
   text-transform: uppercase;
   font-family: var(--font-mono);
 }
 
 .slider {
   width: 100%;
-  accent-color: var(--black);
+  accent-color: var(--text-primary);
   cursor: pointer;
 }
 
@@ -78,9 +81,9 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  background: var(--black);
+  background: var(--bg-subtle);
   border-radius: 4px;
-  border: 1px solid var(--gray-700);
+  border: 1px solid var(--border);
   padding: 24px;
   overflow: hidden;
 }
@@ -88,10 +91,10 @@
 .mathDerivation {
   margin-top: 24px;
   padding: 16px;
-  background: var(--off-white);
+  background: var(--bg-subtle);
   border-radius: 4px;
-  border-left: 2px solid var(--black);
+  border-left: 2px solid var(--text-primary);
   font-size: 13px;
-  color: var(--black);
+  color: var(--text-primary);
   line-height: 1.6;
 }

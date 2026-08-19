@@ -2,6 +2,7 @@
   padding: 32px clamp(16px, 3vw, 40px);
   max-width: 1400px;
   margin: 0 auto;
+  color: var(--text-primary);
 }
 
 .header {
@@ -9,7 +10,7 @@
   justify-content: space-between;
   align-items: flex-end;
   margin-bottom: 32px;
-  border-bottom: 1px solid var(--gray-100);
+  border-bottom: 1px solid var(--border);
   padding-bottom: 24px;
   gap: 16px;
   flex-wrap: wrap;
@@ -20,12 +21,12 @@
   font-weight: 900;
   letter-spacing: -0.03em;
   text-transform: uppercase;
-  color: var(--black);
+  color: var(--text-primary);
 }
 
 .subtitle {
   font-size: 14px;
-  color: var(--gray-600);
+  color: var(--text-secondary);
   margin-top: 4px;
 }
 
@@ -37,13 +38,14 @@
 }
 
 .profileCard {
-  background: var(--white);
-  border: 1px solid var(--gray-100);
+  background: var(--bg-surface);
+  border: 1px solid var(--border);
   border-radius: 6px;
   padding: 20px;
   display: flex;
   flex-direction: column;
   gap: 12px;
+  color: var(--text-primary);
 }
 
 .profileHeader {
@@ -55,7 +57,7 @@
 .platformTitle {
   font-size: 14px;
   font-weight: 800;
-  color: var(--black);
+  color: var(--text-primary);
   text-transform: uppercase;
 }
 
@@ -70,7 +72,7 @@
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 12px;
-  background: var(--off-white);
+  background: var(--bg-subtle);
   padding: 12px;
   border-radius: 4px;
 }
@@ -79,166 +81,95 @@
   font-size: 20px;
   font-weight: 900;
   font-family: var(--font-mono);
-  color: var(--black);
+  color: var(--text-primary);
 }
 
 .pStatLabel {
   font-size: 10px;
-  color: var(--gray-500);
+  color: var(--text-muted);
   text-transform: uppercase;
   font-family: var(--font-mono);
 }
 
-.diffRow {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-  gap: 12px;
-  margin-bottom: 24px;
-}
-
-.diffPill {
-  background: var(--white);
-  border: 1px solid var(--gray-100);
-  border-radius: 4px;
-  padding: 14px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.diffEasyVal {
-  font-size: 22px;
-  font-weight: 900;
-  font-family: var(--font-mono);
-  color: var(--green);
-}
-
-.diffMedVal {
-  font-size: 22px;
-  font-weight: 900;
-  font-family: var(--font-mono);
-  color: var(--amber);
-}
-
-.diffHardVal {
-  font-size: 22px;
-  font-weight: 900;
-  font-family: var(--font-mono);
-  color: var(--red);
-}
-
-.filterBar {
-  margin-bottom: 16px;
-}
-
-.filterTabs {
-  display: flex;
-  gap: 4px;
-}
-
-.fTab {
-  background: transparent;
-  border: 1px solid var(--gray-200);
-  color: var(--gray-600);
-  padding: 6px 12px;
-  border-radius: 4px;
-  cursor: pointer;
-  font-size: 11.5px;
-  font-family: var(--font-mono);
-}
-
-.fTab.active {
-  background: var(--black);
-  color: var(--white);
-  border-color: var(--black);
-}
-
 .tableCard {
-  background: var(--white);
-  border: 1px solid var(--gray-100);
+  background: var(--bg-surface);
+  border: 1px solid var(--border);
   border-radius: 6px;
   overflow: hidden;
 }
 
-.probTable {
+.problemTable {
   width: 100%;
   border-collapse: collapse;
   text-align: left;
 }
 
-.probTable th {
+.problemTable th {
   padding: 12px 14px;
   font-size: 11px;
   font-weight: 600;
   text-transform: uppercase;
   font-family: var(--font-mono);
-  color: var(--gray-500);
-  background: var(--off-white);
-  border-bottom: 1px solid var(--gray-200);
+  color: var(--text-muted);
+  background: var(--bg-subtle);
+  border-bottom: 1px solid var(--border-strong);
 }
 
-.probTable td {
-  padding: 12px 14px;
+.problemTable td {
+  padding: 14px;
   font-size: 13px;
-  border-bottom: 1px solid var(--gray-100);
-  color: var(--black);
+  border-bottom: 1px solid var(--border);
+  color: var(--text-primary);
 }
 
-.probTable tr:last-child td {
+.problemTable tr:last-child td {
   border-bottom: none;
 }
 
-.solvedIcon {
-  color: var(--green);
-  font-size: 12px;
+.problemTable tr:hover td {
+  background: var(--bg-hover);
+}
+
+.platformBadge {
   font-family: var(--font-mono);
-  font-weight: 700;
-}
-
-.probLink {
-  color: var(--black);
-  text-decoration: none;
-  font-weight: 700;
-}
-
-.notesText {
-  font-size: 11.5px;
-  color: var(--gray-500);
-  margin-top: 2px;
-}
-
-.diffTag {
-  font-size: 10.5px;
-  font-family: var(--font-mono);
-  font-weight: 700;
-  text-transform: uppercase;
+  font-size: 11px;
+  background: var(--bg-subtle);
+  color: var(--text-secondary);
   padding: 2px 6px;
   border-radius: 3px;
+  border: 1px solid var(--border);
 }
 
-.tagEasy {
-  background: var(--green-subtle);
-  color: var(--green);
-}
-
-.tagMedium {
-  background: var(--amber-subtle);
-  color: var(--amber);
-}
-
-.tagHard {
-  background: var(--red-subtle);
-  color: var(--red);
-}
-
-.delBtn {
-  background: transparent;
-  border: none;
-  color: var(--gray-400);
-  cursor: pointer;
+.diffBadge {
   font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 700;
+  padding: 2px 6px;
+  border-radius: 3px;
+  text-transform: uppercase;
 }
 
-.delBtn:hover {
+.diffBadge.easy {
+  color: var(--green);
+  background: var(--green-subtle);
+  border: 1px solid var(--green-border);
+}
+
+.diffBadge.medium {
+  color: var(--amber);
+  background: var(--amber-subtle);
+  border: 1px solid var(--amber-border);
+}
+
+.diffBadge.hard {
   color: var(--red);
+  background: var(--red-subtle);
+  border: 1px solid var(--red-border);
+}
+
+.solvedBadge {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--green);
+  font-weight: 700;
 }

@@ -179,7 +179,7 @@ export default function SkillsPage() {
             cy={center}
             r={radius * ratio}
             fill="none"
-            stroke="var(--gray-100)"
+            stroke="var(--border)"
             strokeWidth="1"
           />
         ))}
@@ -192,7 +192,7 @@ export default function SkillsPage() {
             y1={center}
             x2={p.x}
             y2={p.y}
-            stroke="var(--gray-200)"
+            stroke="var(--border-strong)"
             strokeWidth="1"
           />
         ))}
@@ -200,8 +200,8 @@ export default function SkillsPage() {
         {/* Data Area Polygon */}
         <path
           d={pathData}
-          fill="rgba(10, 10, 10, 0.06)"
-          stroke="var(--black)"
+          fill="var(--bg-subtle)"
+          stroke="var(--text-primary)"
           strokeWidth="1.5"
         />
 
@@ -212,8 +212,8 @@ export default function SkillsPage() {
               cx={p.x}
               cy={p.y}
               r="4"
-              fill="var(--black)"
-              stroke="var(--white)"
+              fill="var(--text-primary)"
+              stroke="var(--bg-surface)"
               strokeWidth="1.5"
               style={{ cursor: 'pointer' }}
             />
@@ -224,7 +224,7 @@ export default function SkillsPage() {
               dominantBaseline="central"
               fontSize="10"
               fontWeight="600"
-              fill="var(--gray-600)"
+              fill="var(--text-secondary)"
               fontFamily="var(--font-mono)"
             >
               {p.label.substring(0, 12)} ({p.value}%)

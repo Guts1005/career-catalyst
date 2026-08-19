@@ -245,12 +245,12 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* ─── Chapter 04: DISCOVER (Job Matches on Black) ────────────── */}
+      {/* ─── Chapter 04: DISCOVER (Job Matches) ────────────────────── */}
       <section className={styles.narrativeSectionDark}>
         <div className={styles.sectionHeaderRow}>
           <div>
             <div className={styles.chapterNumberDark}>04 — DISCOVER</div>
-            <h2 className={styles.chapterHeading} style={{ color: 'var(--white)' }}>
+            <h2 className={styles.chapterHeading} style={{ color: 'var(--text-primary)' }}>
               FIND<br />
               THE RIGHT<br />
               OPPORTUNITY.
@@ -266,10 +266,10 @@ export default function HomePage() {
         <div className={styles.jobLedgerDark}>
           <div className={styles.jobLedgerRowDark}>
             <div>
-              <div style={{ fontWeight: 800, fontSize: '15px' }}>Anthropic</div>
-              <div style={{ fontSize: '12px', color: 'var(--gray-400)' }}>Staff AI Engineer • San Francisco</div>
+              <div style={{ fontWeight: 800, fontSize: '15px', color: 'var(--text-primary)' }}>Anthropic</div>
+              <div style={{ fontSize: '12px', color: 'var(--text-muted)' }}>Staff AI Engineer • San Francisco</div>
             </div>
-            <div style={{ fontFamily: 'var(--font-mono)', fontSize: '13px', color: 'var(--gray-300)' }}>
+            <div style={{ fontFamily: 'var(--font-mono)', fontSize: '13px', color: 'var(--text-secondary)' }}>
               $240k - $320k Base + Equity
             </div>
             <div style={{ fontFamily: 'var(--font-mono)', fontSize: '12px', color: 'var(--green)' }}>
@@ -282,10 +282,10 @@ export default function HomePage() {
 
           <div className={styles.jobLedgerRowDark}>
             <div>
-              <div style={{ fontWeight: 800, fontSize: '15px' }}>OpenAI</div>
-              <div style={{ fontSize: '12px', color: 'var(--gray-400)' }}>ML Infrastructure Engineer • San Francisco</div>
+              <div style={{ fontWeight: 800, fontSize: '15px', color: 'var(--text-primary)' }}>OpenAI</div>
+              <div style={{ fontSize: '12px', color: 'var(--text-muted)' }}>ML Infrastructure Engineer • San Francisco</div>
             </div>
-            <div style={{ fontFamily: 'var(--font-mono)', fontSize: '13px', color: 'var(--gray-300)' }}>
+            <div style={{ fontFamily: 'var(--font-mono)', fontSize: '13px', color: 'var(--text-secondary)' }}>
               $220k - $290k Base + Equity
             </div>
             <div style={{ fontFamily: 'var(--font-mono)', fontSize: '12px', color: 'var(--green)' }}>
@@ -298,10 +298,10 @@ export default function HomePage() {
 
           <div className={styles.jobLedgerRowDark}>
             <div>
-              <div style={{ fontWeight: 800, fontSize: '15px' }}>Databricks</div>
-              <div style={{ fontSize: '12px', color: 'var(--gray-400)' }}>Senior Systems Engineer • Mountain View</div>
+              <div style={{ fontWeight: 800, fontSize: '15px', color: 'var(--text-primary)' }}>Databricks</div>
+              <div style={{ fontSize: '12px', color: 'var(--text-muted)' }}>Senior Systems Engineer • Mountain View</div>
             </div>
-            <div style={{ fontFamily: 'var(--font-mono)', fontSize: '13px', color: 'var(--gray-300)' }}>
+            <div style={{ fontFamily: 'var(--font-mono)', fontSize: '13px', color: 'var(--text-secondary)' }}>
               $195k - $260k Base + Equity
             </div>
             <div style={{ fontFamily: 'var(--font-mono)', fontSize: '12px', color: 'var(--green)' }}>
@@ -314,10 +314,10 @@ export default function HomePage() {
         </div>
 
         <div style={{ marginTop: '30px', display: 'flex', gap: '12px' }}>
-          <Link href="/job-tracker" className="btn btn-dark" style={{ fontSize: '12.5px' }}>
+          <Link href="/job-tracker" className="btn btn-primary" style={{ fontSize: '12.5px' }}>
             OPEN PIPELINE KANBAN →
           </Link>
-          <Link href="/salary-insights" className="btn btn-ghost" style={{ fontSize: '12.5px', color: 'var(--white)' }}>
+          <Link href="/salary-insights" className="btn btn-secondary" style={{ fontSize: '12.5px' }}>
             SALARY INTELLIGENCE →
           </Link>
         </div>

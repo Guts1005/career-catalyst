@@ -2,6 +2,7 @@
   padding: 32px clamp(16px, 3vw, 40px);
   max-width: 1300px;
   margin: 0 auto;
+  color: var(--text-primary);
 }
 
 .header {
@@ -9,7 +10,7 @@
   justify-content: space-between;
   align-items: flex-end;
   margin-bottom: 32px;
-  border-bottom: 1px solid var(--gray-100);
+  border-bottom: 1px solid var(--border);
   padding-bottom: 24px;
   gap: 16px;
   flex-wrap: wrap;
@@ -20,12 +21,12 @@
   font-weight: 900;
   letter-spacing: -0.03em;
   text-transform: uppercase;
-  color: var(--black);
+  color: var(--text-primary);
 }
 
 .subtitle {
   font-size: 14px;
-  color: var(--gray-600);
+  color: var(--text-secondary);
   margin-top: 4px;
 }
 
@@ -37,25 +38,26 @@
 }
 
 .statCard {
-  background: var(--white);
-  border: 1px solid var(--gray-100);
+  background: var(--bg-surface);
+  border: 1px solid var(--border);
   border-radius: var(--radius-sm);
   padding: 20px;
   display: flex;
   flex-direction: column;
   gap: 4px;
+  color: var(--text-primary);
 }
 
 .statVal {
   font-size: 32px;
   font-weight: 900;
   font-family: var(--font-mono);
-  color: var(--black);
+  color: var(--text-primary);
 }
 
 .statLabel {
   font-size: 11px;
-  color: var(--gray-500);
+  color: var(--text-muted);
   text-transform: uppercase;
   letter-spacing: 0.05em;
   font-family: var(--font-mono);
@@ -82,15 +84,21 @@
   font-size: 12px;
   font-family: var(--font-mono);
   background: transparent;
-  color: var(--gray-600);
-  border: 1px solid var(--gray-200);
+  color: var(--text-secondary);
+  border: 1px solid var(--border-strong);
   cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.pill:hover {
+  background: var(--bg-hover);
+  color: var(--text-primary);
 }
 
 .pill.active {
-  background: var(--black);
-  color: var(--white);
-  border-color: var(--black);
+  background: var(--bg-inverse);
+  color: var(--text-inverse);
+  border-color: var(--bg-inverse);
 }
 
 .questionList {
@@ -99,89 +107,47 @@
   gap: 12px;
 }
 
-.qCard {
-  background: var(--white);
-  border: 1px solid var(--gray-100);
-  border-radius: 6px;
-  overflow: hidden;
+.questionCard {
+  background: var(--bg-surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 20px;
+  cursor: pointer;
+  transition: border-color 0.15s ease;
+  color: var(--text-primary);
 }
 
-.qCardHeader {
-  padding: 18px 20px;
+.questionCard:hover {
+  border-color: var(--border-strong);
+}
+
+.questionTop {
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
-  cursor: pointer;
+  gap: 12px;
 }
 
-.qMeta {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  margin-bottom: 6px;
-}
-
-.categoryTag {
-  font-size: 10.5px;
-  font-family: var(--font-mono);
-  color: var(--gray-500);
-  text-transform: uppercase;
-}
-
-.difficultyTag {
-  font-size: 10px;
-  font-family: var(--font-mono);
-  font-weight: 700;
-  text-transform: uppercase;
-  padding: 2px 6px;
-  border-radius: 3px;
-}
-
-.diffEasy {
-  background: var(--green-subtle);
-  color: var(--green);
-}
-
-.diffMedium {
-  background: var(--amber-subtle);
-  color: var(--amber);
-}
-
-.diffHard {
-  background: var(--red-subtle);
-  color: var(--red);
-}
-
-.qTitle {
+.questionTitle {
   font-size: 15px;
-  font-weight: 800;
-  color: var(--black);
+  font-weight: 700;
+  color: var(--text-primary);
   line-height: 1.4;
 }
 
-.statusSelect {
-  padding: 4px 8px;
-  border: 1px solid var(--gray-200);
-  border-radius: 4px;
-  font-size: 11.5px;
+.questionCategory {
+  font-size: 11px;
   font-family: var(--font-mono);
-  background: var(--off-white);
-  outline: none;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  margin-top: 4px;
 }
 
-.qCardBody {
-  padding: 0 20px 20px 20px;
-}
-
-.answerSection {
-  background: var(--off-white);
-  border: 1px solid var(--gray-100);
-  border-radius: 4px;
-  padding: 16px;
-}
-
-.answerText {
+.answerBlock {
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px solid var(--border);
   font-size: 13px;
-  color: var(--black);
+  color: var(--text-secondary);
   line-height: 1.6;
 }
