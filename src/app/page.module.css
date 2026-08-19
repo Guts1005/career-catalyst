@@ -1,533 +1,390 @@
 /* ──────────────────────────────────────────────────────────────────
-   Awwwards & Zalak Patel Inspired Portfolio & ML Showcase Styles
+   EDITORIAL × MINIMAL × BRUTALIST LANDING PAGE STYLESHEET
    ────────────────────────────────────────────────────────────────── */
 
-.pageContainer {
-  max-width: 1180px;
-  margin: 0 auto;
-  padding: 0 16px 80px 16px;
-  animation: fadeIn 0.4s ease;
+.landingRoot {
+  width: 100%;
+  min-height: 100vh;
+  background: var(--off-white);
+  color: var(--black);
+  overflow-x: hidden;
 }
 
-/* ─── Floating Top Navbar ────────────────────────────────────────── */
+/* ─── Hero Section (Off-White Canvas) ────────────────────────────── */
 
-.topNav {
-  position: sticky;
-  top: 16px;
-  z-index: 100;
+.heroSection {
+  min-height: 90vh;
+  padding: 40px clamp(24px, 5vw, 80px);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  border-bottom: 1px solid var(--gray-100);
+}
+
+.heroMetaTop {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 10px 18px;
-  background: rgba(18, 18, 22, 0.85);
-  backdrop-filter: blur(16px);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.08);
-  border-radius: 9999px;
-  margin-bottom: 40px;
+  border-bottom: 1px solid var(--gray-100);
+  padding-bottom: 16px;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--gray-500);
 }
 
-.navBrand {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  text-decoration: none;
+.heroMain {
+  padding: 40px 0;
+  display: grid;
+  grid-template-columns: 1.4fr 0.6fr;
+  gap: 40px;
+  align-items: flex-end;
 }
 
-.navAvatar {
-  width: 28px;
-  height: 28px;
-  border-radius: 50%;
-  background: #ffffff;
-  color: #000000;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-weight: 800;
-  font-size: 13px;
+@media (max-width: 900px) {
+  .heroMain {
+    grid-template-columns: 1fr;
+  }
+}
+
+.heroDisplayTitle {
+  font-size: clamp(52px, 8.5vw, 130px);
+  font-weight: 900;
+  line-height: 0.92;
   letter-spacing: -0.04em;
+  text-transform: uppercase;
+  color: var(--black);
 }
 
-.navName {
-  font-size: 13.5px;
-  font-weight: 600;
-  color: var(--text-primary);
+.heroSubtitleBlock {
+  max-width: 380px;
 }
 
-.navLinks {
+.heroDescription {
+  font-size: 15px;
+  line-height: 1.6;
+  color: var(--gray-600);
+  margin-bottom: 24px;
+}
+
+.heroCtaGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.heroMetaBottom {
   display: flex;
   align-items: center;
-  gap: 20px;
+  justify-content: space-between;
+  border-top: 1px solid var(--gray-100);
+  padding-top: 16px;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--gray-500);
 }
 
-.navLink {
-  font-size: 12.5px;
-  color: var(--text-secondary);
-  text-decoration: none;
-  transition: color 0.15s ease;
+/* ─── Generic Section Structure ──────────────────────────────────── */
+
+.narrativeSection {
+  padding: 90px clamp(24px, 5vw, 80px);
+  border-bottom: 1px solid var(--gray-100);
 }
 
-.navLink:hover {
-  color: #ffffff;
+.narrativeSectionDark {
+  padding: 90px clamp(24px, 5vw, 80px);
+  background: var(--black);
+  color: var(--white);
+  border-bottom: 1px solid var(--gray-700);
 }
 
-.navActions {
-  display: flex;
-  align-items: center;
-  gap: 8px;
+.sectionHeaderRow {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 30px;
+  margin-bottom: 60px;
+  align-items: flex-start;
 }
 
-/* ─── Hero Section ───────────────────────────────────────────────── */
+@media (max-width: 768px) {
+  .sectionHeaderRow {
+    grid-template-columns: 1fr;
+  }
+}
 
-.hero {
-  padding: 30px 0 60px 0;
+.chapterNumber {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--gray-500);
+  margin-bottom: 12px;
+}
+
+.chapterNumberDark {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--gray-400);
+  margin-bottom: 12px;
+}
+
+.chapterHeading {
+  font-size: clamp(36px, 5vw, 76px);
+  font-weight: 900;
+  line-height: 0.96;
+  letter-spacing: -0.035em;
+  text-transform: uppercase;
+}
+
+.chapterDescription {
+  font-size: 15px;
+  line-height: 1.6;
+  color: var(--gray-600);
+  max-width: 440px;
+}
+
+.chapterDescriptionDark {
+  font-size: 15px;
+  line-height: 1.6;
+  color: var(--gray-300);
+  max-width: 440px;
+}
+
+/* ─── Chapter 01: KNOW (Readiness & Profile) ─────────────────────── */
+
+.knowGrid {
   display: grid;
   grid-template-columns: 1.2fr 0.8fr;
   gap: 40px;
   align-items: center;
 }
 
-@media (max-width: 900px) {
-  .hero {
+@media (max-width: 860px) {
+  .knowGrid {
     grid-template-columns: 1fr;
   }
 }
 
-.statusBadge {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  padding: 4px 12px;
-  border-radius: 9999px;
-  background: rgba(16, 185, 129, 0.08);
-  border: 1px solid rgba(16, 185, 129, 0.25);
-  font-size: 11.5px;
-  font-weight: 600;
-  color: var(--success);
-  margin-bottom: 18px;
+.bigStatBlock {
+  border-left: 2px solid var(--black);
+  padding-left: 24px;
+}
+
+.statHugeNumber {
+  font-size: clamp(72px, 12vw, 160px);
+  font-weight: 900;
+  line-height: 0.9;
+  letter-spacing: -0.05em;
   font-family: var(--font-mono);
+  color: var(--black);
 }
 
-.statusDot {
-  width: 7px;
-  height: 7px;
-  border-radius: 50%;
-  background: var(--success);
-  box-shadow: 0 0 8px var(--success);
-  animation: pulse 2s infinite;
+.statHugeLabel {
+  font-size: 13px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--gray-500);
+  margin-top: 8px;
 }
 
-.heroTitle {
-  font-size: 44px;
-  font-weight: 800;
-  line-height: 1.1;
-  letter-spacing: -0.04em;
-  color: #ffffff;
-  margin-bottom: 16px;
-}
-
-@media (max-width: 600px) {
-  .heroTitle {
-    font-size: 32px;
-  }
-}
-
-.heroGradient {
-  background: linear-gradient(135deg, #ffffff 0%, #a1a1aa 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-}
-
-.heroSubtitle {
-  font-size: 16px;
-  color: var(--text-secondary);
-  line-height: 1.6;
-  margin-bottom: 24px;
-  max-width: 580px;
-}
-
-.heroCtaRow {
+.strengthList {
   display: flex;
-  align-items: center;
+  flex-direction: column;
   gap: 12px;
-  flex-wrap: wrap;
 }
 
-/* ─── Interactive Hero Terminal Widget ────────────────────────────── */
-
-.heroTerminal {
-  background: rgba(18, 18, 22, 0.9);
-  backdrop-filter: blur(16px);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  box-shadow: 0 16px 48px rgba(0, 0, 0, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.08);
-  border-radius: 12px;
-  overflow: hidden;
-}
-
-.terminalTop {
-  padding: 10px 14px;
-  background: rgba(255, 255, 255, 0.03);
-  border-bottom: 1px solid var(--border);
+.strengthRow {
   display: flex;
   align-items: center;
   justify-content: space-between;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--gray-100);
+  font-size: 13.5px;
 }
 
-.terminalDots {
+/* ─── Chapter 02: IDENTIFY (Skill Gaps on Black) ─────────────────── */
+
+.gapListDark {
   display: flex;
-  gap: 6px;
-}
-
-.terminalDot {
-  width: 10px;
-  height: 10px;
-  border-radius: 50%;
-  background: rgba(255, 255, 255, 0.2);
-}
-
-.terminalTabs {
-  display: flex;
-  gap: 4px;
-}
-
-.terminalTab {
-  padding: 3px 10px;
-  border-radius: 4px;
-  font-size: 11px;
-  font-family: var(--font-mono);
-  background: transparent;
-  border: 1px solid transparent;
-  color: var(--text-muted);
-  cursor: pointer;
-  transition: 0.15s ease;
-}
-
-.terminalTab.activeTab {
-  background: var(--bg-tertiary);
-  border-color: var(--border);
-  color: var(--text-primary);
-  font-weight: 600;
-}
-
-.terminalBody {
-  padding: 16px;
-  font-family: var(--font-mono);
-  font-size: 12px;
-  line-height: 1.6;
-  color: var(--text-secondary);
-  min-height: 180px;
-}
-
-.terminalLine {
-  margin-bottom: 8px;
-}
-
-.terminalPrompt {
-  color: var(--accent);
-  margin-right: 6px;
-}
-
-.terminalHighlight {
-  color: #ffffff;
-  font-weight: 600;
-}
-
-/* ─── Section Headers ────────────────────────────────────────────── */
-
-.section {
-  margin-top: 70px;
-}
-
-.sectionHeader {
-  margin-bottom: 28px;
-}
-
-.sectionTag {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  padding: 2px 8px;
-  border-radius: 4px;
-  background: var(--bg-tertiary);
-  border: 1px solid var(--border);
-  font-size: 11px;
-  color: var(--text-muted);
-  font-family: var(--font-mono);
-  margin-bottom: 8px;
-}
-
-.sectionTitle {
-  font-size: 26px;
-  font-weight: 700;
-  letter-spacing: -0.03em;
-  color: var(--text-primary);
-}
-
-.sectionSubtitle {
-  font-size: 14px;
-  color: var(--text-secondary);
-  margin-top: 4px;
-}
-
-/* ─── Interactive Lab & Playground ───────────────────────────────── */
-
-.labCard {
-  background: var(--bg-secondary);
-  border: 1px solid var(--border);
-  box-shadow: var(--shadow-lg);
-  border-radius: 14px;
-  overflow: hidden;
-}
-
-.labNav {
-  display: flex;
-  background: rgba(255, 255, 255, 0.02);
-  border-bottom: 1px solid var(--border);
-  overflow-x: auto;
-}
-
-.labNavBtn {
-  flex: 1;
-  padding: 14px 18px;
-  background: transparent;
-  border: none;
-  border-bottom: 2px solid transparent;
-  color: var(--text-muted);
-  font-size: 13px;
-  font-weight: 500;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  cursor: pointer;
-  transition: 0.15s ease;
-  white-space: nowrap;
-}
-
-.labNavBtn:hover {
-  color: var(--text-primary);
-}
-
-.labNavBtn.activeLab {
-  color: #ffffff;
-  font-weight: 600;
-  border-bottom-color: var(--accent);
-  background: rgba(59, 130, 246, 0.04);
-}
-
-.labContent {
-  padding: 24px;
-}
-
-/* ─── Featured Projects Bento Grid ───────────────────────────────── */
-
-.projectsGrid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(360px, 1fr));
+  flex-direction: column;
   gap: 20px;
 }
 
-.projectCard {
-  background: var(--bg-secondary);
-  border: 1px solid var(--border);
-  box-shadow: var(--shadow);
-  border-radius: 12px;
-  padding: 22px;
+.gapRowDark {
+  padding: 16px 0;
+  border-bottom: 1px solid var(--gray-700);
+  display: grid;
+  grid-template-columns: 200px 1fr 80px;
+  gap: 20px;
+  align-items: center;
+}
+
+@media (max-width: 640px) {
+  .gapRowDark {
+    grid-template-columns: 1fr auto;
+  }
+}
+
+.gapNameDark {
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+}
+
+.gapTrackDark {
+  width: 100%;
+  height: 2px;
+  background: var(--gray-700);
+  position: relative;
+}
+
+.gapFillDark {
+  height: 100%;
+  background: var(--white);
+}
+
+.gapPercentDark {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  text-align: right;
+  color: var(--gray-300);
+}
+
+/* ─── Chapter 03: BUILD (Portfolio & Sandbox) ────────────────────── */
+
+.projectLedger {
   display: flex;
   flex-direction: column;
-  justify-content: space-between;
-  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
-  position: relative;
-  overflow: hidden;
+  border-top: 1px solid var(--gray-100);
 }
 
-.projectCard:hover {
-  transform: translateY(-2px);
-  border-color: rgba(255, 255, 255, 0.2);
-  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.12);
+.projectLedgerItem {
+  padding: 28px 0;
+  border-bottom: 1px solid var(--gray-100);
+  display: grid;
+  grid-template-columns: 80px 1.5fr 1fr 120px;
+  gap: 20px;
+  align-items: center;
+  text-decoration: none;
+  color: inherit;
+  transition: padding-left 0.15s ease;
 }
 
-.projectTop {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  margin-bottom: 12px;
+.projectLedgerItem:hover {
+  padding-left: 10px;
+  background: rgba(0, 0, 0, 0.015);
 }
 
-.projectName {
-  font-size: 16px;
-  font-weight: 700;
-  color: var(--text-primary);
+@media (max-width: 860px) {
+  .projectLedgerItem {
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+}
+
+.projectIndex {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  color: var(--gray-400);
+}
+
+.projectTitleText {
+  font-size: 18px;
+  font-weight: 800;
   letter-spacing: -0.02em;
 }
 
-.projectCategory {
-  font-size: 11px;
-  color: var(--accent);
-  font-family: var(--font-mono);
-  margin-bottom: 4px;
-}
-
-.projectDesc {
+.projectSummaryText {
   font-size: 13px;
-  color: var(--text-secondary);
-  line-height: 1.55;
-  margin-bottom: 16px;
+  color: var(--gray-600);
 }
 
-.projectImpact {
-  padding: 8px 12px;
-  border-radius: 6px;
-  background: rgba(16, 185, 129, 0.06);
-  border: 1px solid rgba(16, 185, 129, 0.18);
-  font-size: 12px;
-  color: var(--success);
-  font-weight: 500;
-  margin-bottom: 16px;
+/* ─── Chapter 04: DISCOVER (Job Matches on Black) ────────────────── */
+
+.jobLedgerDark {
+  border-top: 1px solid var(--gray-700);
 }
 
-.projectFooter {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding-top: 14px;
-  border-top: 1px solid var(--border);
-}
-
-.projectStack {
-  font-size: 11.5px;
-  color: var(--text-muted);
-  font-family: var(--font-mono);
-}
-
-.projectLinks {
-  display: flex;
-  gap: 10px;
-}
-
-.projectLink {
-  font-size: 12px;
-  color: var(--text-primary);
-  text-decoration: none;
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  transition: color 0.15s ease;
-}
-
-.projectLink:hover {
-  color: var(--accent);
-}
-
-/* ─── Competencies & Credentials ─────────────────────────────────── */
-
-.skillsGrid {
+.jobLedgerRowDark {
+  padding: 20px 0;
+  border-bottom: 1px solid var(--gray-700);
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-  gap: 16px;
+  grid-template-columns: 1fr 1fr 120px 140px;
+  gap: 20px;
+  align-items: center;
 }
 
-.skillBox {
-  background: var(--bg-secondary);
-  border: 1px solid var(--border);
-  border-radius: 10px;
-  padding: 18px;
+@media (max-width: 768px) {
+  .jobLedgerRowDark {
+    grid-template-columns: 1fr;
+    gap: 6px;
+  }
 }
 
-.skillBoxTitle {
-  font-size: 13.5px;
-  font-weight: 600;
-  color: var(--text-primary);
-  margin-bottom: 12px;
-}
+/* ─── Chapter 05: PREPARE (Interview Hub) ────────────────────────── */
 
-.skillPills {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
-}
-
-.skillPillItem {
-  padding: 3px 9px;
-  border-radius: 4px;
-  background: var(--bg-tertiary);
-  border: 1px solid var(--border);
-  font-size: 11.5px;
-  color: var(--text-secondary);
-  font-family: var(--font-mono);
-}
-
-/* ─── OS Tools Suite Grid ────────────────────────────────────────── */
-
-.toolsGrid {
+.prepGrid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: 12px;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 24px;
 }
 
-.toolTile {
-  padding: 16px;
-  border-radius: 8px;
-  background: var(--bg-secondary);
-  border: 1px solid var(--border);
-  text-decoration: none;
-  transition: all 0.15s ease;
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
+.prepCard {
+  border: 1px solid var(--gray-100);
+  background: var(--white);
+  padding: 24px;
+  border-radius: var(--radius-none);
 }
 
-.toolTile:hover {
-  background: var(--bg-tertiary);
-  border-color: rgba(255, 255, 255, 0.18);
-  transform: translateY(-1px);
-}
-
-.toolTileName {
-  font-size: 13.5px;
-  font-weight: 600;
-  color: var(--text-primary);
-}
-
-.toolTileDesc {
-  font-size: 11.5px;
-  color: var(--text-muted);
-  line-height: 1.4;
-}
-
-/* ─── Contact CTA Banner ─────────────────────────────────────────── */
-
-.contactCta {
-  margin-top: 80px;
-  padding: 40px;
-  background: linear-gradient(135deg, rgba(18, 18, 22, 0.9) 0%, rgba(24, 24, 30, 0.9) 100%);
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  box-shadow: 0 16px 48px rgba(0, 0, 0, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.1);
-  border-radius: 16px;
-  text-align: center;
-}
-
-.contactTitle {
-  font-size: 28px;
-  font-weight: 800;
-  letter-spacing: -0.03em;
-  color: #ffffff;
+.prepCardCategory {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--gray-500);
+  text-transform: uppercase;
   margin-bottom: 8px;
 }
 
-.contactSubtitle {
-  font-size: 14px;
-  color: var(--text-secondary);
-  margin-bottom: 24px;
-  max-width: 500px;
-  margin-left: auto;
-  margin-right: auto;
+.prepCardQuestion {
+  font-size: 15px;
+  font-weight: 700;
+  line-height: 1.4;
+  margin-bottom: 14px;
 }
 
-.contactActions {
+.prepCardAnswer {
+  font-size: 12.5px;
+  color: var(--gray-600);
+  line-height: 1.6;
+}
+
+/* ─── Chapter 06: ACT (High-Impact CTA on Black) ─────────────────── */
+
+.actSection {
+  padding: 120px clamp(24px, 5vw, 80px);
+  background: var(--black);
+  color: var(--white);
   display: flex;
-  align-items: center;
+  flex-direction: column;
+  align-items: flex-start;
   justify-content: center;
-  gap: 12px;
+}
+
+.actDisplayTitle {
+  font-size: clamp(48px, 9vw, 130px);
+  font-weight: 900;
+  line-height: 0.92;
+  letter-spacing: -0.04em;
+  text-transform: uppercase;
+  margin-bottom: 30px;
+}
+
+.actButtonGroup {
+  display: flex;
+  gap: 16px;
   flex-wrap: wrap;
+  margin-top: 10px;
 }

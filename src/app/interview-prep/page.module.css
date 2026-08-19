@@ -1,5 +1,5 @@
 .container {
-  animation: fadeIn 0.3s ease;
+  padding: 32px clamp(16px, 3vw, 40px);
   max-width: 1300px;
   margin: 0 auto;
 }
@@ -7,133 +7,110 @@
 .header {
   display: flex;
   justify-content: space-between;
-  align-items: center;
-  margin-bottom: var(--space-xl);
-  gap: var(--space-md);
+  align-items: flex-end;
+  margin-bottom: 32px;
+  border-bottom: 1px solid var(--gray-100);
+  padding-bottom: 24px;
+  gap: 16px;
   flex-wrap: wrap;
 }
 
 .title {
-  font-size: 28px;
-  font-weight: 800;
-  letter-spacing: -0.5px;
-  color: var(--text-primary);
+  font-size: clamp(28px, 4vw, 48px);
+  font-weight: 900;
+  letter-spacing: -0.03em;
+  text-transform: uppercase;
+  color: var(--black);
 }
 
 .subtitle {
   font-size: 14px;
-  color: var(--text-secondary);
+  color: var(--gray-600);
   margin-top: 4px;
 }
-
-/* ─── Stats Grid ────────────────────────────────── */
 
 .statsRow {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: var(--space-md);
-  margin-bottom: var(--space-xl);
+  gap: 16px;
+  margin-bottom: 32px;
 }
 
 .statCard {
-  background: var(--bg-secondary);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-lg);
-  padding: var(--space-lg);
+  background: var(--white);
+  border: 1px solid var(--gray-100);
+  border-radius: var(--radius-sm);
+  padding: 20px;
   display: flex;
-  align-items: center;
-  gap: var(--space-md);
-}
-
-.statIcon {
-  width: 44px;
-  height: 44px;
-  border-radius: var(--radius-md);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 22px;
+  flex-direction: column;
+  gap: 4px;
 }
 
 .statVal {
-  font-size: 24px;
-  font-weight: 800;
-  color: var(--text-primary);
-  line-height: 1.1;
+  font-size: 32px;
+  font-weight: 900;
+  font-family: var(--font-mono);
+  color: var(--black);
 }
 
 .statLabel {
-  font-size: 12px;
-  color: var(--text-muted);
-  font-weight: 500;
+  font-size: 11px;
+  color: var(--gray-500);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  font-family: var(--font-mono);
 }
-
-/* ─── Filter Bar ────────────────────────────────── */
 
 .filterBar {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  gap: var(--space-md);
-  margin-bottom: var(--space-lg);
+  gap: 16px;
+  margin-bottom: 24px;
   flex-wrap: wrap;
 }
 
 .categoryPills {
   display: flex;
-  gap: 6px;
+  gap: 4px;
   flex-wrap: wrap;
 }
 
 .pill {
-  padding: 6px 14px;
-  border-radius: var(--radius-full);
-  font-size: 12.5px;
-  font-weight: 600;
-  background: var(--bg-secondary);
-  color: var(--text-secondary);
-  border: 1px solid var(--border);
+  padding: 6px 12px;
+  border-radius: 4px;
+  font-size: 12px;
+  font-family: var(--font-mono);
+  background: transparent;
+  color: var(--gray-600);
+  border: 1px solid var(--gray-200);
   cursor: pointer;
-  transition: all var(--transition-fast);
-}
-
-.pill:hover {
-  background: var(--bg-hover);
-  color: var(--text-primary);
 }
 
 .pill.active {
-  background: var(--accent-subtle);
-  color: var(--accent);
-  border-color: var(--accent);
+  background: var(--black);
+  color: var(--white);
+  border-color: var(--black);
 }
-
-/* ─── Question Cards List ───────────────────────── */
 
 .questionList {
   display: flex;
   flex-direction: column;
-  gap: var(--space-md);
+  gap: 12px;
 }
 
 .qCard {
-  background: var(--bg-secondary);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-lg);
-  padding: var(--space-lg);
-  transition: all var(--transition-normal);
-}
-
-.qCard:hover {
-  border-color: var(--border-light);
-  box-shadow: var(--shadow);
+  background: var(--white);
+  border: 1px solid var(--gray-100);
+  border-radius: 6px;
+  overflow: hidden;
 }
 
 .qCardHeader {
+  padding: 18px 20px;
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
-  gap: var(--space-md);
   cursor: pointer;
 }
 
@@ -145,169 +122,66 @@
 }
 
 .categoryTag {
-  font-size: 11px;
-  font-weight: 700;
-  color: var(--accent);
-  background: var(--accent-subtle);
-  padding: 2px 8px;
-  border-radius: var(--radius-xs);
+  font-size: 10.5px;
+  font-family: var(--font-mono);
+  color: var(--gray-500);
   text-transform: uppercase;
 }
 
 .difficultyTag {
-  font-size: 11px;
+  font-size: 10px;
+  font-family: var(--font-mono);
   font-weight: 700;
-  padding: 2px 8px;
-  border-radius: var(--radius-xs);
-  text-transform: capitalize;
+  text-transform: uppercase;
+  padding: 2px 6px;
+  border-radius: 3px;
 }
 
 .diffEasy {
-  background: var(--success-subtle);
-  color: var(--success);
+  background: var(--green-subtle);
+  color: var(--green);
 }
 
 .diffMedium {
-  background: var(--warning-subtle);
-  color: var(--warning);
+  background: var(--amber-subtle);
+  color: var(--amber);
 }
 
 .diffHard {
-  background: rgba(248, 113, 113, 0.1);
-  color: var(--danger);
+  background: var(--red-subtle);
+  color: var(--red);
 }
 
 .qTitle {
-  font-size: 16px;
-  font-weight: 700;
-  color: var(--text-primary);
+  font-size: 15px;
+  font-weight: 800;
+  color: var(--black);
   line-height: 1.4;
 }
 
-.expandIndicator {
-  font-size: 14px;
-  color: var(--text-muted);
-  background: var(--bg-tertiary);
-  width: 28px;
-  height: 28px;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-  transition: transform var(--transition-normal);
-}
-
-.expanded {
-  transform: rotate(180deg);
-}
-
-/* ─── Answer Drawer ─────────────────────────────── */
-
-.answerDrawer {
-  margin-top: var(--space-md);
-  padding-top: var(--space-md);
-  border-top: 1px solid var(--border);
-  animation: slideUp 0.2s ease;
-}
-
-.answerHeading {
-  font-size: 12px;
-  font-weight: 700;
-  color: var(--text-muted);
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  margin-bottom: 6px;
-}
-
-.answerBody {
-  font-size: 13.5px;
-  color: var(--text-primary);
-  line-height: 1.6;
-  margin-bottom: var(--space-md);
-}
-
-.takeawayBox {
-  background: rgba(52, 211, 153, 0.05);
-  border-left: 3px solid var(--success);
-  padding: 10px 14px;
-  border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
-  margin-bottom: var(--space-md);
-}
-
-.takeawayTitle {
+.statusSelect {
+  padding: 4px 8px;
+  border: 1px solid var(--gray-200);
+  border-radius: 4px;
   font-size: 11.5px;
-  font-weight: 700;
-  color: var(--success);
-  margin-bottom: 2px;
-}
-
-.takeawayText {
-  font-size: 12.5px;
-  color: var(--text-primary);
-  line-height: 1.4;
-}
-
-.codeBox {
-  background: var(--bg-primary);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-sm);
-  padding: 12px;
   font-family: var(--font-mono);
-  font-size: 12px;
-  color: #a5b4fc;
-  overflow-x: auto;
-  margin-bottom: var(--space-md);
-  white-space: pre-wrap;
+  background: var(--off-white);
+  outline: none;
 }
 
-/* ─── Action Status Bar ─────────────────────────── */
-
-.statusBar {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-top: var(--space-md);
-  padding-top: var(--space-sm);
-  border-top: 1px solid var(--border);
+.qCardBody {
+  padding: 0 20px 20px 20px;
 }
 
-.statusBtns {
-  display: flex;
-  gap: 6px;
+.answerSection {
+  background: var(--off-white);
+  border: 1px solid var(--gray-100);
+  border-radius: 4px;
+  padding: 16px;
 }
 
-.statusBtn {
-  font-size: 11.5px;
-  font-weight: 600;
-  padding: 4px 10px;
-  border-radius: var(--radius-sm);
-  border: 1px solid var(--border);
-  background: var(--bg-tertiary);
-  color: var(--text-secondary);
-  cursor: pointer;
-  transition: all var(--transition-fast);
-}
-
-.statusBtn:hover {
-  border-color: var(--border-light);
-  color: var(--text-primary);
-}
-
-.statusBtn.activeMastered {
-  background: var(--success-subtle);
-  color: var(--success);
-  border-color: var(--success);
-}
-
-.statusBtn.activeReviewing {
-  background: var(--warning-subtle);
-  color: var(--warning);
-  border-color: var(--warning);
-}
-
-.statusBtn.activeUnprepared {
-  background: rgba(248, 113, 113, 0.1);
-  color: var(--danger);
-  border-color: var(--danger);
+.answerText {
+  font-size: 13px;
+  color: var(--black);
+  line-height: 1.6;
 }

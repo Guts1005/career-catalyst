@@ -1,47 +1,51 @@
 .showcase {
-  max-width: 1000px;
+  max-width: 1100px;
   margin: 0 auto;
-  padding: 40px 20px 80px;
+  padding: 48px clamp(16px, 4vw, 40px) 100px;
   animation: fadeIn 0.3s ease;
+  color: var(--black);
 }
 
 .hero {
   display: flex;
   justify-content: space-between;
-  align-items: center;
-  gap: var(--space-xl);
-  margin-bottom: var(--space-2xl);
-  padding-bottom: var(--space-xl);
-  border-bottom: 1px solid var(--border);
+  align-items: flex-end;
+  margin-bottom: 48px;
+  padding-bottom: 32px;
+  border-bottom: 1px solid var(--gray-100);
   flex-wrap: wrap;
+  gap: 24px;
 }
 
 .heroName {
-  font-size: 36px;
+  font-size: clamp(32px, 5vw, 64px);
   font-weight: 900;
-  letter-spacing: var(--tracking-tight);
-  color: var(--text-primary);
+  letter-spacing: -0.04em;
+  text-transform: uppercase;
+  color: var(--black);
+  line-height: 1;
 }
 
 .heroRole {
-  font-size: 18px;
-  color: var(--accent);
+  font-size: 15px;
+  color: var(--gray-600);
   font-weight: 600;
-  margin-top: 4px;
+  margin-top: 6px;
 }
 
 .heroBio {
   font-size: 14.5px;
-  color: var(--text-secondary);
-  max-width: 600px;
+  color: var(--gray-600);
+  max-width: 640px;
   line-height: 1.6;
-  margin-top: 12px;
+  margin-top: 14px;
 }
 
 .socialRow {
   display: flex;
-  gap: 10px;
-  margin-top: 16px;
+  gap: 8px;
+  margin-top: 20px;
+  flex-wrap: wrap;
 }
 
 .socialBtn {
@@ -49,32 +53,33 @@
   align-items: center;
   gap: 6px;
   font-size: 12px;
-  font-weight: 600;
-  background: var(--bg-secondary);
-  border: 1px solid var(--border);
+  font-family: var(--font-mono);
+  background: var(--white);
+  border: 1px solid var(--gray-200);
   padding: 6px 12px;
-  border-radius: var(--radius-full);
-  color: var(--text-primary);
+  border-radius: 4px;
+  color: var(--black);
   text-decoration: none;
-  transition: var(--transition-fast);
 }
 
 .socialBtn:hover {
-  border-color: var(--accent);
-  background: var(--accent-subtle);
-  color: var(--accent);
+  background: var(--off-white);
+  border-color: var(--black);
 }
 
 .section {
-  margin-bottom: var(--space-2xl);
+  margin-bottom: 48px;
 }
 
 .sectionTitle {
-  font-size: 20px;
+  font-size: 16px;
   font-weight: 800;
-  color: var(--text-primary);
-  letter-spacing: var(--tracking-tight);
-  margin-bottom: var(--space-lg);
+  text-transform: uppercase;
+  letter-spacing: -0.01em;
+  color: var(--black);
+  margin-bottom: 20px;
+  border-bottom: 1px solid var(--gray-100);
+  padding-bottom: 10px;
   display: flex;
   align-items: center;
   gap: 8px;
@@ -83,7 +88,7 @@
 .projectsGrid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(440px, 1fr));
-  gap: var(--space-lg);
+  gap: 16px;
 }
 
 @media (max-width: 768px) {
@@ -93,81 +98,125 @@
 }
 
 .projectCard {
-  background: var(--bg-secondary);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-lg);
-  padding: var(--space-lg);
+  background: var(--white);
+  border: 1px solid var(--gray-100);
+  border-radius: 6px;
+  padding: 24px;
   display: flex;
   flex-direction: column;
-  gap: var(--space-sm);
-  transition: var(--transition-spring);
+  justify-content: space-between;
 }
 
-.projectCard:hover {
-  border-color: var(--border-light);
-  transform: translateY(-2px);
-  box-shadow: var(--shadow-lg);
+.projectHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 10px;
 }
 
 .projectName {
-  font-size: 17px;
-  font-weight: 700;
-  color: var(--text-primary);
+  font-size: 16px;
+  font-weight: 800;
+  color: var(--black);
+}
+
+.projectDesc {
+  font-size: 13px;
+  color: var(--gray-600);
+  line-height: 1.55;
+  margin-bottom: 14px;
 }
 
 .projectImpact {
-  font-size: 13px;
-  color: var(--success);
-  font-weight: 600;
-  background: rgba(52, 211, 153, 0.08);
+  font-size: 12px;
+  font-family: var(--font-mono);
+  color: var(--green);
+  background: var(--green-subtle);
+  border: 1px solid var(--green-border);
   padding: 6px 10px;
-  border-radius: var(--radius-xs);
-  margin-top: 4px;
+  border-radius: 4px;
+  margin-bottom: 14px;
 }
 
-.skillsPills {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
+.projectStack {
+  font-size: 11.5px;
+  color: var(--gray-500);
+  font-family: var(--font-mono);
 }
 
-.skillPill {
-  background: var(--bg-secondary);
-  border: 1px solid var(--border);
-  padding: 8px 14px;
-  border-radius: var(--radius-md);
-  font-size: 13px;
-  color: var(--text-primary);
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.skillLevel {
-  font-size: 11px;
-  color: var(--accent);
+.projectLink {
+  color: var(--black);
+  text-decoration: none;
+  font-size: 12px;
+  font-family: var(--font-mono);
   font-weight: 700;
-  background: var(--accent-subtle);
-  padding: 2px 6px;
-  border-radius: var(--radius-xs);
-}
-
-.certList {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-  gap: var(--space-md);
-}
-
-.certBadge {
-  background: var(--bg-secondary);
-  border: 1px solid var(--border);
-  padding: 14px 16px;
-  border-radius: var(--radius-md);
-  display: flex;
+  display: inline-flex;
   align-items: center;
+  gap: 4px;
+}
+
+.skillsGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
   gap: 12px;
 }
 
-.certIcon {
-  font-size: 24px;
+.skillItem {
+  background: var(--white);
+  border: 1px solid var(--gray-100);
+  border-radius: 4px;
+  padding: 12px 14px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.skillName {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--black);
+}
+
+.skillLevel {
+  font-size: 12px;
+  font-family: var(--font-mono);
+  color: var(--gray-500);
+}
+
+.certsGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 12px;
+}
+
+.certCard {
+  background: var(--white);
+  border: 1px solid var(--gray-100);
+  border-radius: 4px;
+  padding: 16px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.certName {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--black);
+}
+
+.certProvider {
+  font-size: 11px;
+  color: var(--gray-500);
+  margin-top: 2px;
+}
+
+.certBadge {
+  font-size: 10.5px;
+  font-family: var(--font-mono);
+  color: var(--green);
+  background: var(--green-subtle);
+  padding: 2px 6px;
+  border-radius: 3px;
+  border: 1px solid var(--green-border);
 }

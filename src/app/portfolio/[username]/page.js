@@ -78,9 +78,9 @@ export default async function PortfolioShowcasePage({ params }) {
       {/* Hero Header */}
       <div className={styles.hero}>
         <div>
-          <div style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', padding: '3px 9px', borderRadius: '9999px', background: 'var(--bg-tertiary)', border: '1px solid var(--border)', fontSize: '11px', color: 'var(--text-secondary)', marginBottom: '12px' }}>
-            <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: 'var(--success)' }} />
-            Verified Profile • @{username}
+          <div style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', padding: '3px 8px', borderRadius: '4px', background: 'var(--white)', border: '1px solid var(--gray-200)', fontSize: '11px', fontFamily: 'var(--font-mono)', color: 'var(--gray-600)', marginBottom: '12px' }}>
+            <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: 'var(--green)' }} />
+            VERIFIED PROFILE • @{username}
           </div>
           <h1 className={styles.heroName}>{name}</h1>
           <div className={styles.heroRole}>Data Science & Machine Learning Specialist</div>

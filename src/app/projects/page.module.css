@@ -1,479 +1,321 @@
 .container {
-  padding: 2rem;
-  max-width: 1200px;
+  padding: 32px clamp(16px, 3vw, 40px);
+  max-width: 1400px;
   margin: 0 auto;
 }
 
 .header {
   display: flex;
   justify-content: space-between;
-  align-items: flex-start;
-  margin-bottom: 2rem;
+  align-items: flex-end;
+  margin-bottom: 32px;
+  border-bottom: 1px solid var(--gray-100);
+  padding-bottom: 24px;
+  gap: 16px;
+  flex-wrap: wrap;
 }
 
 .title {
-  font-size: 2rem;
-  font-weight: 700;
-  color: var(--text-primary);
-  margin: 0 0 0.5rem 0;
+  font-size: clamp(28px, 4vw, 48px);
+  font-weight: 900;
+  letter-spacing: -0.03em;
+  text-transform: uppercase;
+  color: var(--black);
+  margin: 0 0 4px 0;
 }
 
 .subtitle {
-  color: var(--text-secondary);
+  color: var(--gray-600);
+  font-size: 14px;
   margin: 0;
 }
 
 .primaryBtn {
-  background: var(--accent);
-  color: #fff;
-  border: none;
+  background: var(--black);
+  color: var(--white);
+  border: 1px solid var(--black);
   border-radius: var(--radius-sm);
-  padding: 0.75rem 1.25rem;
+  padding: 8px 16px;
   font-weight: 600;
+  font-size: 13px;
   cursor: pointer;
-  transition: all 0.2s ease;
 }
 
 .primaryBtn:hover {
-  background: var(--accent-hover);
-  transform: translateY(-1px);
-}
-
-.secondaryBtn {
-  background: var(--bg-hover);
-  color: var(--text-primary);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-sm);
-  padding: 0.5rem 1rem;
-  font-weight: 500;
-  cursor: pointer;
-  transition: all 0.2s ease;
-}
-
-.secondaryBtn:hover {
-  background: var(--border);
+  background: var(--gray-700);
 }
 
 .filters {
   display: flex;
-  gap: 0.75rem;
-  margin-bottom: 2rem;
+  gap: 4px;
+  margin-bottom: 24px;
   overflow-x: auto;
-  padding-bottom: 0.5rem;
 }
 
 .filterBtn {
-  background: var(--bg-secondary);
-  color: var(--text-secondary);
-  border: 1px solid var(--border);
-  border-radius: 20px;
-  padding: 0.4rem 1rem;
-  font-size: 0.85rem;
+  background: transparent;
+  color: var(--gray-600);
+  border: 1px solid var(--gray-200);
+  border-radius: 4px;
+  padding: 6px 12px;
+  font-size: 11.5px;
+  font-family: var(--font-mono);
   font-weight: 600;
   cursor: pointer;
-  transition: all 0.2s ease;
   white-space: nowrap;
 }
 
-.filterBtn:hover {
-  color: var(--text-primary);
-  border-color: var(--border-light);
-}
-
 .activeFilter {
-  background: var(--accent-subtle);
-  color: var(--accent);
-  border-color: var(--accent);
+  background: var(--black);
+  color: var(--white);
+  border-color: var(--black);
 }
 
 .emptyState {
   text-align: center;
-  padding: 4rem 2rem;
-  background: var(--bg-secondary);
-  border-radius: var(--radius-lg);
-  border: 1px dashed var(--border-light);
+  padding: 60px 20px;
+  background: var(--white);
+  border-radius: 4px;
+  border: 1px solid var(--gray-100);
 }
 
 .emptyIcon {
-  font-size: 3rem;
-  margin-bottom: 1rem;
+  display: none;
 }
 
 .grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-  gap: 1.5rem;
+  grid-template-columns: repeat(auto-fit, minmax(360px, 1fr));
+  gap: 16px;
 }
 
 .card {
-  background: var(--bg-secondary);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-lg);
-  padding: 1.5rem;
-  cursor: pointer;
-  transition: all 0.2s ease;
+  background: var(--white);
+  border: 1px solid var(--gray-100);
+  border-radius: 6px;
+  padding: 24px;
   display: flex;
   flex-direction: column;
-}
-
-.card:hover {
-  border-color: var(--border-light);
-  box-shadow: var(--shadow);
-  transform: translateY(-2px);
-}
-
-.cardExpanded {
-  grid-column: 1 / -1;
-  cursor: default;
-}
-@media (min-width: 768px) {
-  .cardExpanded {
-    grid-column: span 2;
-  }
+  justify-content: space-between;
 }
 
 .cardHeader {
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
-  margin-bottom: 1rem;
+  margin-bottom: 12px;
 }
 
 .cardTitleGroup {
   display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
+  align-items: center;
+  gap: 8px;
 }
 
 .cardTitle {
-  font-size: 1.25rem;
-  font-weight: 600;
-  margin: 0;
-  color: var(--text-primary);
+  font-size: 16px;
+  font-weight: 800;
+  color: var(--black);
 }
 
 .statusBadge {
-  display: inline-block;
-  padding: 0.25rem 0.75rem;
-  border-radius: 20px;
-  font-size: 0.75rem;
-  font-weight: 600;
+  font-size: 10px;
+  font-family: var(--font-mono);
   text-transform: uppercase;
-  width: fit-content;
+  font-weight: 700;
+  padding: 2px 6px;
+  border-radius: 3px;
 }
 
-.statusPlanned { background: rgba(107, 114, 128, 0.1); color: var(--text-secondary); }
-.statusInProgress { background: var(--accent-subtle); color: var(--accent); }
-.statusCompleted { background: rgba(52, 211, 153, 0.1); color: var(--success); }
-.statusPaused { background: rgba(251, 191, 36, 0.1); color: var(--warning); }
+.statusCompleted {
+  background: var(--green-subtle);
+  color: var(--green);
+}
+
+.statusInProgress {
+  background: var(--amber-subtle);
+  color: var(--amber);
+}
+
+.statusPlanned {
+  background: var(--gray-100);
+  color: var(--gray-500);
+}
+
+.statusPaused {
+  background: var(--gray-100);
+  color: var(--gray-500);
+}
 
 .cardActions {
   display: flex;
-  gap: 0.5rem;
+  gap: 4px;
 }
 
 .iconBtn {
   background: transparent;
   border: none;
-  color: var(--text-muted);
+  font-size: 14px;
+  color: var(--gray-400);
   cursor: pointer;
-  font-size: 1.2rem;
-  padding: 0.25rem;
-  border-radius: 4px;
-  transition: color 0.2s, background 0.2s;
+  padding: 4px;
 }
 
 .iconBtn:hover {
-  color: var(--text-primary);
-  background: var(--bg-hover);
+  color: var(--black);
 }
 
 .description {
-  color: var(--text-secondary);
-  font-size: 0.95rem;
-  line-height: 1.5;
-  margin: 0 0 1rem 0;
-  display: -webkit-box;
-  -webkit-line-clamp: 3;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-}
-
-.cardExpanded .description {
-  -webkit-line-clamp: unset;
+  font-size: 13px;
+  color: var(--gray-600);
+  line-height: 1.55;
+  margin-bottom: 16px;
 }
 
 .tags {
   display: flex;
   flex-wrap: wrap;
-  gap: 0.5rem;
-  margin-bottom: 1.5rem;
+  gap: 4px;
+  margin-bottom: 16px;
 }
 
 .tag {
-  background: var(--bg-tertiary);
-  color: var(--text-primary);
-  padding: 0.25rem 0.6rem;
-  border-radius: 4px;
-  font-size: 0.8rem;
-  border: 1px solid var(--border);
-}
-
-.progressSection {
-  margin-top: auto;
-  margin-bottom: 1rem;
-}
-
-.progressHeader {
-  display: flex;
-  justify-content: space-between;
-  font-size: 0.85rem;
-  color: var(--text-muted);
-  margin-bottom: 0.5rem;
-}
-
-.progressBar {
-  height: 6px;
-  background: var(--bg-tertiary);
+  font-size: 11px;
+  font-family: var(--font-mono);
+  background: var(--off-white);
+  color: var(--gray-600);
+  padding: 2px 6px;
   border-radius: 3px;
-  overflow: hidden;
-}
-
-.progressFill {
-  height: 100%;
-  background: var(--accent);
-  border-radius: 3px;
-  transition: width 0.3s ease;
+  border: 1px solid var(--gray-100);
 }
 
 .links {
   display: flex;
-  gap: 1rem;
-  margin-top: 1rem;
-  padding-top: 1rem;
-  border-top: 1px solid var(--border);
+  gap: 12px;
+  font-size: 12px;
+  font-family: var(--font-mono);
+  margin-bottom: 16px;
 }
 
 .link {
-  color: var(--accent);
+  color: var(--black);
   text-decoration: none;
-  font-size: 0.9rem;
-  font-weight: 500;
-  transition: color 0.2s;
+  font-weight: 600;
 }
 
-.link:hover {
-  color: var(--accent-hover);
-  text-decoration: underline;
+.progressSection {
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid var(--gray-100);
 }
 
-.expandedContent {
-  margin-top: 1.5rem;
-  padding-top: 1.5rem;
-  border-top: 1px solid var(--border-light);
-  animation: slideDown 0.3s ease;
+.progressInfo {
+  display: flex;
+  justify-content: space-between;
+  font-size: 11px;
+  font-family: var(--font-mono);
+  color: var(--gray-500);
+  margin-bottom: 4px;
 }
 
-@keyframes slideDown {
-  from { opacity: 0; transform: translateY(-10px); }
-  to { opacity: 1; transform: translateY(0); }
+.progressBarTrack {
+  height: 2px;
+  background: var(--gray-100);
 }
 
-.sectionTitle {
-  font-size: 1rem;
-  color: var(--text-primary);
-  margin: 0 0 1rem 0;
+.progressBarFill {
+  height: 100%;
+  background: var(--black);
+}
+
+.milestonesSection {
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px solid var(--gray-100);
 }
 
 .milestoneList {
   display: flex;
   flex-direction: column;
-  gap: 0.75rem;
-  margin-bottom: 1rem;
-}
-
-.noMilestones {
-  color: var(--text-muted);
-  font-size: 0.9rem;
-  font-style: italic;
+  gap: 8px;
+  margin-top: 8px;
 }
 
 .milestoneItem {
   display: flex;
+  align-items: center;
   justify-content: space-between;
-  align-items: center;
-  background: var(--bg-tertiary);
-  padding: 0.75rem 1rem;
-  border-radius: var(--radius-sm);
-  border: 1px solid var(--border);
+  font-size: 12px;
+  padding: 4px 0;
 }
 
-.checkboxLabel {
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-  cursor: pointer;
-  color: var(--text-primary);
-  flex: 1;
-}
-
-.checkboxLabel input[type="checkbox"] {
-  width: 1.2rem;
-  height: 1.2rem;
-  accent-color: var(--accent);
-  cursor: pointer;
-}
-
-.completedText {
-  text-decoration: line-through;
-  color: var(--text-muted);
-}
-
-.deleteMilestone {
-  background: transparent;
-  border: none;
-  color: var(--text-muted);
-  cursor: pointer;
-  font-size: 1.2rem;
-  padding: 0.25rem 0.5rem;
-}
-
-.deleteMilestone:hover {
-  color: var(--danger);
-}
-
-.addMilestone {
-  display: flex;
-  gap: 0.5rem;
-  margin-bottom: 2rem;
-}
-
-.impactSection {
-  background: var(--bg-tertiary);
-  padding: 1.25rem;
-  border-radius: var(--radius-sm);
-  border-left: 3px solid var(--accent);
-}
-
-.impactText {
-  color: var(--text-secondary);
-  font-size: 0.95rem;
-  line-height: 1.6;
-  margin: 0;
-}
-
-/* Modal Styles */
 .modalOverlay {
   position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: rgba(0, 0, 0, 0.7);
-  backdrop-filter: blur(4px);
+  inset: 0;
+  background: rgba(10, 10, 10, 0.5);
   display: flex;
   align-items: center;
   justify-content: center;
   z-index: 1000;
-  padding: 1rem;
+  padding: 20px;
 }
 
 .modal {
-  background: var(--bg-secondary);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-lg);
+  background: var(--white);
+  border: 1px solid var(--gray-200);
+  border-radius: 8px;
+  max-width: 540px;
   width: 100%;
-  max-width: 600px;
-  max-height: 90vh;
+  max-height: 85vh;
   overflow-y: auto;
-  box-shadow: var(--shadow);
 }
 
 .modalHeader {
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--gray-100);
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 1.5rem;
-  border-bottom: 1px solid var(--border);
-  position: sticky;
-  top: 0;
-  background: var(--bg-secondary);
-  z-index: 10;
 }
 
 .modalHeader h2 {
-  margin: 0;
-  color: var(--text-primary);
-}
-
-.closeBtn {
-  background: transparent;
-  border: none;
-  color: var(--text-muted);
-  font-size: 1.5rem;
-  cursor: pointer;
-}
-
-.closeBtn:hover {
-  color: var(--text-primary);
+  font-size: 14px;
+  font-weight: 800;
+  text-transform: uppercase;
 }
 
 .form {
-  padding: 1.5rem;
-}
-
-.formGrid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 1rem;
-}
-@media (max-width: 600px) {
-  .formGrid { grid-template-columns: 1fr; }
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
 }
 
 .formGroup {
-  margin-bottom: 1.25rem;
   display: flex;
   flex-direction: column;
-  gap: 0.5rem;
+  gap: 4px;
 }
 
 .formGroup label {
-  color: var(--text-secondary);
-  font-size: 0.9rem;
-  font-weight: 500;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  color: var(--gray-500);
+  font-family: var(--font-mono);
 }
 
-.input, .textarea, .select {
-  background: var(--bg-tertiary);
-  border: 1px solid var(--border);
-  color: var(--text-primary);
-  padding: 0.75rem;
-  border-radius: var(--radius-sm);
-  font-family: inherit;
-  font-size: 1rem;
-}
-
-.input:focus, .textarea:focus, .select:focus {
-  outline: none;
-  border-color: var(--accent);
-}
-
-.milestoneInputRow {
-  display: flex;
-  gap: 0.5rem;
-  margin-bottom: 0.5rem;
-}
-
-.milestoneInputRow .input {
-  flex: 1;
+.formRow {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
 }
 
 .modalFooter {
+  padding: 14px 20px;
+  border-top: 1px solid var(--gray-100);
   display: flex;
   justify-content: flex-end;
-  gap: 1rem;
-  margin-top: 2rem;
-  padding-top: 1.5rem;
-  border-top: 1px solid var(--border);
+  gap: 8px;
+  background: var(--off-white);
 }

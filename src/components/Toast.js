@@ -49,33 +49,27 @@ export default function ToastContainer() {
             pointerEvents: 'auto',
             display: 'flex',
             alignItems: 'center',
-            gap: '8px',
-            padding: '10px 14px',
-            background: 'rgba(18, 18, 22, 0.92)',
-            backdropFilter: 'blur(16px)',
-            border: '1px solid rgba(255, 255, 255, 0.12)',
-            boxShadow: '0 8px 32px rgba(0, 0, 0, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.1)',
-            borderRadius: '8px',
-            color: '#fafafa',
+            gap: '10px',
+            padding: '10px 16px',
+            background: 'var(--black)',
+            border: '1px solid var(--gray-700)',
+            boxShadow: '0 4px 16px rgba(0, 0, 0, 0.2)',
+            borderRadius: '4px',
+            color: 'var(--white)',
             fontSize: '12.5px',
+            fontFamily: 'var(--font-sans)',
             fontWeight: 500,
-            animation: 'toastSlideIn 0.25s cubic-bezier(0.16, 1, 0.3, 1)',
+            animation: 'fadeIn 0.15s ease',
           }}
         >
           <span
             style={{
-              width: '18px',
-              height: '18px',
+              width: '6px',
+              height: '6px',
               borderRadius: '50%',
-              background: t.type === 'success' ? 'var(--success-subtle)' : 'var(--accent-subtle)',
-              color: t.type === 'success' ? 'var(--success)' : 'var(--accent)',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
+              background: t.type === 'error' ? 'var(--red)' : t.type === 'info' ? 'var(--blue)' : 'var(--green)',
             }}
-          >
-            <IconCheck size={11} />
-          </span>
+          />
           <span>{t.message}</span>
         </div>
       ))}
