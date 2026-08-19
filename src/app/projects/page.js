@@ -1,6 +1,7 @@
 'use client';
 import { useState, useEffect } from 'react';
 import styles from './page.module.css';
+import { showToast } from '@/components/Toast';
 
 export default function ProjectsPage() {
   const [projects, setProjects] = useState([]);
@@ -72,17 +73,20 @@ export default function ProjectsPage() {
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(formData)
         });
+        showToast('Project updated successfully!', 'success');
       } else {
         await fetch('/api/projects', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(formData)
         });
+        showToast(`Project "${formData.name}" added to portfolio!`, 'success');
       }
       setShowModal(false);
       fetchProjects();
     } catch (err) {
       console.error('Failed to save project', err);
+      showToast('Failed to save project', 'error');
     }
   };
 
@@ -91,6 +95,7 @@ export default function ProjectsPage() {
     if (confirm('Are you sure you want to delete this project?')) {
       try {
         await fetch(`/api/projects/${id}`, { method: 'DELETE' });
+        showToast('Project deleted from portfolio', 'info');
         fetchProjects();
       } catch (err) {
         console.error('Failed to delete', err);
@@ -105,6 +110,7 @@ export default function ProjectsPage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ milestone_id: milestoneId, completed: !currentStatus })
       });
+      showToast(!currentStatus ? 'Milestone marked as complete!' : 'Milestone reopened', 'info');
       fetchProjects();
     } catch (err) {
       console.error('Failed to toggle milestone', err);

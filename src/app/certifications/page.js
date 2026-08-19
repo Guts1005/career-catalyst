@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import styles from './page.module.css';
+import { showToast } from '@/components/Toast';
 
 export default function CertificationsPage() {
   const [certifications, setCertifications] = useState([]);
@@ -106,11 +107,13 @@ export default function CertificationsPage() {
       });
 
       if (res.ok) {
+        showToast(editingCert ? 'Certification updated successfully!' : 'New credential added to portfolio!', 'success');
         closeModal();
         fetchCertifications();
       }
     } catch (error) {
       console.error('Failed to save certification:', error);
+      showToast('Failed to save certification', 'error');
     }
   };
 
@@ -120,6 +123,7 @@ export default function CertificationsPage() {
     try {
       const res = await fetch(`/api/certifications/${id}`, { method: 'DELETE' });
       if (res.ok) {
+        showToast('Certification removed', 'info');
         fetchCertifications();
       }
     } catch (error) {
@@ -146,6 +150,7 @@ export default function CertificationsPage() {
       });
 
       if (res.ok) {
+        showToast(`Progress updated to ${parsed}%`, 'info');
         fetchCertifications();
       }
     } catch (error) {
@@ -162,6 +167,7 @@ export default function CertificationsPage() {
       });
 
       if (res.ok) {
+        showToast('Credential marked 100% Completed & Verified!', 'success');
         fetchCertifications();
       }
     } catch (error) {

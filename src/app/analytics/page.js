@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import styles from './page.module.css';
+import { IconAnalytics } from '@/components/Icons';
 
 export default function AnalyticsPage() {
   const [data, setData] = useState(null);
@@ -162,8 +163,16 @@ export default function AnalyticsPage() {
   return (
     <div className={styles.container}>
       <header className={styles.header}>
-        <h1>Career Analytics</h1>
-        <p>Insights and tracking for your professional growth.</p>
+        <div>
+          <div style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', padding: '2px 8px', borderRadius: '4px', background: 'var(--bg-tertiary)', border: '1px solid var(--border)', fontSize: '11px', color: 'var(--text-muted)', marginBottom: '8px', fontFamily: 'var(--font-mono)' }}>
+            <IconAnalytics size={13} />
+            METRICS & PIPELINE VELOCITY
+          </div>
+          <h1 style={{ letterSpacing: '-0.03em', fontSize: '24px', fontWeight: 700 }}>Career Analytics & Insights</h1>
+          <p style={{ color: 'var(--text-secondary)', fontSize: '13.5px', marginTop: '4px' }}>
+            Data visualization across pipeline completion velocity, certification investment, and skill distribution.
+          </p>
+        </div>
       </header>
 
       {/* Recommendations */}

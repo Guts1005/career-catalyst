@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import styles from './page.module.css';
+import { showToast } from '@/components/Toast';
 
 const TYPE_ICONS = {
   course: '📖',
@@ -118,11 +119,13 @@ export default function ResourcesPage() {
       });
       
       if (res.ok) {
+        showToast(isUpdate ? 'Resource updated successfully!' : 'Technical resource added to library!', 'success');
         await fetchResources();
         handleCloseModal();
       }
     } catch (err) {
       console.error('Failed to save resource:', err);
+      showToast('Failed to save resource', 'error');
     }
   };
 
@@ -131,6 +134,7 @@ export default function ResourcesPage() {
       try {
         const res = await fetch(`/api/resources/${id}`, { method: 'DELETE' });
         if (res.ok) {
+          showToast('Resource removed from library', 'info');
           fetchResources();
         }
       } catch (err) {
@@ -152,6 +156,7 @@ export default function ResourcesPage() {
         setResources(resources.map(r => 
           r.id === resource.id ? { ...r, completed: newCompletedState } : r
         ));
+        showToast(newCompletedState === 1 ? 'Resource marked as Completed!' : 'Resource reopened for study', 'info');
       }
     } catch (err) {
       console.error('Failed to toggle completion:', err);
