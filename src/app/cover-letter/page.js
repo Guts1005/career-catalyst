@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import styles from './page.module.css';
+import { showToast } from '@/components/Toast';
 import {
   IconCoverLetter,
   IconCheck,
@@ -78,12 +79,14 @@ export default function CoverLetterPage() {
   const handleCopyPitch = () => {
     navigator.clipboard.writeText(recruiterPitch);
     setCopiedPitch(true);
+    showToast('InMail outreach pitch copied to clipboard!', 'success');
     setTimeout(() => setCopiedPitch(false), 2000);
   };
 
   const handleCopyLetter = () => {
     navigator.clipboard.writeText(coverLetter);
     setCopiedLetter(true);
+    showToast('STAR cover letter copied to clipboard!', 'success');
     setTimeout(() => setCopiedLetter(false), 2000);
   };
 

@@ -2,6 +2,14 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import styles from './page.module.css';
+import { showToast } from '@/components/Toast';
+import {
+  IconResume,
+  IconCertifications,
+  IconProjects,
+  IconSkills,
+  IconCheck,
+} from '@/components/Icons';
 
 export default function ResumeBuilderPage() {
   const [data, setData] = useState(null);
@@ -74,21 +82,24 @@ export default function ResumeBuilderPage() {
           summary,
           template_name: 'modern-ats',
           education: educationList,
-          experience: experienceList
-        })
+          experience: experienceList,
+        }),
       });
       if (res.ok) {
         setSaveSuccess(true);
+        showToast('Resume profile saved to cloud database!', 'success');
         setTimeout(() => setSaveSuccess(false), 3000);
       }
     } catch (e) {
       console.error('Error saving resume:', e);
+      showToast('Failed to save resume changes', 'error');
     } finally {
       setSaving(false);
     }
   };
 
   const handlePrint = () => {
+    showToast('Opening print dialog for ATS PDF export...', 'info');
     window.print();
   };
 
@@ -100,8 +111,8 @@ export default function ResumeBuilderPage() {
         company: 'Company Name',
         location: 'Location',
         dates: 'Jun 2025 – Aug 2025',
-        bullets: ['Engineered ML pipeline improving performance by 25%.']
-      }
+        bullets: ['Engineered ML pipeline improving performance by 25%.'],
+      },
     ]);
   };
 
@@ -137,7 +148,7 @@ export default function ResumeBuilderPage() {
     return (
       <div className="loading" style={{ minHeight: '60vh' }}>
         <div className="loadingSpinner" />
-        <p>Loading Resume Studio...</p>
+        <p style={{ color: 'var(--text-muted)', fontSize: '13px', marginTop: '12px' }}>Loading Resume Editor...</p>
       </div>
     );
   }
@@ -148,23 +159,35 @@ export default function ResumeBuilderPage() {
 
   return (
     <div className={styles.container}>
+      {/* Header */}
       <div className={styles.header}>
         <div>
-          <h1 className={styles.headerTitle}>📄 AI Resume Studio & PDF Exporter</h1>
-          <p className={styles.headerSubtitle}>
-            Auto-generate and fine-tune an ATS-optimized Data Science & ML resume synced directly with your database.
+          <div style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', padding: '2px 8px', borderRadius: '4px', background: 'var(--bg-tertiary)', border: '1px solid var(--border)', fontSize: '11px', color: 'var(--text-muted)', marginBottom: '8px', fontFamily: 'var(--font-mono)' }}>
+            <IconResume size={13} />
+            ATS RESUME COMPILER
+          </div>
+          <h1 className={styles.headerTitle} style={{ letterSpacing: '-0.03em', fontSize: '24px', fontWeight: 700 }}>
+            Resume Editor & PDF Exporter
+          </h1>
+          <p className={styles.headerSubtitle} style={{ color: 'var(--text-secondary)', fontSize: '13.5px', marginTop: '4px' }}>
+            Fine-tune an ATS-optimized Machine Learning resume synced live with your verified credentials and project metrics.
           </p>
         </div>
-        <div className={styles.headerActions}>
-          <button 
-            className="btn btn-secondary" 
-            onClick={handleSave} 
+        <div className={styles.headerActions} style={{ display: 'flex', gap: '8px' }}>
+          <button
+            className="btn btn-secondary"
+            onClick={handleSave}
             disabled={saving}
+            style={{ fontSize: '12.5px', padding: '7px 14px' }}
           >
-            {saving ? 'Saving...' : saveSuccess ? '✓ Saved' : '💾 Save Changes'}
+            {saving ? 'Saving...' : saveSuccess ? '✓ Saved' : 'Save Changes'}
           </button>
-          <button className="btn btn-primary" onClick={handlePrint}>
-            🖨️ Export PDF / Print
+          <button
+            className="btn btn-primary"
+            onClick={handlePrint}
+            style={{ fontSize: '12.5px', padding: '7px 14px' }}
+          >
+            Export PDF / Print
           </button>
         </div>
       </div>
@@ -175,58 +198,58 @@ export default function ResumeBuilderPage() {
           {/* Contact Information */}
           <div className={styles.sectionCard}>
             <div className={styles.sectionHeader}>
-              <div className={styles.sectionTitle}>👤 Personal & Contact Info</div>
+              <div className={styles.sectionTitle} style={{ fontSize: '13.5px' }}>Personal & Contact Details</div>
             </div>
             <div className={styles.inputGroup}>
               <label className={styles.inputLabel}>Full Name</label>
-              <input 
-                className={styles.input} 
-                value={fullName} 
-                onChange={(e) => setFullName(e.target.value)} 
+              <input
+                className={styles.input}
+                value={fullName}
+                onChange={(e) => setFullName(e.target.value)}
                 placeholder="Sharvin Neve"
               />
             </div>
             <div className={styles.inputGrid}>
               <div className={styles.inputGroup}>
                 <label className={styles.inputLabel}>Email</label>
-                <input 
-                  className={styles.input} 
-                  value={email} 
-                  onChange={(e) => setEmail(e.target.value)} 
+                <input
+                  className={styles.input}
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
                 />
               </div>
               <div className={styles.inputGroup}>
                 <label className={styles.inputLabel}>Phone</label>
-                <input 
-                  className={styles.input} 
-                  value={phone} 
-                  onChange={(e) => setPhone(e.target.value)} 
+                <input
+                  className={styles.input}
+                  value={phone}
+                  onChange={(e) => setPhone(e.target.value)}
                 />
               </div>
             </div>
             <div className={styles.inputGroup}>
               <label className={styles.inputLabel}>Location</label>
-              <input 
-                className={styles.input} 
-                value={location} 
-                onChange={(e) => setLocation(e.target.value)} 
+              <input
+                className={styles.input}
+                value={location}
+                onChange={(e) => setLocation(e.target.value)}
               />
             </div>
             <div className={styles.inputGrid}>
               <div className={styles.inputGroup}>
-                <label className={styles.inputLabel}>LinkedIn</label>
-                <input 
-                  className={styles.input} 
-                  value={linkedinUrl} 
-                  onChange={(e) => setLinkedinUrl(e.target.value)} 
+                <label className={styles.inputLabel}>LinkedIn URL</label>
+                <input
+                  className={styles.input}
+                  value={linkedinUrl}
+                  onChange={(e) => setLinkedinUrl(e.target.value)}
                 />
               </div>
               <div className={styles.inputGroup}>
-                <label className={styles.inputLabel}>GitHub</label>
-                <input 
-                  className={styles.input} 
-                  value={githubUrl} 
-                  onChange={(e) => setGithubUrl(e.target.value)} 
+                <label className={styles.inputLabel}>GitHub URL</label>
+                <input
+                  className={styles.input}
+                  value={githubUrl}
+                  onChange={(e) => setGithubUrl(e.target.value)}
                 />
               </div>
             </div>
@@ -235,52 +258,52 @@ export default function ResumeBuilderPage() {
           {/* Professional Summary */}
           <div className={styles.sectionCard}>
             <div className={styles.sectionHeader}>
-              <div className={styles.sectionTitle}>🎯 Executive Summary</div>
+              <div className={styles.sectionTitle} style={{ fontSize: '13.5px' }}>Professional Summary</div>
             </div>
-            <textarea 
-              className={styles.textarea} 
-              rows={4} 
-              value={summary} 
-              onChange={(e) => setSummary(e.target.value)} 
-              placeholder="Highlight your DS/ML expertise, top languages, and passion..."
+            <textarea
+              className={styles.textarea}
+              rows={4}
+              value={summary}
+              onChange={(e) => setSummary(e.target.value)}
+              placeholder="Highlight your DS/ML expertise, top frameworks, and quantifiable production achievements..."
             />
           </div>
 
           {/* Synced Database Data Toggles */}
           <div className={styles.sectionCard}>
             <div className={styles.sectionHeader}>
-              <div className={styles.sectionTitle}>⚡ Integrated Database Sync</div>
-              <span className={styles.sectionBadge}>Live Data</span>
+              <div className={styles.sectionTitle} style={{ fontSize: '13.5px' }}>Database Synchronization</div>
+              <span className={styles.sectionBadge} style={{ fontFamily: 'var(--font-mono)', fontSize: '10px' }}>LIVE SYNC</span>
             </div>
             <div className={styles.toggleList}>
               <label className={styles.toggleItem}>
-                <span className={styles.toggleLabel}>
-                  🏆 Include Completed Certifications ({liveCertifications.length})
+                <span className={styles.toggleLabel} style={{ fontSize: '12.5px' }}>
+                  Include Verified Certifications ({liveCertifications.length})
                 </span>
-                <input 
-                  type="checkbox" 
-                  checked={includeAllCerts} 
-                  onChange={(e) => setIncludeAllCerts(e.target.checked)} 
+                <input
+                  type="checkbox"
+                  checked={includeAllCerts}
+                  onChange={(e) => setIncludeAllCerts(e.target.checked)}
                 />
               </label>
               <label className={styles.toggleItem}>
-                <span className={styles.toggleLabel}>
-                  🚀 Include Tracked Projects ({liveProjects.length})
+                <span className={styles.toggleLabel} style={{ fontSize: '12.5px' }}>
+                  Include Tracked Projects ({liveProjects.length})
                 </span>
-                <input 
-                  type="checkbox" 
-                  checked={includeAllProjects} 
-                  onChange={(e) => setIncludeAllProjects(e.target.checked)} 
+                <input
+                  type="checkbox"
+                  checked={includeAllProjects}
+                  onChange={(e) => setIncludeAllProjects(e.target.checked)}
                 />
               </label>
               <label className={styles.toggleItem}>
-                <span className={styles.toggleLabel}>
-                  🎯 Include Categorized Technical Skills
+                <span className={styles.toggleLabel} style={{ fontSize: '12.5px' }}>
+                  Include Categorized Technical Skills
                 </span>
-                <input 
-                  type="checkbox" 
-                  checked={includeAllSkills} 
-                  onChange={(e) => setIncludeAllSkills(e.target.checked)} 
+                <input
+                  type="checkbox"
+                  checked={includeAllSkills}
+                  onChange={(e) => setIncludeAllSkills(e.target.checked)}
                 />
               </label>
             </div>
@@ -289,8 +312,8 @@ export default function ResumeBuilderPage() {
           {/* Experience Section */}
           <div className={styles.sectionCard}>
             <div className={styles.sectionHeader}>
-              <div className={styles.sectionTitle}>💼 Experience & Research</div>
-              <button className="btn btn-secondary btn-sm" onClick={handleAddExperience}>
+              <div className={styles.sectionTitle} style={{ fontSize: '13.5px' }}>Experience & Research</div>
+              <button className="btn btn-secondary btn-sm" onClick={handleAddExperience} style={{ fontSize: '11px', padding: '2px 8px' }}>
                 + Add Experience
               </button>
             </div>
@@ -298,7 +321,7 @@ export default function ResumeBuilderPage() {
             {experienceList.map((exp, expIdx) => (
               <div key={expIdx} className={styles.expItem}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
-                  <strong>Experience #{expIdx + 1}</strong>
+                  <strong style={{ fontSize: '12.5px' }}>Experience #{expIdx + 1}</strong>
                   <button className={styles.deleteBtn} onClick={() => handleDeleteExperience(expIdx)}>
                     Remove
                   </button>
@@ -306,60 +329,60 @@ export default function ResumeBuilderPage() {
                 <div className={styles.inputGrid}>
                   <div className={styles.inputGroup}>
                     <label className={styles.inputLabel}>Role</label>
-                    <input 
-                      className={styles.input} 
-                      value={exp.role} 
-                      onChange={(e) => handleUpdateExperience(expIdx, 'role', e.target.value)} 
+                    <input
+                      className={styles.input}
+                      value={exp.role}
+                      onChange={(e) => handleUpdateExperience(expIdx, 'role', e.target.value)}
                     />
                   </div>
                   <div className={styles.inputGroup}>
-                    <label className={styles.inputLabel}>Organization / Company</label>
-                    <input 
-                      className={styles.input} 
-                      value={exp.company} 
-                      onChange={(e) => handleUpdateExperience(expIdx, 'company', e.target.value)} 
+                    <label className={styles.inputLabel}>Company / Lab</label>
+                    <input
+                      className={styles.input}
+                      value={exp.company}
+                      onChange={(e) => handleUpdateExperience(expIdx, 'company', e.target.value)}
                     />
                   </div>
                 </div>
                 <div className={styles.inputGrid}>
                   <div className={styles.inputGroup}>
                     <label className={styles.inputLabel}>Location</label>
-                    <input 
-                      className={styles.input} 
-                      value={exp.location} 
-                      onChange={(e) => handleUpdateExperience(expIdx, 'location', e.target.value)} 
+                    <input
+                      className={styles.input}
+                      value={exp.location}
+                      onChange={(e) => handleUpdateExperience(expIdx, 'location', e.target.value)}
                     />
                   </div>
                   <div className={styles.inputGroup}>
                     <label className={styles.inputLabel}>Dates</label>
-                    <input 
-                      className={styles.input} 
-                      value={exp.dates} 
-                      onChange={(e) => handleUpdateExperience(expIdx, 'dates', e.target.value)} 
+                    <input
+                      className={styles.input}
+                      value={exp.dates}
+                      onChange={(e) => handleUpdateExperience(expIdx, 'dates', e.target.value)}
                     />
                   </div>
                 </div>
 
                 <div style={{ marginTop: '8px' }}>
-                  <label className={styles.inputLabel}>Impact Bullets (STAR Method)</label>
+                  <label className={styles.inputLabel}>STAR Impact Bullets</label>
                   {exp.bullets.map((b, bIdx) => (
                     <div key={bIdx} className={styles.bulletInputRow}>
-                      <input 
-                        className={styles.input} 
-                        value={b} 
-                        onChange={(e) => handleUpdateBullet(expIdx, bIdx, e.target.value)} 
+                      <input
+                        className={styles.input}
+                        value={b}
+                        onChange={(e) => handleUpdateBullet(expIdx, bIdx, e.target.value)}
                       />
-                      <button 
-                        className={styles.deleteBtn} 
+                      <button
+                        className={styles.deleteBtn}
                         onClick={() => handleDeleteBullet(expIdx, bIdx)}
                       >
                         ✕
                       </button>
                     </div>
                   ))}
-                  <button 
-                    className="btn btn-ghost btn-sm" 
-                    style={{ marginTop: '4px' }}
+                  <button
+                    className="btn btn-ghost btn-sm"
+                    style={{ marginTop: '4px', fontSize: '11px' }}
                     onClick={() => handleAddBullet(expIdx)}
                   >
                     + Add Bullet
@@ -367,13 +390,6 @@ export default function ResumeBuilderPage() {
                 </div>
               </div>
             ))}
-
-            <div className={styles.starBox}>
-              <div className={styles.starTitle}>💡 High-Impact STAR Formula for DS/ML:</div>
-              <div className={styles.starDesc}>
-                [Action Verb: <em>Architected/Trained/Optimized</em>] + [System: <em>Transformer pipeline/XGBoost classifier</em>] + [Technologies: <em>PyTorch, Docker, AWS</em>] + [Quantifiable Metric: <em>improved latency by 35% / +94% precision</em>].
-              </div>
-            </div>
           </div>
         </div>
 
@@ -382,13 +398,13 @@ export default function ResumeBuilderPage() {
           <div className={styles.paperWrapper} id="resume-paper">
             {/* Header */}
             <div className={styles.paperHeader}>
-              <h1 className={styles.paperName}>{fullName || 'Your Name'}</h1>
+              <h1 className={styles.paperName}>{fullName || 'Sharvin Neve'}</h1>
               <div className={styles.paperContact}>
-                {email && <span>✉️ {email}</span>}
-                {phone && <span>📞 {phone}</span>}
-                {location && <span>📍 {location}</span>}
-                {linkedinUrl && <span>🔗 {linkedinUrl}</span>}
-                {githubUrl && <span>🐙 {githubUrl}</span>}
+                {email && <span>{email}</span>}
+                {phone && <span>• {phone}</span>}
+                {location && <span>• {location}</span>}
+                {linkedinUrl && <span>• {linkedinUrl}</span>}
+                {githubUrl && <span>• {githubUrl}</span>}
               </div>
             </div>
 
@@ -468,7 +484,7 @@ export default function ResumeBuilderPage() {
                 <ul className={styles.paperBullets}>
                   {liveCertifications.map((c) => (
                     <li key={c.id}>
-                      <strong>{c.name}</strong> — {c.provider} {c.status === 'completed' ? '(Verified / Earned)' : `(${c.progress}% Completed)`}
+                      <strong>{c.name}</strong> — {c.provider} {c.status === 'completed' ? '(Verified)' : `(${c.progress}% Completed)`}
                     </li>
                   ))}
                 </ul>

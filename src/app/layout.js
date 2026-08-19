@@ -1,10 +1,11 @@
 import './globals.css';
 import Sidebar from '@/components/Sidebar';
 import CommandPalette from '@/components/CommandPalette';
+import ToastContainer from '@/components/Toast';
 
 export const metadata = {
-  title: 'Career Catalyst — DS/ML/AI Resume Dashboard',
-  description: 'Plan, track, and optimize your Data Science & Machine Learning career. Track certifications, build your portfolio, analyze your resume, and accelerate your career growth.',
+  title: 'Catalyst OS — Career Operating System for ML & Data Systems',
+  description: 'Plan, track, and optimize your Machine Learning career. Track certifications, benchmark algorithms, build your portfolio, and accelerate technical hiring.',
 };
 
 export default function RootLayout({ children }) {
@@ -12,7 +13,7 @@ export default function RootLayout({ children }) {
     <html lang="en" suppressHydrationWarning>
       <head>
         <meta name="viewport" content="width=device-width, initial-scale=1" />
-        <meta name="theme-color" content="#0a0a0f" />
+        <meta name="theme-color" content="#09090b" />
       </head>
       <body suppressHydrationWarning>
         <div className="app-layout">
@@ -22,6 +23,7 @@ export default function RootLayout({ children }) {
           </main>
         </div>
         <CommandPalette />
+        <ToastContainer />
       </body>
     </html>
   );

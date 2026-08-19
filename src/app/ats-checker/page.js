@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import styles from './page.module.css';
+import { showToast } from '@/components/Toast';
 import {
   IconATS,
   IconCheck,
@@ -142,6 +143,7 @@ export default function AtsCheckerPage() {
 
   const handleInjectKeyword = (kw) => {
     setContent((prev) => prev + `\n- Proficient in ${kw} and enterprise implementation.`);
+    showToast(`Keyword "+ ${kw}" injected into resume!`, 'success');
   };
 
   const radius = 56;

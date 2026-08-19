@@ -1,6 +1,7 @@
 import { getSupabase } from '@/lib/supabase';
 import styles from './page.module.css';
 import Link from 'next/link';
+import ShareProfileButton from '@/components/ShareProfileButton';
 import {
   IconGitHub,
   IconArrowUpRight,
@@ -98,9 +99,10 @@ export default async function PortfolioShowcasePage({ params }) {
           </div>
         </div>
 
-        <div style={{ textAlign: 'right' }}>
-          <Link href="/resume-builder" className="btn btn-primary" style={{ display: 'inline-flex', alignItems: 'center', gap: '8px' }}>
-            <IconResume size={14} /> View ATS Resume
+        <div style={{ display: 'flex', gap: '8px', alignItems: 'center', justifyContent: 'flex-end', flexWrap: 'wrap' }}>
+          <ShareProfileButton username={username} />
+          <Link href="/resume-builder" className="btn btn-primary" style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', fontSize: '12.5px', padding: '7px 14px' }}>
+            <IconResume size={13} /> View ATS Resume
           </Link>
         </div>
       </div>
