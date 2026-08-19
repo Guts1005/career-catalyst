@@ -129,17 +129,21 @@ export default function Sidebar() {
       )}
 
       <aside
-        className={isOpen ? 'open' : ''}
+        className={`app-sidebar ${isOpen ? 'open' : ''}`}
         style={{
           width: 'var(--sidebar-width)',
           flexShrink: 0,
-          minHeight: '100vh',
+          height: '100vh',
+          position: 'sticky',
+          top: 0,
           background: 'var(--white)',
           borderRight: '1px solid var(--gray-100)',
           display: 'flex',
           flexDirection: 'column',
           justifyContent: 'space-between',
           padding: '24px 16px',
+          overflowY: 'auto',
+          zIndex: 50,
         }}
       >
         <div>
