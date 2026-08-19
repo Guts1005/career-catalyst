@@ -2,6 +2,7 @@ import { getSupabase } from '@/lib/supabase';
 import styles from './page.module.css';
 import Link from 'next/link';
 import ShareProfileButton from '@/components/ShareProfileButton';
+import { BENCHMARK_DEMO_DATA } from '@/lib/careerGraph';
 import {
   IconGitHub,
   IconArrowUpRight,
@@ -35,41 +36,23 @@ export default async function PortfolioShowcasePage({ params }) {
     // Graceful fallback to default profile
   }
 
-  const name = resume?.full_name || 'Sharvin Neve';
+  const name = resume?.full_name || BENCHMARK_DEMO_DATA.profile.name;
   const email = resume?.email || 'sharvinneve67@gmail.com';
-  const summary = resume?.summary || 'Machine Learning Engineer with hands-on experience building production deep learning systems, multi-modal RAG architectures, and scalable cloud ML pipelines.';
+  const summary = resume?.summary || BENCHMARK_DEMO_DATA.profile.bio;
 
-  // Fallback defaults if database was empty
-  if (certs.length === 0) {
-    certs = [
-      { id: 1, name: 'AWS Certified Machine Learning – Specialty', provider: 'Amazon' },
-      { id: 2, name: 'TensorFlow Developer Certificate', provider: 'Google' },
-      { id: 3, name: 'Google Cloud Professional ML Engineer', provider: 'Google Cloud' },
-      { id: 4, name: 'Deep Learning Specialization', provider: 'DeepLearning.AI' },
-    ];
+  if (projects.length === 0) {
+    projects = BENCHMARK_DEMO_DATA.projects;
   }
 
   if (skills.length === 0) {
-    skills = [
-      { id: 1, name: 'Python', current_level: 90 },
-      { id: 2, name: 'PyTorch', current_level: 85 },
-      { id: 3, name: 'SQL', current_level: 80 },
-      { id: 4, name: 'Transformers & LLMs', current_level: 85 },
-      { id: 5, name: 'Scikit-learn', current_level: 85 },
-      { id: 6, name: 'Docker & MLOps', current_level: 75 },
-    ];
+    skills = BENCHMARK_DEMO_DATA.skills;
   }
 
-  if (projects.length === 0) {
-    projects = [
-      {
-        id: 1,
-        name: 'Enterprise Multi-Modal RAG Engine',
-        description: 'Engineered hybrid dense-sparse vector search using LangChain, FAISS, and BM25 with cross-encoder re-ranking.',
-        tech_stack: 'Python, PyTorch, LangChain, FAISS, FastAPI, Docker',
-        impact: '45% reduction in query latency, 94.2% retrieval accuracy',
-        github_url: 'https://github.com/Guts1005',
-      },
+  if (certs.length === 0) {
+    certs = [
+      { id: 1, name: 'AWS Certified Machine Learning – Specialty', provider: 'Amazon Web Services' },
+      { id: 2, name: 'TensorFlow Developer Certificate', provider: 'Google' },
+      { id: 3, name: 'Deep Learning Specialization', provider: 'DeepLearning.AI' },
     ];
   }
 
@@ -78,12 +61,12 @@ export default async function PortfolioShowcasePage({ params }) {
       {/* Hero Header */}
       <div className={styles.hero}>
         <div>
-          <div style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', padding: '3px 8px', borderRadius: '4px', background: 'var(--white)', border: '1px solid var(--gray-200)', fontSize: '11px', fontFamily: 'var(--font-mono)', color: 'var(--gray-600)', marginBottom: '12px' }}>
+          <div style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', padding: '3px 8px', borderRadius: '4px', background: 'var(--bg-surface)', border: '1px solid var(--border)', fontSize: '11px', fontFamily: 'var(--font-mono)', color: 'var(--text-muted)', marginBottom: '12px' }}>
             <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: 'var(--green)' }} />
-            VERIFIED PROFILE • @{username}
+            VERIFIED CANDIDATE PROFILE • @{username}
           </div>
           <h1 className={styles.heroName}>{name}</h1>
-          <div className={styles.heroRole}>Data Science & Machine Learning Specialist</div>
+          <div className={styles.heroRole}>Machine Learning & Distributed Systems Engineer</div>
           <p className={styles.heroBio}>{summary}</p>
 
           <div className={styles.socialRow}>
@@ -99,40 +82,51 @@ export default async function PortfolioShowcasePage({ params }) {
           </div>
         </div>
 
-        <div style={{ display: 'flex', gap: '8px', alignItems: 'center', justifyContent: 'flex-end', flexWrap: 'wrap' }}>
+        <div>
           <ShareProfileButton username={username} />
-          <Link href="/resume-builder" className="btn btn-primary" style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', fontSize: '12.5px', padding: '7px 14px' }}>
-            <IconResume size={13} /> View ATS Resume
-          </Link>
         </div>
       </div>
 
-      {/* Featured Projects */}
+      {/* Verified Projects Showcase */}
       <div className={styles.section}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '16px' }}>
-          <IconProjects size={18} style={{ color: 'var(--text-muted)' }} />
-          <h2 className={styles.sectionTitle} style={{ margin: 0 }}>Featured Machine Learning Systems</h2>
+        <div className={styles.sectionTitle}>
+          <IconProjects size={18} /> Verified Portfolio Case Studies
         </div>
         <div className={styles.projectsGrid}>
           {projects.map((p) => (
             <div key={p.id} className={styles.projectCard}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-                <h3 className={styles.projectName}>{p.name}</h3>
-                {p.github_url && (
-                  <a href={p.github_url} target="_blank" rel="noopener noreferrer" style={{ fontSize: '12px', display: 'flex', alignItems: 'center', gap: '4px', color: 'var(--accent)' }}>
-                    Source <IconArrowUpRight size={12} />
+              <div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '8px' }}>
+                  <h3 style={{ fontSize: '16px', fontWeight: 800, color: 'var(--text-primary)', margin: 0 }}>
+                    {p.name}
+                  </h3>
+                  <span style={{ fontSize: '10.5px', fontFamily: 'var(--font-mono)', padding: '2px 6px', borderRadius: '3px', background: 'var(--green-subtle)', color: 'var(--green)', border: '1px solid var(--green-border)' }}>
+                    ✓ {p.verification_status || 'VERIFIED'}
+                  </span>
+                </div>
+                <p style={{ fontSize: '13px', color: 'var(--text-secondary)', lineHeight: 1.5, marginBottom: '14px' }}>
+                  {p.description}
+                </p>
+
+                <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap', marginBottom: '14px' }}>
+                  {(p.technologies || p.tech_stack || 'PyTorch, Docker').split(',').map((tech) => (
+                    <span key={tech} style={{ fontSize: '10.5px', fontFamily: 'var(--font-mono)', background: 'var(--bg-subtle)', border: '1px solid var(--border)', padding: '2px 6px', borderRadius: '3px', color: 'var(--text-muted)' }}>
+                      {tech.trim()}
+                    </span>
+                  ))}
+                </div>
+              </div>
+
+              {p.github_url && (
+                <div style={{ borderTop: '1px solid var(--border)', paddingTop: '10px' }}>
+                  <a
+                    href={p.github_url}
+                    target="_blank"
+                    rel="noreferrer"
+                    style={{ fontSize: '12px', fontFamily: 'var(--font-mono)', color: 'var(--text-primary)', textDecoration: 'none', fontWeight: 600, display: 'inline-flex', alignItems: 'center', gap: '4px' }}
+                  >
+                    View Codebase & Benchmarks ↗
                   </a>
-                )}
-              </div>
-              <p style={{ fontSize: '13.5px', color: 'var(--text-secondary)', lineHeight: 1.5 }}>
-                {p.description}
-              </p>
-              <div style={{ fontSize: '12px', color: 'var(--text-muted)' }}>
-                <strong>Stack:</strong> {p.tech_stack}
-              </div>
-              {p.impact && (
-                <div className={styles.projectImpact}>
-                  🎯 {p.impact}
                 </div>
               )}
             </div>
@@ -140,45 +134,19 @@ export default async function PortfolioShowcasePage({ params }) {
         </div>
       </div>
 
-      {/* Core Competencies */}
+      {/* Verified Core Competencies */}
       <div className={styles.section}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '16px' }}>
-          <IconSkills size={18} style={{ color: 'var(--text-muted)' }} />
-          <h2 className={styles.sectionTitle} style={{ margin: 0 }}>Core Technical Competencies</h2>
+        <div className={styles.sectionTitle}>
+          <IconSkills size={18} /> Verified Technical Competencies
         </div>
-        <div className={styles.skillsPills}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: '10px' }}>
           {skills.map((s) => (
-            <div key={s.id} className={styles.skillPill}>
-              <span>{s.name}</span>
-              <span className={styles.skillLevel} style={{ fontFamily: 'var(--font-mono)' }}>{s.current_level}%</span>
+            <div key={s.id || s.name} style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: '4px', padding: '10px 12px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <span style={{ fontSize: '13px', fontWeight: 600, color: 'var(--text-primary)' }}>{s.name}</span>
+              <span style={{ fontSize: '11px', fontFamily: 'var(--font-mono)', color: 'var(--green)' }}>{s.current_level}%</span>
             </div>
           ))}
         </div>
-      </div>
-
-      {/* Verified Certifications */}
-      <div className={styles.section}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '16px' }}>
-          <IconCertifications size={18} style={{ color: 'var(--text-muted)' }} />
-          <h2 className={styles.sectionTitle} style={{ margin: 0 }}>Verified Credentials & Certifications</h2>
-        </div>
-        <div className={styles.certList}>
-          {certs.map((c) => (
-            <div key={c.id} className={styles.certBadge}>
-              <div className={styles.certIcon}>
-                <IconCertifications size={16} />
-              </div>
-              <div>
-                <strong style={{ color: 'var(--text-primary)', fontSize: '13.5px' }}>{c.name}</strong>
-                <div style={{ fontSize: '11.5px', color: 'var(--text-muted)' }}>{c.provider} • Verified Credential</div>
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
-
-      <div style={{ textAlign: 'center', marginTop: '48px', color: 'var(--text-muted)', fontSize: '11.5px', fontFamily: 'var(--font-mono)' }}>
-        Catalyst OS • Verified Profile: @{username}
       </div>
     </div>
   );

@@ -5,6 +5,7 @@ import Link from 'next/link';
 import styles from './page.module.css';
 import { showToast } from '@/components/Toast';
 import PageHeader from '@/components/PageHeader';
+import { useCareer } from '@/context/CareerContext';
 import { IconJobs, IconCheck, IconArrowUpRight } from '@/components/Icons';
 
 const STAGES = [
@@ -14,9 +15,19 @@ const STAGES = [
   { key: 'interview', label: 'Interview Round', dotClass: 'status-dot-purple' },
   { key: 'final', label: 'Final Round', dotClass: 'status-dot-orange' },
   { key: 'offer', label: 'Offers / Decided', dotClass: 'status-dot-green' },
+  { key: 'rejected', label: 'Archived / Outcome', dotClass: 'status-dot-red' },
+];
+
+const REJECTION_REASONS = [
+  'System Design & Architecture',
+  'Distributed Systems & Concurrency',
+  'MLOps & Production Deployment',
+  'Coding & Algorithm Optimization',
+  'Years of Seniority Experience',
 ];
 
 export default function JobTrackerPage() {
+  const { logRejectionFeedback, refreshCareerState } = useCareer();
   const [jobs, setJobs] = useState([]);
   const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -24,6 +35,10 @@ export default function JobTrackerPage() {
   const [searchQuery, setSearchQuery] = useState('');
   const [mobileStage, setMobileStage] = useState('all');
   const searchInputRef = useRef(null);
+
+  // Rejection Feedback State
+  const [rejectionModal, setRejectionModal] = useState({ isOpen: false, jobId: null, company: '' });
+  const [customRejectionReason, setCustomRejectionReason] = useState('');
 
   // Form State
   const [company, setCompany] = useState('');
@@ -64,6 +79,7 @@ export default function JobTrackerPage() {
       } else if (e.key === 'Escape') {
         setSelectedJob(null);
         setIsModalOpen(false);
+        setRejectionModal({ isOpen: false, jobId: null, company: '' });
       }
     };
     window.addEventListener('keydown', handleKeyDown);
@@ -105,6 +121,7 @@ export default function JobTrackerPage() {
         setRequiredSkills('');
         setNotes('');
         fetchJobs();
+        refreshCareerState();
       }
     } catch (err) {
       console.error('Error creating job:', err);
@@ -123,10 +140,22 @@ export default function JobTrackerPage() {
         showToast(`Stage updated for ${companyName} → ${nextStage.toUpperCase()}`, 'success');
         setSelectedJob((prev) => (prev ? { ...prev, status: nextStage } : null));
         fetchJobs();
+        refreshCareerState();
+
+        // If moved to rejected, trigger feedback modal to turn loss into skill gap intelligence
+        if (nextStage === 'rejected') {
+          setRejectionModal({ isOpen: true, jobId, company: companyName });
+        }
       }
     } catch (e) {
       console.error('Error moving job stage:', e);
     }
+  };
+
+  const handleSubmitRejectionFeedback = (reason) => {
+    logRejectionFeedback(rejectionModal.jobId, rejectionModal.company, reason);
+    setRejectionModal({ isOpen: false, jobId: null, company: '' });
+    setCustomRejectionReason('');
   };
 
   const handleDeleteJob = async (id, companyName) => {
@@ -137,6 +166,7 @@ export default function JobTrackerPage() {
         showToast(`Application record for ${companyName} deleted`, 'info');
         setSelectedJob(null);
         fetchJobs();
+        refreshCareerState();
       }
     } catch (e) {
       console.error('Error deleting job:', e);
@@ -295,6 +325,27 @@ export default function JobTrackerPage() {
             </div>
 
             <div className="modal-body" style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+              {/* Connected Interview Preparation Banner */}
+              {['interview', 'final'].includes(selectedJob.status) && (
+                <div style={{ background: 'var(--bg-subtle)', border: '1px solid var(--border)', borderLeft: '3px solid var(--purple)', padding: '12px 14px', borderRadius: '4px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '12px', flexWrap: 'wrap' }}>
+                  <div>
+                    <div style={{ fontSize: '11px', fontFamily: 'var(--font-mono)', color: 'var(--purple)', fontWeight: 800 }}>
+                      ⚡ ACTIVE TECHNICAL INTERVIEW STAGE
+                    </div>
+                    <div style={{ fontSize: '12px', color: 'var(--text-secondary)', marginTop: '2px' }}>
+                      Prepare system design, architecture trade-offs, and live coding for {selectedJob.company}.
+                    </div>
+                  </div>
+                  <Link
+                    href={`/interview-prep?company=${encodeURIComponent(selectedJob.company)}`}
+                    className="btn btn-primary btn-sm"
+                    style={{ fontSize: '11.5px', padding: '6px 12px' }}
+                  >
+                    START INTERVIEW PREP →
+                  </Link>
+                </div>
+              )}
+
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(130px, 1fr))', gap: '12px' }}>
                 <div style={{ background: 'var(--bg-subtle)', padding: '10px', borderRadius: '4px', border: '1px solid var(--border)' }}>
                   <div style={{ fontSize: '10px', fontFamily: 'var(--font-mono)', color: 'var(--text-muted)' }}>CURRENT STATUS</div>
@@ -385,6 +436,57 @@ export default function JobTrackerPage() {
         </div>
       )}
 
+      {/* ─── Rejection Feedback & Skill Gap Capture Modal ───────────── */}
+      {rejectionModal.isOpen && (
+        <div className="modal-overlay" onClick={() => setRejectionModal({ isOpen: false, jobId: null, company: '' })}>
+          <div className="modal" style={{ maxWidth: '480px' }} onClick={(e) => e.stopPropagation()}>
+            <div className="modal-header">
+              <h3 className="modal-title">Turn Feedback into Skill Growth</h3>
+              <button className="modal-close" onClick={() => setRejectionModal({ isOpen: false, jobId: null, company: '' })}>✕</button>
+            </div>
+
+            <div className="modal-body" style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+              <p style={{ fontSize: '13px', color: 'var(--text-secondary)', lineHeight: 1.5, margin: 0 }}>
+                What technical topic or gap was highlighted by <strong>{rejectionModal.company}</strong>? Catalyst will elevate this competency in your Skill Gap Map to strengthen future applications.
+              </p>
+
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                {REJECTION_REASONS.map((reason) => (
+                  <button
+                    key={reason}
+                    type="button"
+                    className="btn btn-secondary"
+                    onClick={() => handleSubmitRejectionFeedback(reason)}
+                    style={{ textAlign: 'left', justifyContent: 'flex-start', fontSize: '12px', padding: '10px 14px' }}
+                  >
+                    + Prioritize: {reason}
+                  </button>
+                ))}
+              </div>
+
+              <div style={{ display: 'flex', gap: '8px', marginTop: '6px' }}>
+                <input
+                  type="text"
+                  className="input"
+                  value={customRejectionReason}
+                  onChange={(e) => setCustomRejectionReason(e.target.value)}
+                  placeholder="Or enter custom topic (e.g. Triton, Ray)..."
+                  style={{ flex: 1, fontSize: '12px' }}
+                />
+                <button
+                  type="button"
+                  className="btn btn-primary"
+                  onClick={() => customRejectionReason.trim() && handleSubmitRejectionFeedback(customRejectionReason.trim())}
+                  disabled={!customRejectionReason.trim()}
+                >
+                  SAVE GAP
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* ─── Add Role Modal ────────────────────────────────────────── */}
       {isModalOpen && (
         <div className="modal-overlay" onClick={() => setIsModalOpen(false)}>
@@ -461,6 +563,7 @@ export default function JobTrackerPage() {
                     <option value="interview">Interview Round</option>
                     <option value="final">Final Round</option>
                     <option value="offer">Offer Received</option>
+                    <option value="rejected">Archived / Rejected</option>
                   </select>
                 </div>
 

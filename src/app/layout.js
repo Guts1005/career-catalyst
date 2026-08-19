@@ -1,4 +1,5 @@
 import './globals.css';
+import { CareerProvider } from '@/context/CareerContext';
 import Sidebar from '@/components/Sidebar';
 import MobileNav from '@/components/MobileNav';
 import CommandPalette from '@/components/CommandPalette';
@@ -29,15 +30,17 @@ export default function RootLayout({ children }) {
         />
       </head>
       <body suppressHydrationWarning>
-        <div className="app-layout">
-          <Sidebar />
-          <main className="main-content">
-            {children}
-          </main>
-        </div>
-        <MobileNav />
-        <CommandPalette />
-        <ToastContainer />
+        <CareerProvider>
+          <div className="app-layout">
+            <Sidebar />
+            <main className="main-content">
+              {children}
+            </main>
+          </div>
+          <MobileNav />
+          <CommandPalette />
+          <ToastContainer />
+        </CareerProvider>
       </body>
     </html>
   );

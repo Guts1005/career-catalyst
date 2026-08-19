@@ -74,9 +74,12 @@ const MORE_SECTIONS = [
   },
 ];
 
+import { useCareer } from '@/context/CareerContext';
+
 export default function MobileNav() {
   const pathname = usePathname();
   const [isMoreOpen, setIsMoreOpen] = useState(false);
+  const { readiness } = useCareer();
 
   useEffect(() => {
     setIsMoreOpen(false);
@@ -152,7 +155,9 @@ export default function MobileNav() {
             <div className={styles.sheetHeader}>
               <div>
                 <div className={styles.sheetBrand}>CATALYST OS</div>
-                <div className={styles.sheetSubtitle}>Navigation Directory</div>
+                <div className={styles.sheetSubtitle}>
+                  {readiness?.targetRoleTitle || 'ML Engineer'} • {readiness?.overallScore || 84}% Readiness
+                </div>
               </div>
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                 <ThemeToggle showLabel={false} />

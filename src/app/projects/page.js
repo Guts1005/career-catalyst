@@ -1,30 +1,33 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
+import Link from 'next/link';
 import styles from './page.module.css';
 import { showToast } from '@/components/Toast';
 import PageHeader from '@/components/PageHeader';
+import { useCareer } from '@/context/CareerContext';
 
 export default function ProjectsPage() {
-  const [projects, setProjects] = useState([]);
+  const { projects: contextProjects, setProjects: setContextProjects, skills, setSkills, refreshCareerState } = useCareer();
   const [statusFilter, setStatusFilter] = useState('all');
   const [showModal, setShowModal] = useState(false);
   const [selectedCaseStudy, setSelectedCaseStudy] = useState(null);
   const [searchQuery, setSearchQuery] = useState('');
   const searchInputRef = useRef(null);
-  
+
   const initialForm = {
-    name: '', description: '', status: 'planned', 
-    github_url: '', live_url: '', tech_stack: '', 
-    category: '', impact: '', start_date: '', end_date: '',
-    milestones: [{ name: '', due_date: '' }]
+    name: '',
+    description: '',
+    status: 'completed',
+    github_url: '',
+    live_url: '',
+    tech_stack: '',
+    skills_demonstrated: '',
+    category: 'Distributed Systems',
+    impact: 'P99 latency < 15ms under 5k QPS',
   };
   const [formData, setFormData] = useState(initialForm);
   const [editId, setEditId] = useState(null);
-
-  useEffect(() => {
-    fetchProjects();
-  }, [statusFilter]);
 
   // Keyboard shortcut '/' to search
   useEffect(() => {
@@ -41,24 +44,6 @@ export default function ProjectsPage() {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [showModal, selectedCaseStudy]);
 
-  const fetchProjects = async () => {
-    try {
-      const res = await fetch(`/api/projects?status=${statusFilter}`);
-      if (res.ok) {
-        const data = await res.json();
-        setProjects(data);
-      }
-    } catch (err) {
-      console.error('Failed to fetch projects', err);
-    }
-  };
-
-  const getProgress = (milestones) => {
-    if (!milestones || milestones.length === 0) return 0;
-    const completed = milestones.filter(m => m.completed).length;
-    return Math.round((completed / milestones.length) * 100);
-  };
-
   const handleOpenModal = (project = null, e = null) => {
     if (e) e.stopPropagation();
     if (project) {
@@ -66,15 +51,13 @@ export default function ProjectsPage() {
       setFormData({
         name: project.name || '',
         description: project.description || '',
-        status: project.status || 'planned',
+        status: project.status || 'completed',
         github_url: project.github_url || '',
         live_url: project.live_url || '',
-        tech_stack: project.tech_stack || '',
-        category: project.category || '',
+        tech_stack: project.technologies || project.tech_stack || '',
+        skills_demonstrated: project.skills_demonstrated || project.technologies || '',
+        category: project.category || 'Distributed Systems',
         impact: project.impact || '',
-        start_date: project.start_date || '',
-        end_date: project.end_date || '',
-        milestones: []
       });
     } else {
       setEditId(null);
@@ -85,166 +68,145 @@ export default function ProjectsPage() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (!formData.name.trim()) return;
+
     try {
       if (editId) {
-        await fetch(`/api/projects/${editId}`, {
-          method: 'PUT',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(formData)
-        });
-        showToast('Project updated successfully!', 'success');
+        setContextProjects(contextProjects.map((p) => (p.id === editId ? { ...p, ...formData } : p)));
+        showToast('Project case study updated!', 'success');
       } else {
-        await fetch('/api/projects', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(formData)
-        });
-        showToast(`Project "${formData.name}" added to portfolio!`, 'success');
+        const newProj = {
+          id: `proj_${Date.now()}`,
+          ...formData,
+          verification_status: formData.github_url ? 'VERIFIED' : 'PROJECT',
+        };
+        setContextProjects([newProj, ...contextProjects]);
+
+        // Auto-update skill evidence levels based on skills demonstrated in this project
+        if (formData.skills_demonstrated) {
+          const demonstratedSkills = formData.skills_demonstrated.split(',').map((s) => s.trim().toLowerCase());
+          setSkills((prevSkills) =>
+            prevSkills.map((s) => {
+              if (demonstratedSkills.includes(s.name.toLowerCase())) {
+                return {
+                  ...s,
+                  evidence_level: formData.github_url ? 'VERIFIED' : 'PROJECT',
+                  current_level: Math.min(s.current_level + 10, 95),
+                };
+              }
+              return s;
+            })
+          );
+          showToast(`Project created: Verified evidence linked to ${demonstratedSkills.length} competencies!`, 'success');
+        } else {
+          showToast('Project created and added to portfolio evidence!', 'success');
+        }
       }
+
       setShowModal(false);
-      fetchProjects();
+      refreshCareerState();
     } catch (err) {
-      console.error('Failed to save project', err);
-      showToast('Failed to save project', 'error');
+      console.error('Failed to save project:', err);
     }
   };
 
-  const handleDelete = async (id, e) => {
-    if (e) e.stopPropagation();
-    if (confirm('Are you sure you want to delete this project?')) {
-      try {
-        await fetch(`/api/projects/${id}`, { method: 'DELETE' });
-        showToast('Project deleted from portfolio', 'info');
-        setSelectedCaseStudy(null);
-        fetchProjects();
-      } catch (err) {
-        console.error('Failed to delete project', err);
-      }
-    }
-  };
-
-  const filteredProjects = projects.filter((p) => {
+  const filteredProjects = contextProjects.filter((p) => {
+    if (statusFilter !== 'all' && p.status !== statusFilter) return false;
     if (!searchQuery.trim()) return true;
     const q = searchQuery.toLowerCase();
-    return p.name?.toLowerCase().includes(q) || p.tech_stack?.toLowerCase().includes(q) || p.description?.toLowerCase().includes(q);
+    return (
+      p.name?.toLowerCase().includes(q) ||
+      p.description?.toLowerCase().includes(q) ||
+      p.technologies?.toLowerCase().includes(q) ||
+      p.skills_demonstrated?.toLowerCase().includes(q)
+    );
   });
 
   return (
     <div className={styles.container}>
       <PageHeader
-        chapter="PORTFOLIO / 01"
-        title={<>WHAT<br />YOU'VE BUILT.</>}
-        subtitle="A structured archive of your production machine learning systems, architectures, and measurable outcomes."
+        chapter="PORTFOLIO & PROOF / 06"
+        title={<>PORTFOLIO ARCHITECTURE<br />CASE STUDIES.</>}
+        subtitle="Verifiable engineering artifacts, latency benchmarks, and architectural invariant write-ups."
         actions={
-          <button className="btn btn-primary" onClick={() => handleOpenModal()} style={{ fontSize: '13px', padding: '8px 16px' }}>
-            + NEW ARCHITECTURE
+          <button className="btn btn-primary" onClick={() => handleOpenModal(null)}>
+            + NEW CASE STUDY
           </button>
         }
       />
 
-      {/* Filter and Search Bar */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px', gap: '12px', flexWrap: 'wrap' }}>
-        <div style={{ display: 'flex', gap: '6px' }}>
-          {['all', 'in_progress', 'completed', 'planned'].map((s) => (
-            <button
-              key={s}
-              type="button"
-              onClick={() => setStatusFilter(s)}
-              className={`btn ${statusFilter === s ? 'btn-primary' : 'btn-secondary'} btn-sm`}
-              style={{ textTransform: 'uppercase' }}
-            >
-              {s.replace('_', ' ')}
-            </button>
-          ))}
-        </div>
-
-        <div style={{ position: 'relative', maxWidth: '280px', width: '100%' }}>
-          <input
-            ref={searchInputRef}
-            type="text"
-            className="input"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="Search projects... (/)"
-            style={{ fontSize: '12px', paddingRight: '28px' }}
-          />
-          <span style={{ position: 'absolute', right: '10px', top: '7px', fontSize: '10px', fontFamily: 'var(--font-mono)', color: 'var(--gray-400)' }}>
-            /
-          </span>
-        </div>
+      {/* Filters and Search */}
+      <div className={styles.filters}>
+        {['all', 'completed', 'in_progress', 'planned'].map((stg) => (
+          <button
+            key={stg}
+            type="button"
+            className={`${styles.filterBtn} ${statusFilter === stg ? styles.activeFilter : ''}`}
+            onClick={() => setStatusFilter(stg)}
+          >
+            {stg.toUpperCase().replace('_', ' ')}
+          </button>
+        ))}
       </div>
 
       {/* Projects Grid */}
-      {filteredProjects.length === 0 ? (
-        <div className={styles.emptyState}>
-          <p style={{ fontSize: '13.5px', color: 'var(--gray-600)', marginBottom: '16px' }}>
-            No engineering projects found matching current criteria.
-          </p>
-          <button className="btn btn-primary" onClick={() => handleOpenModal()}>
-            CREATE FIRST ARCHITECTURE
-          </button>
-        </div>
-      ) : (
-        <div className={styles.grid}>
-          {filteredProjects.map((project, index) => {
-            const progress = getProgress(project.milestones);
-            return (
-              <div
-                key={project.id}
-                className={styles.card}
-                onClick={() => setSelectedCaseStudy(project)}
-                style={{ cursor: 'pointer' }}
-              >
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
-                  <span style={{ fontFamily: 'var(--font-mono)', fontSize: '11px', color: 'var(--gray-500)' }}>
-                    0{index + 1}
-                  </span>
-                  <span style={{ fontSize: '10.5px', fontFamily: 'var(--font-mono)', color: project.status === 'completed' ? 'var(--green)' : 'var(--blue)', fontWeight: 700, textTransform: 'uppercase' }}>
-                    ● {project.status.replace('_', ' ')}
-                  </span>
-                </div>
-
-                <h3 className={styles.cardTitle}>{project.name}</h3>
-
-                <p className={styles.description}>
-                  {project.description}
-                </p>
-
-                {project.tech_stack && (
-                  <div className={styles.techStack}>
-                    {project.tech_stack.split(',').map((tech, i) => (
-                      <span key={i} className={styles.techTag}>
-                        {tech.trim()}
-                      </span>
-                    ))}
-                  </div>
-                )}
-
-                <div className={styles.progressContainer} style={{ marginTop: '16px' }}>
-                  <div className={styles.progressBar}>
-                    <div
-                      className={styles.progressFill}
-                      style={{
-                        width: project.status === 'completed' ? '100%' : `${progress}%`,
-                        background: 'var(--black)'
-                      }}
-                    />
-                  </div>
-                </div>
+      <div className={styles.grid}>
+        {filteredProjects.map((p, idx) => (
+          <div
+            key={p.id || idx}
+            className={styles.card}
+            onClick={() => setSelectedCaseStudy(p)}
+            style={{ cursor: 'pointer' }}
+          >
+            <div>
+              <div className={styles.cardTop}>
+                <h3 className={styles.cardTitle}>{p.name}</h3>
+                <span
+                  style={{
+                    fontSize: '10.5px',
+                    fontFamily: 'var(--font-mono)',
+                    padding: '2px 6px',
+                    borderRadius: '3px',
+                    background: p.verification_status === 'VERIFIED' ? 'var(--green-subtle)' : 'var(--bg-subtle)',
+                    color: p.verification_status === 'VERIFIED' ? 'var(--green)' : 'var(--text-muted)',
+                    border: `1px solid ${p.verification_status === 'VERIFIED' ? 'var(--green-border)' : 'var(--border)'}`,
+                  }}
+                >
+                  {p.verification_status || 'PROJECT'}
+                </span>
               </div>
-            );
-          })}
-        </div>
-      )}
 
-      {/* ─── Case-Study Deep Dive Drawer / Modal ────────────────────── */}
+              <p className={styles.cardDesc}>{p.description}</p>
+
+              <div className={styles.cardMeta}>
+                {(p.technologies || p.tech_stack || 'PyTorch, Docker').split(',').map((tech) => (
+                  <span key={tech} className={styles.metaBadge}>
+                    {tech.trim()}
+                  </span>
+                ))}
+              </div>
+            </div>
+
+            <div className={styles.cardBottom}>
+              <span className={styles.statusBadge} style={{ color: p.status === 'completed' ? 'var(--green)' : 'var(--amber)' }}>
+                ● {p.status?.toUpperCase().replace('_', ' ') || 'COMPLETED'}
+              </span>
+              <span style={{ fontSize: '11.5px', fontFamily: 'var(--font-mono)', color: 'var(--text-primary)', fontWeight: 600 }}>
+                EXPAND CASE STUDY →
+              </span>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {/* Case Study Detail Modal */}
       {selectedCaseStudy && (
         <div className="modal-overlay" onClick={() => setSelectedCaseStudy(null)}>
-          <div className="modal" style={{ maxWidth: '640px' }} onClick={(e) => e.stopPropagation()}>
+          <div className="modal" style={{ maxWidth: '680px' }} onClick={(e) => e.stopPropagation()}>
             <div className="modal-header">
               <div>
-                <span style={{ fontSize: '10.5px', fontFamily: 'var(--font-mono)', color: 'var(--gray-500)', textTransform: 'uppercase' }}>
-                  SYSTEM ARCHITECTURE CASE STUDY
+                <span style={{ fontSize: '10.5px', fontFamily: 'var(--font-mono)', color: 'var(--text-muted)', textTransform: 'uppercase' }}>
+                  PORTFOLIO EVIDENCE RECORD
                 </span>
                 <h3 className="modal-title" style={{ fontSize: '18px', marginTop: '2px' }}>
                   {selectedCaseStudy.name}
@@ -255,152 +217,118 @@ export default function ProjectsPage() {
 
             <div className="modal-body" style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
               <div>
-                <div style={{ fontSize: '11px', fontFamily: 'var(--font-mono)', color: 'var(--gray-500)', marginBottom: '4px' }}>
-                  SYSTEM SUMMARY & ARCHITECTURE:
+                <div style={{ fontSize: '11px', fontFamily: 'var(--font-mono)', color: 'var(--text-muted)', textTransform: 'uppercase', marginBottom: '4px' }}>
+                  Problem & Architectural Approach
                 </div>
-                <p style={{ fontSize: '13.5px', color: 'var(--black)', lineHeight: 1.6 }}>
+                <p style={{ fontSize: '13.5px', color: 'var(--text-secondary)', lineHeight: 1.6, background: 'var(--bg-subtle)', padding: '14px', borderRadius: '4px', border: '1px solid var(--border)', margin: 0 }}>
                   {selectedCaseStudy.description}
                 </p>
               </div>
 
-              {selectedCaseStudy.impact && (
-                <div style={{ background: 'var(--off-white)', padding: '12px', borderRadius: '4px', border: '1px solid var(--gray-100)' }}>
-                  <div style={{ fontSize: '10.5px', fontFamily: 'var(--font-mono)', color: 'var(--green)', fontWeight: 700 }}>
-                    MEASURABLE OUTCOME / STAR IMPACT:
-                  </div>
-                  <div style={{ fontSize: '13px', color: 'var(--black)', marginTop: '4px' }}>
-                    {selectedCaseStudy.impact}
-                  </div>
+              <div>
+                <div style={{ fontSize: '11px', fontFamily: 'var(--font-mono)', color: 'var(--text-muted)', textTransform: 'uppercase', marginBottom: '6px' }}>
+                  Demonstrated Competencies
                 </div>
-              )}
+                <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
+                  {(selectedCaseStudy.skills_demonstrated || selectedCaseStudy.technologies || 'PyTorch, Docker').split(',').map((sk) => (
+                    <span key={sk} style={{ fontSize: '11px', background: 'var(--bg-subtle)', border: '1px solid var(--border)', padding: '4px 8px', borderRadius: '4px', fontFamily: 'var(--font-mono)', color: 'var(--text-primary)' }}>
+                      ✓ {sk.trim()}
+                    </span>
+                  ))}
+                </div>
+              </div>
 
-              {selectedCaseStudy.tech_stack && (
+              {selectedCaseStudy.github_url && (
                 <div>
-                  <div style={{ fontSize: '11px', fontFamily: 'var(--font-mono)', color: 'var(--gray-500)', marginBottom: '6px' }}>
-                    ENGINEERING STACK:
+                  <div style={{ fontSize: '11px', fontFamily: 'var(--font-mono)', color: 'var(--text-muted)', textTransform: 'uppercase', marginBottom: '4px' }}>
+                    Repository Evidence
                   </div>
-                  <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
-                    {selectedCaseStudy.tech_stack.split(',').map((tech) => (
-                      <span key={tech} style={{ fontSize: '11px', background: 'var(--off-white)', border: '1px solid var(--gray-200)', padding: '3px 8px', borderRadius: '3px', fontFamily: 'var(--font-mono)' }}>
-                        {tech.trim()}
-                      </span>
-                    ))}
-                  </div>
+                  <a
+                    href={selectedCaseStudy.github_url}
+                    target="_blank"
+                    rel="noreferrer"
+                    style={{ fontSize: '13px', fontFamily: 'var(--font-mono)', color: 'var(--blue)', textDecoration: 'none' }}
+                  >
+                    ↗ {selectedCaseStudy.github_url}
+                  </a>
                 </div>
               )}
             </div>
 
-            <div className="modal-footer" style={{ display: 'flex', justifyContent: 'space-between' }}>
+            <div className="modal-footer" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <Link
+                href="/portfolio/sharvin"
+                className="btn btn-secondary btn-sm"
+                style={{ fontSize: '11.5px' }}
+              >
+                VIEW ON PUBLIC SHOWCASE ↗
+              </Link>
               <button
                 type="button"
-                onClick={(e) => handleDelete(selectedCaseStudy.id, e)}
-                style={{ background: 'transparent', border: 'none', color: 'var(--red)', fontSize: '12px', fontFamily: 'var(--font-mono)', cursor: 'pointer' }}
+                className="btn btn-primary btn-sm"
+                onClick={() => setSelectedCaseStudy(null)}
               >
-                DELETE PROJECT
+                CLOSE PREVIEW
               </button>
-
-              <div style={{ display: 'flex', gap: '8px' }}>
-                <button
-                  type="button"
-                  className="btn btn-secondary btn-sm"
-                  onClick={() => {
-                    const curr = selectedCaseStudy;
-                    setSelectedCaseStudy(null);
-                    handleOpenModal(curr);
-                  }}
-                >
-                  EDIT DETAILS
-                </button>
-                {selectedCaseStudy.github_url && (
-                  <a href={selectedCaseStudy.github_url} target="_blank" rel="noreferrer" className="btn btn-primary btn-sm">
-                    VIEW REPO ↗
-                  </a>
-                )}
-              </div>
             </div>
           </div>
         </div>
       )}
 
-      {/* Edit/Create Form Modal */}
+      {/* Add / Edit Project Modal */}
       {showModal && (
         <div className="modal-overlay" onClick={() => setShowModal(false)}>
-          <div className="modal" onClick={(e) => e.stopPropagation()}>
+          <div className="modal" style={{ maxWidth: '600px' }} onClick={(e) => e.stopPropagation()}>
             <div className="modal-header">
-              <h3 className="modal-title">{editId ? 'Edit Project' : 'New Project'}</h3>
+              <h3 className="modal-title">{editId ? 'Edit Case Study' : 'New Technical Project'}</h3>
               <button className="modal-close" onClick={() => setShowModal(false)}>✕</button>
             </div>
-            
+
             <form onSubmit={handleSubmit}>
-              <div className="modal-body">
+              <div className="modal-body" style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
                 <div className="form-group">
-                  <label className="form-label">Project Title *</label>
+                  <label className="form-label">Project Name *</label>
                   <input
                     type="text"
                     required
                     className="input"
                     value={formData.name}
-                    onChange={e => setFormData({...formData, name: e.target.value})}
-                    placeholder="e.g. Distributed LLM Serving Engine"
+                    onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                    placeholder="e.g. Distributed Triton Inference Gateway"
                   />
                 </div>
 
                 <div className="form-group">
-                  <label className="form-label">Technical Description *</label>
+                  <label className="form-label">Architectural Overview & Metrics *</label>
                   <textarea
-                    required
                     className="input"
                     rows="3"
+                    required
                     value={formData.description}
-                    onChange={e => setFormData({...formData, description: e.target.value})}
-                    placeholder="Describe problem, architecture and implementation details..."
-                  />
-                </div>
-
-                <div className="grid-2">
-                  <div className="form-group">
-                    <label className="form-label">Status</label>
-                    <select
-                      className="input"
-                      value={formData.status}
-                      onChange={e => setFormData({...formData, status: e.target.value})}
-                    >
-                      <option value="planned">Planned</option>
-                      <option value="in_progress">In Progress</option>
-                      <option value="completed">Completed</option>
-                    </select>
-                  </div>
-                  <div className="form-group">
-                    <label className="form-label">Category</label>
-                    <input
-                      type="text"
-                      className="input"
-                      value={formData.category}
-                      onChange={e => setFormData({...formData, category: e.target.value})}
-                      placeholder="e.g. MLOps / Systems"
-                    />
-                  </div>
-                </div>
-
-                <div className="form-group">
-                  <label className="form-label">Tech Stack (comma-separated)</label>
-                  <input
-                    type="text"
-                    className="input"
-                    value={formData.tech_stack}
-                    onChange={e => setFormData({...formData, tech_stack: e.target.value})}
-                    placeholder="e.g. PyTorch, Triton, FastAPI, Docker"
+                    onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                    placeholder="What problem does it solve? What were the benchmarked latency / throughput results?"
                   />
                 </div>
 
                 <div className="form-group">
-                  <label className="form-label">Measurable Impact / STAR Metric</label>
+                  <label className="form-label">Skills Demonstrated (Comma-separated)</label>
                   <input
                     type="text"
                     className="input"
-                    value={formData.impact}
-                    onChange={e => setFormData({...formData, impact: e.target.value})}
-                    placeholder="e.g. Reduced p99 latency by 45% via KV-cache optimizations"
+                    value={formData.skills_demonstrated}
+                    onChange={(e) => setFormData({ ...formData, skills_demonstrated: e.target.value })}
+                    placeholder="PyTorch & CUDA, MLOps & Deployment, Docker & Kubernetes"
+                  />
+                </div>
+
+                <div className="form-group">
+                  <label className="form-label">GitHub Repository URL (For Verification)</label>
+                  <input
+                    type="url"
+                    className="input"
+                    value={formData.github_url}
+                    onChange={(e) => setFormData({ ...formData, github_url: e.target.value })}
+                    placeholder="https://github.com/username/project"
                   />
                 </div>
               </div>
@@ -410,7 +338,7 @@ export default function ProjectsPage() {
                   Cancel
                 </button>
                 <button type="submit" className="btn btn-primary">
-                  {editId ? 'Save Changes' : 'Create Architecture'}
+                  {editId ? 'Save Changes' : 'Create & Link Evidence'}
                 </button>
               </div>
             </form>

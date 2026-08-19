@@ -1,31 +1,26 @@
 'use client';
 
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useMemo } from 'react';
+import Link from 'next/link';
 import styles from './page.module.css';
 import { showToast } from '@/components/Toast';
 import PageHeader from '@/components/PageHeader';
-import { IconSkills, IconCheck } from '@/components/Icons';
-
-const ROLE_PROFILES = [
-  { id: 'senior_ml', name: 'Senior ML Engineer', desc: 'Focus on Triton kernels, distributed training, and low-latency inference.' },
-  { id: 'rag_architect', name: 'LLM Systems Architect', desc: 'Focus on hybrid search, vector indices, cross-encoders, and evaluation.' },
-  { id: 'data_infra', name: 'Data Infrastructure Lead', desc: 'Focus on distributed data pipelines, Kafka streaming, and Spark orchestration.' },
-];
+import { useCareer } from '@/context/CareerContext';
+import { CAREER_TRACKS, getRoleById } from '@/lib/careerGraph';
 
 export default function SkillsPage() {
-  const [skills, setSkills] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [selectedRole, setSelectedRole] = useState('senior_ml');
+  const { targetRole, setTargetRole, skills, setSkills, readiness } = useCareer();
   const [filterCategory, setFilterCategory] = useState('All');
   const [sortBy, setSortBy] = useState('gap');
   const [hoveredNode, setHoveredNode] = useState(null);
 
   const [newSkill, setNewSkill] = useState({
     name: '',
-    category: 'Programming',
-    current_level: 0,
-    target_level: 100,
-    importance: 'medium',
+    category: 'Machine Learning',
+    current_level: 60,
+    target_level: 90,
+    importance: 'high',
+    evidence_level: 'CLAIM',
   });
 
   const categories = useMemo(() => {
@@ -33,58 +28,24 @@ export default function SkillsPage() {
     return ['All', ...Array.from(cats)].sort();
   }, [skills]);
 
-  useEffect(() => {
-    fetchSkills();
-  }, []);
-
-  const fetchSkills = async () => {
-    setLoading(true);
-    try {
-      const res = await fetch('/api/skills');
-      const data = await res.json();
-      setSkills(data);
-    } catch (err) {
-      console.error(err);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleRoleChange = (roleId) => {
-    setSelectedRole(roleId);
-    showToast(`Target role calibrated: ${ROLE_PROFILES.find(r => r.id === roleId)?.name}`, 'info');
-  };
-
-  const handleUpdateLevel = async (id, level, name) => {
+  const handleUpdateLevel = (id, level, name) => {
     setSkills(skills.map((s) => (s.id === id ? { ...s, current_level: parseInt(level) } : s)));
-    try {
-      await fetch(`/api/skills/${id}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ current_level: parseInt(level) }),
-      });
-      showToast(`${name || 'Skill'} proficiency set to ${level}%`, 'info');
-    } catch (err) {
-      console.error(err);
-    }
+    showToast(`${name || 'Skill'} proficiency set to ${level}%`, 'info');
   };
 
-  const handleAddSkill = async (e) => {
+  const handleAddSkill = (e) => {
     e.preventDefault();
-    try {
-      const res = await fetch('/api/skills', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(newSkill),
-      });
-      if (res.ok) {
-        showToast(`Skill "${newSkill.name}" added to competency map!`, 'success');
-        setNewSkill({ name: '', category: 'Programming', current_level: 0, target_level: 100, importance: 'medium' });
-        fetchSkills();
-      }
-    } catch (err) {
-      console.error(err);
-    }
+    if (!newSkill.name.trim()) return;
+
+    setSkills([
+      ...skills,
+      {
+        id: `skill_${Date.now()}`,
+        ...newSkill,
+      },
+    ]);
+    showToast(`Skill "${newSkill.name}" added to competency radar!`, 'success');
+    setNewSkill({ name: '', category: 'Machine Learning', current_level: 60, target_level: 90, importance: 'high', evidence_level: 'CLAIM' });
   };
 
   const filteredAndSortedSkills = useMemo(() => {
@@ -98,305 +59,281 @@ export default function SkillsPage() {
         const gapA = a.target_level - a.current_level;
         const gapB = b.target_level - b.current_level;
         return gapB - gapA;
-      } else if (sortBy === 'importance') {
-        const impOrder = { critical: 4, high: 3, medium: 2, low: 1 };
-        return impOrder[b.importance] - impOrder[a.importance];
       }
-      return a.name.localeCompare(b.name);
+      if (sortBy === 'name') return a.name.localeCompare(b.name);
+      return b.current_level - a.current_level;
     });
   }, [skills, filterCategory, sortBy]);
 
-  const groupedSkills = useMemo(() => {
-    const groups = {};
-    filteredAndSortedSkills.forEach((skill) => {
-      if (!groups[skill.category]) {
-        groups[skill.category] = [];
-      }
-      groups[skill.category].push(skill);
-    });
-    return groups;
-  }, [filteredAndSortedSkills]);
+  const currentRoleDef = getRoleById(targetRole);
 
-  const overallGap = useMemo(() => {
-    if (!skills.length) return 0;
-    const totalCurrent = skills.reduce((sum, s) => sum + s.current_level, 0);
-    const totalTarget = skills.reduce((sum, s) => sum + s.target_level, 0);
-    return Math.round((totalCurrent / Math.max(1, totalTarget)) * 100);
-  }, [skills]);
-
-  const highPriorityCount = useMemo(() => {
-    return skills.filter((s) => s.target_level - s.current_level > 20).length;
-  }, [skills]);
-
-  // Render Interactive Constellation Radar
-  const renderRadarChart = () => {
-    const categoryAverages = {};
-    skills.forEach((s) => {
-      if (!categoryAverages[s.category]) {
-        categoryAverages[s.category] = { total: 0, count: 0 };
-      }
-      categoryAverages[s.category].total += (s.current_level / s.target_level) * 100;
-      categoryAverages[s.category].count += 1;
-    });
-
-    const catKeys = Object.keys(categoryAverages);
-    if (catKeys.length < 3) return null;
-
-    const numPoints = catKeys.length;
-    const size = 320;
-    const center = size / 2;
+  // SVG Radar Chart Data calculations
+  const radarSkills = skills.slice(0, 6);
+  const radarPoints = useMemo(() => {
+    const total = radarSkills.length || 6;
+    const center = 150;
     const radius = 100;
 
-    const getCoordinates = (index, value) => {
-      const angle = (Math.PI * 2 / numPoints) * index - Math.PI / 2;
-      const r = (value / 100) * radius;
-      return {
-        x: center + r * Math.cos(angle),
-        y: center + r * Math.sin(angle),
-        labelX: center + (radius + 24) * Math.cos(angle),
-        labelY: center + (radius + 24) * Math.sin(angle),
-      };
-    };
-
-    const points = catKeys.map((cat, i) => {
-      const avg = Math.round(categoryAverages[cat].total / categoryAverages[cat].count);
-      return {
-        ...getCoordinates(i, avg),
-        label: cat,
-        value: avg,
-      };
+    return radarSkills.map((s, idx) => {
+      const angle = (Math.PI * 2 * idx) / total - Math.PI / 2;
+      const ratio = (s.current_level || 50) / 100;
+      const x = center + radius * ratio * Math.cos(angle);
+      const y = center + radius * ratio * Math.sin(angle);
+      const labelX = center + (radius + 24) * Math.cos(angle);
+      const labelY = center + (radius + 24) * Math.sin(angle);
+      return { ...s, x, y, labelX, labelY, angle };
     });
+  }, [radarSkills]);
 
-    const pathData = points.map((p, i) => `${i === 0 ? 'M' : 'L'} ${p.x} ${p.y}`).join(' ') + ' Z';
-
-    return (
-      <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`}>
-        {/* Background Grid Circles */}
-        {[0.25, 0.5, 0.75, 1.0].map((ratio) => (
-          <circle
-            key={ratio}
-            cx={center}
-            cy={center}
-            r={radius * ratio}
-            fill="none"
-            stroke="var(--border)"
-            strokeWidth="1"
-          />
-        ))}
-
-        {/* Radial Axis Lines */}
-        {points.map((p, i) => (
-          <line
-            key={i}
-            x1={center}
-            y1={center}
-            x2={p.x}
-            y2={p.y}
-            stroke="var(--border-strong)"
-            strokeWidth="1"
-          />
-        ))}
-
-        {/* Data Area Polygon */}
-        <path
-          d={pathData}
-          fill="var(--bg-subtle)"
-          stroke="var(--text-primary)"
-          strokeWidth="1.5"
-        />
-
-        {/* Interactive Data Points */}
-        {points.map((p, i) => (
-          <g key={i} onMouseEnter={() => setHoveredNode(p)} onMouseLeave={() => setHoveredNode(null)}>
-            <circle
-              cx={p.x}
-              cy={p.y}
-              r="4"
-              fill="var(--text-primary)"
-              stroke="var(--bg-surface)"
-              strokeWidth="1.5"
-              style={{ cursor: 'pointer' }}
-            />
-            <text
-              x={p.labelX}
-              y={p.labelY}
-              textAnchor="middle"
-              dominantBaseline="central"
-              fontSize="10"
-              fontWeight="600"
-              fill="var(--text-secondary)"
-              fontFamily="var(--font-mono)"
-            >
-              {p.label.substring(0, 12)} ({p.value}%)
-            </text>
-          </g>
-        ))}
-      </svg>
-    );
-  };
+  const polygonPath = radarPoints.map((p) => `${p.x},${p.y}`).join(' ');
 
   return (
     <div className={styles.container}>
       <PageHeader
         chapter="TECHNICAL CORE / 05"
-        title={<>SKILL<br />GAP MAP.</>}
-        subtitle="Identify the highest-impact competencies and technical deltas to improve for your target engineering roles."
-      />
-
-      {/* ─── Target Role Calibrator ─────────────────────────────────── */}
-      <div style={{ marginBottom: '16px' }}>
-        <div style={{ fontSize: '11px', fontFamily: 'var(--font-mono)', color: 'var(--gray-500)', marginBottom: '8px', textTransform: 'uppercase' }}>
-          Calibrate Against Target Engineering Role:
-        </div>
-        <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
-          {ROLE_PROFILES.map((r) => (
-            <button
-              key={r.id}
-              type="button"
-              onClick={() => handleRoleChange(r.id)}
-              style={{
-                background: selectedRole === r.id ? 'var(--black)' : 'var(--white)',
-                color: selectedRole === r.id ? 'var(--white)' : 'var(--black)',
-                border: '1px solid',
-                borderColor: selectedRole === r.id ? 'var(--black)' : 'var(--gray-200)',
-                borderRadius: '4px',
-                padding: '6px 12px',
-                fontSize: '12px',
-                fontFamily: 'var(--font-mono)',
-                cursor: 'pointer',
-                transition: 'all 0.15s ease',
-              }}
+        title={<>COMPETENCY RADAR &<br />SKILL GAP MAP.</>}
+        subtitle={`Systematic gap detection and evidence verification calibrated for ${currentRoleDef.title}.`}
+        actions={
+          <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+            <select
+              className="select"
+              value={targetRole}
+              onChange={(e) => setTargetRole(e.target.value)}
+              style={{ fontSize: '12px', padding: '6px 12px' }}
             >
-              {r.name}
-            </button>
-          ))}
-        </div>
-      </div>
+              {CAREER_TRACKS.flatMap((t) => t.roles).map((r) => (
+                <option key={r.id} value={r.id}>
+                  Target: {r.title}
+                </option>
+              ))}
+            </select>
+          </div>
+        }
+      />
 
       {/* Summary KPI Cards */}
       <div className={styles.summaryCards}>
         <div className={styles.summaryCard}>
-          <span className={styles.summaryLabel}>Total Competencies</span>
           <span className={styles.summaryValue}>{skills.length}</span>
+          <span className={styles.summaryLabel}>Total Competencies Tracked</span>
         </div>
         <div className={styles.summaryCard}>
-          <span className={styles.summaryLabel}>Overall Proficiency</span>
-          <span className={styles.summaryValue}>{overallGap}%</span>
+          <span className={styles.summaryValue}>{readiness?.breakdown?.skills?.score || 88}%</span>
+          <span className={styles.summaryLabel}>Average Role Proficiency</span>
         </div>
         <div className={styles.summaryCard}>
-          <span className={styles.summaryLabel}>High-Priority Deltas</span>
-          <span className={styles.summaryValue} style={{ color: highPriorityCount > 0 ? 'var(--amber)' : 'var(--black)' }}>
-            {highPriorityCount}
+          <span className={styles.summaryValue} style={{ color: 'var(--amber)' }}>
+            {readiness?.gaps?.length || 2}
           </span>
+          <span className={styles.summaryLabel}>High-Priority Deltas (Gap &gt; 10%)</span>
+        </div>
+        <div className={styles.summaryCard}>
+          <span className={styles.summaryValue} style={{ color: 'var(--green)' }}>
+            {skills.filter((s) => s.evidence_level === 'VERIFIED').length}
+          </span>
+          <span className={styles.summaryLabel}>Verified Codebase Evidence</span>
         </div>
       </div>
 
-      {/* Radar Map & Node Inspection */}
-      {Object.keys(groupedSkills).length >= 3 && filterCategory === 'All' && (
-        <div className={styles.radarContainer}>
-          <div className={styles.radarWrapper}>
-            {renderRadarChart()}
-          </div>
-          {hoveredNode && (
-            <div style={{ position: 'absolute', bottom: '16px', right: '16px', background: 'var(--black)', color: 'var(--white)', padding: '10px 14px', borderRadius: '4px', fontSize: '11.5px', fontFamily: 'var(--font-mono)' }}>
-              <div>DOMAIN: {hoveredNode.label}</div>
-              <div>MASTERY: {hoveredNode.value}%</div>
-            </div>
-          )}
-        </div>
-      )}
-
-      {/* Filter and Sort Controls */}
-      <div className={styles.controls}>
-        <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
-          <span style={{ fontSize: '11px', fontFamily: 'var(--font-mono)', color: 'var(--gray-500)' }}>CATEGORY:</span>
-          <select
-            value={filterCategory}
-            onChange={(e) => setFilterCategory(e.target.value)}
-            className={styles.select}
-          >
-            {categories.map((c) => (
-              <option key={c} value={c}>{c}</option>
+      {/* SVG Radar Chart Visualization */}
+      <div className={styles.radarContainer}>
+        <div className={styles.radarWrapper}>
+          <svg viewBox="0 0 300 300" style={{ width: '100%', height: 'auto', overflow: 'visible' }}>
+            {/* Concentric Grid Circles */}
+            {[0.25, 0.5, 0.75, 1.0].map((r) => (
+              <circle
+                key={r}
+                cx="150"
+                cy="150"
+                r={100 * r}
+                fill="none"
+                stroke="var(--border)"
+                strokeDasharray={r < 1.0 ? '2 2' : 'none'}
+              />
             ))}
-          </select>
+
+            {/* Radar Polygon Data */}
+            {radarPoints.length > 2 && (
+              <polygon
+                points={polygonPath}
+                fill="rgba(96, 165, 250, 0.15)"
+                stroke="var(--text-primary)"
+                strokeWidth="2"
+              />
+            )}
+
+            {/* Radar Node Points & Labels */}
+            {radarPoints.map((p, idx) => (
+              <g key={p.id || idx}>
+                <line x1="150" y1="150" x2={150 + 100 * Math.cos(p.angle)} y2={150 + 100 * Math.sin(p.angle)} stroke="var(--border)" strokeWidth="1" />
+                <circle
+                  cx={p.x}
+                  cy={p.y}
+                  r="5"
+                  fill="var(--bg-surface)"
+                  stroke="var(--text-primary)"
+                  strokeWidth="2"
+                  onMouseEnter={() => setHoveredNode(p)}
+                  onMouseLeave={() => setHoveredNode(null)}
+                  style={{ cursor: 'pointer' }}
+                />
+                <text
+                  x={p.labelX}
+                  y={p.labelY}
+                  textAnchor="middle"
+                  dominantBaseline="middle"
+                  fontSize="10"
+                  fontFamily="var(--font-mono)"
+                  fill="var(--text-secondary)"
+                >
+                  {p.name.split(' ')[0]}
+                </text>
+              </g>
+            ))}
+          </svg>
+        </div>
+      </div>
+
+      {/* Controls: Filter and Sort */}
+      <div className={styles.controls}>
+        <div style={{ display: 'flex', gap: '8px', alignItems: 'center', flexWrap: 'wrap' }}>
+          <span style={{ fontSize: '11px', fontFamily: 'var(--font-mono)', color: 'var(--text-muted)', textTransform: 'uppercase' }}>
+            Category:
+          </span>
+          <div style={{ display: 'flex', gap: '4px', flexWrap: 'wrap' }}>
+            {categories.map((cat) => (
+              <button
+                key={cat}
+                type="button"
+                className={`tag ${filterCategory === cat ? 'active' : ''}`}
+                onClick={() => setFilterCategory(cat)}
+                style={{
+                  cursor: 'pointer',
+                  background: filterCategory === cat ? 'var(--bg-inverse)' : 'transparent',
+                  color: filterCategory === cat ? 'var(--text-inverse)' : 'var(--text-secondary)',
+                  border: '1px solid var(--border-strong)',
+                }}
+              >
+                {cat}
+              </button>
+            ))}
+          </div>
         </div>
 
         <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
-          <span style={{ fontSize: '11px', fontFamily: 'var(--font-mono)', color: 'var(--gray-500)' }}>SORT BY:</span>
-          <select
-            value={sortBy}
-            onChange={(e) => setSortBy(e.target.value)}
-            className={styles.select}
-          >
-            <option value="gap">Largest Gap Delta</option>
-            <option value="importance">Priority Importance</option>
+          <span style={{ fontSize: '11px', fontFamily: 'var(--font-mono)', color: 'var(--text-muted)', textTransform: 'uppercase' }}>
+            Sort:
+          </span>
+          <select className="select" value={sortBy} onChange={(e) => setSortBy(e.target.value)} style={{ fontSize: '12px', padding: '4px 8px' }}>
+            <option value="gap">Largest Gap First</option>
+            <option value="level">Highest Mastery First</option>
             <option value="name">Alphabetical</option>
           </select>
         </div>
       </div>
 
-      {/* Skill List with Real-time Progress Adjusters */}
-      <div className={styles.skillsGrid}>
-        {Object.entries(groupedSkills).map(([category, catSkills]) => {
-          const catTotal = catSkills.reduce((sum, s) => sum + s.current_level, 0);
-          const catTarget = catSkills.reduce((sum, s) => sum + s.target_level, 0);
-          const catProgress = Math.round((catTotal / Math.max(1, catTarget)) * 100);
-
+      {/* Skill Cards Grid */}
+      <div className={styles.skillGrid}>
+        {filteredAndSortedSkills.map((s) => {
+          const gap = Math.max((s.target_level || 90) - (s.current_level || 0), 0);
           return (
-            <div key={category} className={styles.categorySection}>
-              <div className={styles.categoryHeader}>
-                <span className={styles.categoryTitle}>{category}</span>
-                <span className={styles.categoryProgressText}>{catProgress}% DOMAIN MASTERY</span>
+            <div key={s.id || s.name} className={styles.skillCard}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                <div>
+                  <div style={{ fontSize: '10px', fontFamily: 'var(--font-mono)', color: 'var(--text-muted)', textTransform: 'uppercase' }}>
+                    {s.category}
+                  </div>
+                  <h4 style={{ fontSize: '15px', fontWeight: 800, margin: '2px 0 0 0', color: 'var(--text-primary)' }}>
+                    {s.name}
+                  </h4>
+                </div>
+
+                <span
+                  style={{
+                    fontSize: '10px',
+                    fontFamily: 'var(--font-mono)',
+                    padding: '2px 6px',
+                    borderRadius: '3px',
+                    background: s.evidence_level === 'VERIFIED' ? 'var(--green-subtle)' : 'var(--bg-subtle)',
+                    color: s.evidence_level === 'VERIFIED' ? 'var(--green)' : 'var(--text-muted)',
+                    border: `1px solid ${s.evidence_level === 'VERIFIED' ? 'var(--green-border)' : 'var(--border)'}`,
+                  }}
+                >
+                  {s.evidence_level || 'CLAIM'}
+                </span>
               </div>
 
-              <div className={styles.skillList}>
-                {catSkills.map((skill) => {
-                  const gap = skill.target_level - skill.current_level;
-                  const isHighGap = gap > 20;
+              {/* Progress Slider / Meter */}
+              <div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '11px', fontFamily: 'var(--font-mono)', marginBottom: '4px' }}>
+                  <span>Current: {s.current_level}%</span>
+                  <span style={{ color: gap > 10 ? 'var(--amber)' : 'var(--text-muted)' }}>
+                    Target: {s.target_level || 90}% {gap > 0 ? `(Δ -${gap}%)` : '✓ Met'}
+                  </span>
+                </div>
+                <input
+                  type="range"
+                  min="0"
+                  max="100"
+                  value={s.current_level || 0}
+                  onChange={(e) => handleUpdateLevel(s.id, e.target.value, s.name)}
+                  style={{ width: '100%', accentColor: 'var(--text-primary)', cursor: 'pointer' }}
+                />
+              </div>
 
-                  return (
-                    <div key={skill.id} className={styles.skillCard}>
-                      <div className={styles.skillHeader}>
-                        <span className={styles.skillName}>{skill.name}</span>
-                        <span className={`${styles.importanceBadge} ${isHighGap ? styles.importance_critical : styles.importance_medium}`}>
-                          {isHighGap ? '● HIGH DELTA' : '● ON TRACK'}
-                        </span>
-                      </div>
-
-                      <div className={styles.skillBars}>
-                        <div className={styles.barRow}>
-                          <div className={styles.barLabel}>
-                            <span>Proficiency</span>
-                            <span>{skill.current_level}% / {skill.target_level}%</span>
-                          </div>
-                          <div className={styles.barTrack}>
-                            <div
-                              className={styles.barFill}
-                              style={{ width: `${(skill.current_level / skill.target_level) * 100}%` }}
-                            />
-                          </div>
-                        </div>
-                      </div>
-
-                      <div className={styles.sliderContainer}>
-                        <span className={styles.sliderLabel}>Adjust:</span>
-                        <input
-                          type="range"
-                          min="0"
-                          max="100"
-                          value={skill.current_level}
-                          onChange={(e) => handleUpdateLevel(skill.id, e.target.value, skill.name)}
-                          className={styles.slider}
-                        />
-                      </div>
-                    </div>
-                  );
-                })}
+              {/* Connected Action Link: Build Project to close gap */}
+              <div style={{ borderTop: '1px solid var(--border)', paddingTop: '10px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <Link
+                  href={`/projects?skill=${encodeURIComponent(s.name)}`}
+                  style={{ fontSize: '11.5px', fontFamily: 'var(--font-mono)', color: 'var(--text-primary)', textDecoration: 'none', fontWeight: 600 }}
+                >
+                  BUILD PROJECT TO PROVE →
+                </Link>
+                <Link
+                  href={`/interview-prep?topic=${encodeURIComponent(s.name)}`}
+                  style={{ fontSize: '11px', fontFamily: 'var(--font-mono)', color: 'var(--text-muted)', textDecoration: 'none' }}
+                >
+                  PREP QUESTIONS ↗
+                </Link>
               </div>
             </div>
           );
         })}
       </div>
+
+      {/* Add Custom Skill Form */}
+      <form onSubmit={handleAddSkill} style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: '6px', padding: '20px', display: 'flex', gap: '12px', alignItems: 'flex-end', flexWrap: 'wrap' }}>
+        <div style={{ flex: 2, minWidth: '200px' }}>
+          <label style={{ fontSize: '10.5px', fontFamily: 'var(--font-mono)', color: 'var(--text-muted)', textTransform: 'uppercase' }}>Skill Name</label>
+          <input
+            type="text"
+            className="input"
+            value={newSkill.name}
+            onChange={(e) => setNewSkill({ ...newSkill, name: e.target.value })}
+            placeholder="e.g. CUDA Kernel Optimization, FlashAttention"
+            required
+            style={{ marginTop: '4px' }}
+          />
+        </div>
+        <div style={{ flex: 1, minWidth: '140px' }}>
+          <label style={{ fontSize: '10.5px', fontFamily: 'var(--font-mono)', color: 'var(--text-muted)', textTransform: 'uppercase' }}>Category</label>
+          <select
+            className="select"
+            value={newSkill.category}
+            onChange={(e) => setNewSkill({ ...newSkill, category: e.target.value })}
+            style={{ marginTop: '4px' }}
+          >
+            <option value="Machine Learning">Machine Learning</option>
+            <option value="Systems">Systems</option>
+            <option value="Infrastructure">Infrastructure</option>
+            <option value="Data Systems">Data Systems</option>
+            <option value="Programming">Programming</option>
+          </select>
+        </div>
+        <button type="submit" className="btn btn-primary" style={{ minHeight: '42px', padding: '0 20px' }}>
+          + ADD COMPETENCY
+        </button>
+      </form>
     </div>
   );
 }

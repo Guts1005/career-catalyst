@@ -1,27 +1,34 @@
 'use client';
 
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useState, useEffect, useCallback, useRef, Suspense } from 'react';
+import { useSearchParams } from 'next/navigation';
 import styles from './page.module.css';
 import { showToast } from '@/components/Toast';
 import PageHeader from '@/components/PageHeader';
+import { useCareer } from '@/context/CareerContext';
 import { IconInterview, IconCheck } from '@/components/Icons';
 
 const CATEGORIES = [
   'All',
-  'Machine Learning',
-  'Deep Learning',
-  'Statistics & Math',
-  'Python & SQL',
   'ML System Design',
+  'Distributed Systems',
+  'Deep Learning & LLMs',
+  'Python & Triton',
+  'Statistics & Probability',
 ];
 
-export default function InterviewPrepPage() {
+function InterviewPrepContent() {
+  const { logRejectionFeedback, refreshCareerState } = useCareer();
+  const searchParams = useSearchParams();
+  const initialCompany = searchParams.get('company') || '';
+  const initialTopic = searchParams.get('topic') || '';
+
   const [questions, setQuestions] = useState([]);
   const [stats, setStats] = useState(null);
   const [loading, setLoading] = useState(true);
   const [selectedCategory, setSelectedCategory] = useState('All');
   const [expandedId, setExpandedId] = useState(null);
-  const [search, setSearch] = useState('');
+  const [search, setSearch] = useState(initialCompany || initialTopic || '');
   const searchInputRef = useRef(null);
 
   const fetchQuestions = useCallback(async () => {
@@ -59,7 +66,7 @@ export default function InterviewPrepPage() {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, []);
 
-  const handleUpdateStatus = async (questionId, newStatus) => {
+  const handleUpdateStatus = async (questionId, newStatus, questionCategory) => {
     try {
       const res = await fetch(`/api/interview-prep/${questionId}`, {
         method: 'PUT',
@@ -72,13 +79,20 @@ export default function InterviewPrepPage() {
             q.id === questionId ? { ...q, user_status: newStatus } : q
           )
         );
-        showToast(
-          newStatus === 'mastered'
-            ? 'Solution marked as Mastered!'
-            : `Question status updated to ${newStatus.toUpperCase()}`,
-          'info'
-        );
+
+        if (newStatus === 'needs_review' && questionCategory) {
+          logRejectionFeedback(null, 'Interview Practice Deficit', questionCategory);
+          showToast(`Marked for Review: Added "${questionCategory}" to your high-priority Skill Gaps!`, 'info');
+        } else {
+          showToast(
+            newStatus === 'mastered'
+              ? 'Solution marked as Mastered!'
+              : `Question status updated to ${newStatus.toUpperCase()}`,
+            'info'
+          );
+        }
         fetchQuestions();
+        refreshCareerState();
       }
     } catch (e) {
       console.error('Error updating question status:', e);
@@ -88,60 +102,75 @@ export default function InterviewPrepPage() {
   const filteredQuestions = questions.filter((q) => {
     if (!search.trim()) return true;
     const term = search.toLowerCase();
-    return q.question.toLowerCase().includes(term) || (q.tags && q.tags.toLowerCase().includes(term));
+    return q.question.toLowerCase().includes(term) || (q.tags && q.tags.toLowerCase().includes(term)) || (q.category && q.category.toLowerCase().includes(term));
   });
-
-  if (loading) {
-    return (
-      <div className="loading" style={{ minHeight: '60vh' }}>
-        <div className="loadingSpinner" />
-        <p style={{ color: 'var(--text-muted)', fontSize: '13px', marginTop: '12px' }}>Loading Technical Question Bank...</p>
-      </div>
-    );
-  }
-
-  const masteryPercent =
-    stats?.total_questions > 0
-      ? Math.round((stats.mastered_count / stats.total_questions) * 100)
-      : 0;
 
   return (
     <div className={styles.container}>
       <PageHeader
-        chapter="TECHNICAL CORE / 07"
-        title={<>QUESTION<br />BANK.</>}
-        subtitle="A structured index of technical problems across Machine Learning, Transformer architectures, and System Design."
+        chapter="TECHNICAL CORE / 04"
+        title={<>SYSTEM DESIGN &<br />QUESTION BANK.</>}
+        subtitle="Architectural trade-off questions, latency bounds, and distributed training invariants."
+        actions={
+          <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+            <span style={{ fontSize: '11px', fontFamily: 'var(--font-mono)', color: 'var(--text-muted)' }}>
+              MASTERED: {stats?.mastered || 0} / {stats?.total || questions.length}
+            </span>
+          </div>
+        }
       />
 
-      {/* Progress KPIs */}
+      {/* Contextual Company or Topic Target Banner */}
+      {initialCompany && (
+        <div style={{ background: 'var(--bg-subtle)', border: '1px solid var(--border)', borderLeft: '3px solid var(--purple)', padding: '12px 16px', borderRadius: '4px', marginBottom: '20px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <span style={{ fontSize: '13px', color: 'var(--text-primary)' }}>
+            🎯 Calibrated for upcoming <strong>{initialCompany}</strong> technical round.
+          </span>
+          <button
+            type="button"
+            className="btn btn-ghost btn-sm"
+            onClick={() => setSearch('')}
+            style={{ fontSize: '11px' }}
+          >
+            Clear Filter ✕
+          </button>
+        </div>
+      )}
+
+      {/* Stats KPI Row */}
       <div className={styles.statsRow}>
         <div className={styles.statCard}>
-          <div className={styles.statVal} style={{ fontFamily: 'var(--font-mono)' }}>{stats?.total_questions || 0}</div>
-          <div className={styles.statLabel}>Core Problems</div>
+          <div className={styles.statVal}>{questions.length}</div>
+          <div className={styles.statLabel}>Available Problems</div>
         </div>
-
         <div className={styles.statCard}>
-          <div className={styles.statVal} style={{ fontFamily: 'var(--font-mono)', color: 'var(--green)' }}>
-            {stats?.mastered_count || 0} <span style={{ fontSize: '12px', color: 'var(--gray-500)' }}>({masteryPercent}%)</span>
+          <div className={styles.statVal} style={{ color: 'var(--green)' }}>
+            {questions.filter((q) => q.user_status === 'mastered').length}
           </div>
           <div className={styles.statLabel}>Mastered Solutions</div>
         </div>
-
         <div className={styles.statCard}>
-          <div className={styles.statVal} style={{ fontFamily: 'var(--font-mono)', color: 'var(--amber)' }}>
-            {stats?.reviewing_count || 0}
+          <div className={styles.statVal} style={{ color: 'var(--amber)' }}>
+            {questions.filter((q) => q.user_status === 'needs_review').length}
           </div>
-          <div className={styles.statLabel}>In Active Review</div>
+          <div className={styles.statLabel}>Needs Review</div>
+        </div>
+        <div className={styles.statCard}>
+          <div className={styles.statVal} style={{ color: 'var(--blue)' }}>
+            {questions.filter((q) => q.user_status === 'attempted').length}
+          </div>
+          <div className={styles.statLabel}>In Progress</div>
         </div>
       </div>
 
-      {/* Filters and Search */}
-      <div className={styles.filterSection}>
-        <div className={styles.categories}>
+      {/* Filter and Search Bar */}
+      <div className={styles.filterBar}>
+        <div className={styles.categoryPills}>
           {CATEGORIES.map((cat) => (
             <button
               key={cat}
-              className={`${styles.catBtn} ${selectedCategory === cat ? styles.catActive : ''}`}
+              type="button"
+              className={`${styles.pill} ${selectedCategory === cat ? styles.active : ''}`}
               onClick={() => setSelectedCategory(cat)}
             >
               {cat}
@@ -149,99 +178,120 @@ export default function InterviewPrepPage() {
           ))}
         </div>
 
-        <div className={styles.searchWrapper}>
+        <div style={{ position: 'relative', width: '100%', maxWidth: '280px' }}>
           <input
             ref={searchInputRef}
             type="text"
-            className={styles.searchInput}
-            placeholder="Search problems by keyword or concept... (/)"
+            className="input"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
+            placeholder="Search problems or tags... (/)"
+            style={{ fontSize: '12.5px', paddingRight: '30px' }}
           />
+          <span style={{ position: 'absolute', right: '10px', top: '8px', fontSize: '11px', fontFamily: 'var(--font-mono)', color: 'var(--text-muted)', border: '1px solid var(--border)', borderRadius: '3px', padding: '1px 5px' }}>
+            /
+          </span>
         </div>
       </div>
 
-      {/* Question List */}
+      {/* Questions Accordion List */}
       <div className={styles.questionList}>
-        {filteredQuestions.length === 0 ? (
-          <div className={styles.emptyState}>No matching questions found in category.</div>
-        ) : (
-          filteredQuestions.map((q, idx) => {
-            const isExpanded = expandedId === q.id;
-            return (
-              <div key={q.id} className={`${styles.questionCard} ${isExpanded ? styles.cardExpanded : ''}`}>
-                <div
-                  className={styles.cardHeader}
-                  onClick={() => setExpandedId(isExpanded ? null : q.id)}
-                  style={{ cursor: 'pointer' }}
-                >
-                  <div className={styles.qLeft}>
-                    <span className={styles.qIndex} style={{ fontFamily: 'var(--font-mono)' }}>
-                      0{idx + 1}
-                    </span>
-                    <div>
-                      <div className={styles.qTitle}>{q.question}</div>
-                      <div className={styles.qMeta}>
-                        <span className={`${styles.difficultyBadge} ${styles[q.difficulty]}`}>
-                          {q.difficulty}
-                        </span>
-                        <span className={styles.metaCategory}>{q.category}</span>
-                        {q.tags && (
-                          <span className={styles.metaTags}>
-                            {q.tags.split(',').map((t) => (
-                              <span key={t} className={styles.tag}>
-                                {t.trim()}
-                              </span>
-                            ))}
-                          </span>
-                        )}
-                      </div>
-                    </div>
+        {filteredQuestions.map((q, idx) => {
+          const isExpanded = expandedId === q.id;
+          return (
+            <div
+              key={q.id || idx}
+              className={styles.questionCard}
+              onClick={() => setExpandedId(isExpanded ? null : q.id)}
+            >
+              <div className={styles.questionTop}>
+                <div>
+                  <div className={styles.questionCategory}>
+                    0{idx + 1} • {q.category || 'ML System Design'}
                   </div>
-
-                  <div className={styles.qRight}>
-                    <span className={`${styles.statusPill} ${styles[q.user_status || 'unseen']}`}>
-                      {q.user_status === 'mastered' ? '● MASTERED' : q.user_status === 'reviewing' ? '● REVIEWING' : '○ PRACTICE'}
-                    </span>
-                    <button className={styles.expandToggle} type="button">
-                      {isExpanded ? '↑ LESS' : '↓ EXAMINE'}
-                    </button>
-                  </div>
+                  <h3 className={styles.questionTitle}>{q.question}</h3>
                 </div>
 
-                {isExpanded && (
-                  <div className={styles.cardBody}>
-                    <div className={styles.answerSection}>
-                      <div className={styles.sectionHeader}>TECHNICAL SOLUTION & SYSTEM ARCHITECTURE</div>
-                      <div className={styles.answerContent}>{q.answer}</div>
-                    </div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <span
+                    style={{
+                      fontSize: '10px',
+                      fontFamily: 'var(--font-mono)',
+                      padding: '2px 6px',
+                      borderRadius: '3px',
+                      background: q.user_status === 'mastered' ? 'var(--green-subtle)' : 'var(--bg-subtle)',
+                      color: q.user_status === 'mastered' ? 'var(--green)' : 'var(--text-muted)',
+                      border: '1px solid var(--border)',
+                    }}
+                  >
+                    {q.user_status ? q.user_status.toUpperCase() : 'UNATTEMPTED'}
+                  </span>
+                  <span style={{ color: 'var(--text-muted)' }}>{isExpanded ? '▲' : '▼'}</span>
+                </div>
+              </div>
 
-                    <div className={styles.actionRow}>
-                      <div className={styles.statusButtons}>
-                        <span style={{ fontSize: '11px', fontFamily: 'var(--font-mono)', color: 'var(--gray-500)', marginRight: '8px' }}>
-                          UPDATE STATUS:
-                        </span>
-                        <button
-                          className={`btn ${q.user_status === 'mastered' ? 'btn-primary' : 'btn-secondary'} btn-sm`}
-                          onClick={() => handleUpdateStatus(q.id, 'mastered')}
-                        >
-                          ✓ Mastered
-                        </button>
-                        <button
-                          className={`btn ${q.user_status === 'reviewing' ? 'btn-primary' : 'btn-secondary'} btn-sm`}
-                          onClick={() => handleUpdateStatus(q.id, 'reviewing')}
-                        >
-                          Reviewing
-                        </button>
+              {isExpanded && (
+                <div className={styles.answerBlock} onClick={(e) => e.stopPropagation()}>
+                  <div style={{ marginBottom: '14px' }}>
+                    <div style={{ fontSize: '11px', fontFamily: 'var(--font-mono)', color: 'var(--text-muted)', textTransform: 'uppercase', marginBottom: '6px' }}>
+                      Architectural Solution & Key Invariants
+                    </div>
+                    <p style={{ margin: 0 }}>{q.answer}</p>
+                  </div>
+
+                  {q.key_points && (
+                    <div style={{ marginTop: '12px' }}>
+                      <div style={{ fontSize: '11px', fontFamily: 'var(--font-mono)', color: 'var(--text-muted)', textTransform: 'uppercase', marginBottom: '4px' }}>
+                        Core Checklist / Discussion Points
+                      </div>
+                      <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
+                        {q.key_points.split(',').map((pt) => (
+                          <span key={pt} style={{ fontSize: '11px', fontFamily: 'var(--font-mono)', background: 'var(--bg-subtle)', border: '1px solid var(--border)', padding: '2px 8px', borderRadius: '3px', color: 'var(--text-secondary)' }}>
+                            • {pt.trim()}
+                          </span>
+                        ))}
                       </div>
                     </div>
+                  )}
+
+                  {/* Connected Feedback Triggers */}
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '16px', paddingTop: '12px', borderTop: '1px solid var(--border)', flexWrap: 'wrap', gap: '10px' }}>
+                    <span style={{ fontSize: '11px', fontFamily: 'var(--font-mono)', color: 'var(--text-muted)' }}>
+                      Mark Mastery Level:
+                    </span>
+                    <div style={{ display: 'flex', gap: '6px' }}>
+                      <button
+                        type="button"
+                        className="btn btn-secondary btn-sm"
+                        onClick={() => handleUpdateStatus(q.id, 'needs_review', q.category)}
+                        style={{ fontSize: '11px', color: 'var(--amber)' }}
+                      >
+                        Needs Review (! Flag Gap)
+                      </button>
+                      <button
+                        type="button"
+                        className="btn btn-primary btn-sm"
+                        onClick={() => handleUpdateStatus(q.id, 'mastered', q.category)}
+                        style={{ fontSize: '11px' }}
+                      >
+                        ✓ Mark Mastered
+                      </button>
+                    </div>
                   </div>
-                )}
-              </div>
-            );
-          })
-        )}
+                </div>
+              )}
+            </div>
+          );
+        })}
       </div>
     </div>
+  );
+}
+
+export default function InterviewPrepPage() {
+  return (
+    <Suspense fallback={<div className="loading"><div className="loadingSpinner" /><p>Calibrating Question Bank...</p></div>}>
+      <InterviewPrepContent />
+    </Suspense>
   );
 }
