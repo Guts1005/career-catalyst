@@ -3,11 +3,7 @@
 import { useState } from 'react';
 import styles from './page.module.css';
 import PageHeader from '@/components/PageHeader';
-import {
-  IconSandbox,
-  IconAnalytics,
-  IconCheck,
-} from '@/components/Icons';
+import { IconSandbox, IconAnalytics, IconCheck } from '@/components/Icons';
 
 const MATH_PRESETS = {
   gradient_descent: [
@@ -25,6 +21,11 @@ const MATH_PRESETS = {
     { name: 'Medical Diagnostic Screening (τ = 0.15)', thresh: 0.15, desc: 'Maximized Recall (0.90+) to eliminate False Negatives in clinical settings.' },
     { name: 'Fraud / Spam Filter (τ = 0.85)', thresh: 0.85, desc: 'Maximized Precision (0.95+) to prevent blocking legitimate transactions.' },
   ],
+  activations: [
+    { name: 'GELU (Gaussian Error Linear Unit)', type: 'gelu', desc: 'Default transformer activation multiplying input by normal cumulative distribution.' },
+    { name: 'Swish / SiLU (Sigmoid Linear Unit)', type: 'silu', desc: 'Smooth non-monotonic activation used in modern LLaMA & Mistral architectures.' },
+    { name: 'ReLU (Rectified Linear Unit)', type: 'relu', desc: 'Classical piecewise linear activation with constant unit derivative for positive inputs.' },
+  ]
 };
 
 export default function AlgorithmSandboxPage() {
@@ -39,6 +40,10 @@ export default function AlgorithmSandboxPage() {
 
   // ROC/AUC Threshold
   const [threshold, setThreshold] = useState(0.5);
+
+  // Activation Function State
+  const [actType, setActType] = useState('gelu');
+  const [actX, setActX] = useState(1.2);
 
   // Compute Gradient Descent Trajectory on f(x) = x^2
   const computeGD = () => {
@@ -72,6 +77,20 @@ export default function AlgorithmSandboxPage() {
   const recall = tp / (tp + fn) || 0;
   const f1 = (2 * precision * recall) / (precision + recall) || 0;
 
+  // Activation Function Calculations
+  const computeActivation = (x, type) => {
+    if (type === 'relu') return Math.max(0, x);
+    if (type === 'silu') return x / (1 + Math.exp(-x));
+    if (type === 'gelu') {
+      return 0.5 * x * (1 + Math.tanh(Math.sqrt(2 / Math.PI) * (x + 0.044715 * Math.pow(x, 3))));
+    }
+    if (type === 'sigmoid') return 1 / (1 + Math.exp(-x));
+    if (type === 'tanh') return Math.tanh(x);
+    return x;
+  };
+
+  const actY = computeActivation(actX, actType);
+
   return (
     <div className={styles.container}>
       <PageHeader
@@ -80,37 +99,31 @@ export default function AlgorithmSandboxPage() {
         subtitle="An interactive technical workspace for exploring gradient descent dynamics, attention scaling, and loss surfaces."
       />
 
-      {/* Tabs */}
-      <div className="tabs" style={{ marginBottom: '20px' }}>
-        <button
-          className={`tab ${activeTab === 'gradient_descent' ? 'active' : ''}`}
-          onClick={() => setActiveTab('gradient_descent')}
-          style={{ fontSize: '13px', fontWeight: 500 }}
-        >
-          Gradient Descent Optimization
-        </button>
-        <button
-          className={`tab ${activeTab === 'attention' ? 'active' : ''}`}
-          onClick={() => setActiveTab('attention')}
-          style={{ fontSize: '13px', fontWeight: 500 }}
-        >
-          Scaled Dot-Product Attention
-        </button>
-        <button
-          className={`tab ${activeTab === 'roc' ? 'active' : ''}`}
-          onClick={() => setActiveTab('roc')}
-          style={{ fontSize: '13px', fontWeight: 500 }}
-        >
-          Decision Boundary & ROC / F1
-        </button>
+      {/* Navigation Tabs */}
+      <div style={{ display: 'flex', gap: '4px', marginBottom: '24px', flexWrap: 'wrap' }}>
+        {[
+          { key: 'gradient_descent', label: 'Gradient Descent' },
+          { key: 'attention', label: 'Self-Attention Softmax' },
+          { key: 'roc', label: 'ROC / Decision Boundary' },
+          { key: 'activations', label: 'Transformer Activations' },
+        ].map((tab) => (
+          <button
+            key={tab.key}
+            type="button"
+            className={`btn ${activeTab === tab.key ? 'btn-primary' : 'btn-secondary'}`}
+            onClick={() => setActiveTab(tab.key)}
+            style={{ fontSize: '12px', padding: '6px 12px' }}
+          >
+            {tab.label}
+          </button>
+        ))}
       </div>
 
-      {/* TAB 1: GRADIENT DESCENT */}
+      {/* ─── TAB 1: GRADIENT DESCENT ───────────────────────────────── */}
       {activeTab === 'gradient_descent' && (
         <div>
-          {/* 1-Click Presets */}
           <div style={{ marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
-            <span style={{ fontSize: '12px', color: 'var(--text-muted)', fontWeight: 600 }}>Convergence Scenarios:</span>
+            <span style={{ fontSize: '11.5px', color: 'var(--gray-500)', fontFamily: 'var(--font-mono)', fontWeight: 600 }}>CONVERGENCE SCENARIOS:</span>
             {MATH_PRESETS.gradient_descent.map((p) => (
               <button
                 key={p.name}
@@ -127,32 +140,23 @@ export default function AlgorithmSandboxPage() {
             ))}
           </div>
 
-          <div className={styles.grid}>
-            {/* Left Controls */}
-            <div className="card">
-              <div className="card-title" style={{ fontSize: '13.5px', marginBottom: '16px' }}>Hyperparameter Controls</div>
-
-              <div className="form-group" style={{ marginBottom: '16px' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '6px' }}>
-                  <label className="form-label">Learning Rate (α)</label>
-                  <span style={{ fontFamily: 'var(--font-mono)', fontSize: '12px', color: 'var(--text-primary)' }}>{lr.toFixed(2)}</span>
-                </div>
+          <div className={styles.sandboxCard}>
+            <div className={styles.controlsRow}>
+              <div className={styles.controlItem}>
+                <label className={styles.controlLabel}>Learning Rate (η): {lr.toFixed(3)}</label>
                 <input
                   type="range"
                   min="0.01"
-                  max="1.0"
+                  max="0.95"
                   step="0.01"
                   value={lr}
                   onChange={(e) => setLr(parseFloat(e.target.value))}
-                  style={{ width: '100%' }}
+                  className={styles.slider}
                 />
               </div>
 
-              <div className="form-group" style={{ marginBottom: '20px' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '6px' }}>
-                  <label className="form-label">Optimization Epochs / Steps</label>
-                  <span style={{ fontFamily: 'var(--font-mono)', fontSize: '12px', color: 'var(--text-primary)' }}>{steps}</span>
-                </div>
+              <div className={styles.controlItem}>
+                <label className={styles.controlLabel}>Optimization Steps: {steps}</label>
                 <input
                   type="range"
                   min="2"
@@ -160,82 +164,60 @@ export default function AlgorithmSandboxPage() {
                   step="1"
                   value={steps}
                   onChange={(e) => setSteps(parseInt(e.target.value))}
-                  style={{ width: '100%' }}
+                  className={styles.slider}
                 />
               </div>
 
-              <div style={{ padding: '12px', borderRadius: '6px', background: 'var(--bg-tertiary)', border: '1px solid var(--border)' }}>
-                <div style={{ fontSize: '11px', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.04em', fontWeight: 600 }}>
-                  Convergence Metrics
-                </div>
-                <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '8px' }}>
-                  <span style={{ fontSize: '12.5px', color: 'var(--text-secondary)' }}>Final Loss f(x*):</span>
-                  <span style={{ fontSize: '12.5px', fontFamily: 'var(--font-mono)', fontWeight: 700, color: finalLoss < 0.01 ? 'var(--success)' : 'var(--warning)' }}>
-                    {finalLoss.toFixed(6)}
-                  </span>
-                </div>
-                <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '4px' }}>
-                  <span style={{ fontSize: '12.5px', color: 'var(--text-secondary)' }}>Status:</span>
-                  <span style={{ fontSize: '12px', fontWeight: 600, color: finalLoss < 0.01 ? 'var(--success)' : 'var(--text-muted)' }}>
-                    {finalLoss < 0.01 ? '✓ Converged to Global Minimum' : 'Iterating...'}
-                  </span>
+              <div className={styles.controlItem}>
+                <label className={styles.controlLabel}>Final Convex Loss: {finalLoss.toFixed(5)}</label>
+                <div style={{ fontSize: '12px', fontFamily: 'var(--font-mono)', color: finalLoss < 0.01 ? 'var(--green)' : 'var(--amber)' }}>
+                  {finalLoss < 0.01 ? '● CONVERGED' : '● OSCILLATING / STEPPING'}
                 </div>
               </div>
             </div>
 
-            {/* Right: Trajectory Plot */}
-            <div className="card">
-              <div className="card-title" style={{ fontSize: '13.5px', marginBottom: '12px' }}>Loss Landscape Trajectory [ f(x) = x² ]</div>
-              <div style={{ width: '100%', height: '220px', background: 'var(--bg-tertiary)', borderRadius: '6px', border: '1px solid var(--border)', position: 'relative', overflow: 'hidden', display: 'flex', alignItems: 'flex-end', padding: '10px' }}>
-                <svg viewBox="-5 -1 10 20" style={{ width: '100%', height: '100%', transform: 'scaleY(-1)' }}>
-                  {/* Parabola curve */}
-                  <path
-                    d="M -4.5 20.25 Q 0 0 4.5 20.25"
-                    fill="none"
-                    stroke="rgba(255,255,255,0.15)"
-                    strokeWidth="0.4"
+            {/* SVG Loss Curve Simulation */}
+            <div className={styles.vizContainer}>
+              <svg width="600" height="240" viewBox="-5 -2 10 20">
+                {/* Parabola f(x) = x^2 */}
+                <path
+                  d="M -4.5 20.25 Q 0 -2 4.5 20.25"
+                  fill="none"
+                  stroke="#333333"
+                  strokeWidth="0.25"
+                />
+                {/* Descent Path */}
+                <polyline
+                  fill="none"
+                  stroke="#FFFFFF"
+                  strokeWidth="0.2"
+                  points={gdPoints.map((p) => `${p.x},${p.loss}`).join(' ')}
+                />
+                {/* Points */}
+                {gdPoints.map((p, i) => (
+                  <circle
+                    key={i}
+                    cx={p.x}
+                    cy={p.loss}
+                    r="0.25"
+                    fill={i === gdPoints.length - 1 ? 'var(--green)' : '#FFFFFF'}
                   />
-                  {/* Step points */}
-                  {gdPoints.map((pt, idx) => (
-                    <circle
-                      key={idx}
-                      cx={pt.x}
-                      cy={pt.loss}
-                      r={idx === gdPoints.length - 1 ? "0.6" : "0.35"}
-                      fill={idx === gdPoints.length - 1 ? "var(--success)" : "var(--accent)"}
-                    />
-                  ))}
-                  {/* Step path line */}
-                  <polyline
-                    points={gdPoints.map((p) => `${p.x},${p.loss}`).join(' ')}
-                    fill="none"
-                    stroke="var(--accent)"
-                    strokeWidth="0.15"
-                    strokeDasharray="0.3 0.2"
-                  />
-                </svg>
-              </div>
-
-              {/* Epoch logs */}
-              <div style={{ marginTop: '12px', maxHeight: '100px', overflowY: 'auto', fontFamily: 'var(--font-mono)', fontSize: '11px', color: 'var(--text-muted)' }}>
-                {gdPoints.slice(0, 6).map((pt, i) => (
-                  <div key={i} style={{ display: 'flex', justifyContent: 'space-between', padding: '2px 0' }}>
-                    <span>Step {i.toString().padStart(2, '0')}: x = {pt.x.toFixed(3)}</span>
-                    <span>Loss = {pt.loss.toFixed(4)} | ∇ = {pt.grad.toFixed(3)}</span>
-                  </div>
                 ))}
-              </div>
+              </svg>
+            </div>
+
+            <div className={styles.mathDerivation}>
+              <strong>Analytical Gradient Derivation:</strong> For objective function <code>f(x) = x²</code>, the exact gradient vector is <code>∇f(x) = 2x</code>. Weight update step evaluates as: <code>x_next = x - η · 2x</code>.
             </div>
           </div>
         </div>
       )}
 
-      {/* TAB 2: ATTENTION SOFTMAX */}
+      {/* ─── TAB 2: SELF ATTENTION TEMPERATURE ───────────────────────── */}
       {activeTab === 'attention' && (
         <div>
-          {/* 1-Click Presets */}
           <div style={{ marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
-            <span style={{ fontSize: '12px', color: 'var(--text-muted)', fontWeight: 600 }}>Temperature Scenarios:</span>
+            <span style={{ fontSize: '11.5px', color: 'var(--gray-500)', fontFamily: 'var(--font-mono)', fontWeight: 600 }}>TEMPERATURE REGIMES:</span>
             {MATH_PRESETS.attention.map((p) => (
               <button
                 key={p.name}
@@ -249,65 +231,48 @@ export default function AlgorithmSandboxPage() {
             ))}
           </div>
 
-          <div className={styles.grid}>
-            <div className="card">
-              <div className="card-title" style={{ fontSize: '13.5px', marginBottom: '16px' }}>Attention Mechanism Formula</div>
-              <div style={{ padding: '12px', borderRadius: '6px', background: 'var(--bg-tertiary)', border: '1px solid var(--border)', fontFamily: 'var(--font-mono)', fontSize: '12px', color: 'var(--text-primary)', marginBottom: '16px' }}>
-                Attention(Q, K, V) = softmax( (Q · Kᵀ) / √d_k ) · V
-              </div>
-
-              <div className="form-group">
-                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '6px' }}>
-                  <label className="form-label">Softmax Temperature (τ)</label>
-                  <span style={{ fontFamily: 'var(--font-mono)', fontSize: '12px', color: 'var(--text-primary)' }}>{temperature.toFixed(2)}</span>
-                </div>
+          <div className={styles.sandboxCard}>
+            <div className={styles.controlsRow}>
+              <div className={styles.controlItem}>
+                <label className={styles.controlLabel}>Softmax Temperature (τ): {temperature.toFixed(2)}</label>
                 <input
                   type="range"
                   min="0.1"
                   max="4.0"
-                  step="0.1"
+                  step="0.05"
                   value={temperature}
                   onChange={(e) => setTemperature(parseFloat(e.target.value))}
-                  style={{ width: '100%' }}
+                  className={styles.slider}
                 />
               </div>
             </div>
 
-            <div className="card">
-              <div className="card-title" style={{ fontSize: '13.5px', marginBottom: '12px' }}>Token Attention Distribution</div>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-                {['Token 1 (Query Match)', 'Token 2 (Context)', 'Token 3 (Distractor)'].map((tok, i) => (
-                  <div key={tok}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '12px', marginBottom: '4px' }}>
-                      <span style={{ color: 'var(--text-secondary)' }}>{tok} [Raw: {rawScores[i]}]</span>
-                      <span style={{ fontFamily: 'var(--font-mono)', fontWeight: 700, color: 'var(--text-primary)' }}>
-                        {(attentionWeights[i] * 100).toFixed(1)}%
-                      </span>
-                    </div>
-                    <div className="progress-bar" style={{ height: '6px' }}>
-                      <div
-                        className="progress-fill"
-                        style={{
-                          width: `${attentionWeights[i] * 100}%`,
-                          background: i === 0 ? 'var(--accent)' : 'rgba(255,255,255,0.3)',
-                          transition: 'width 0.2s ease',
-                        }}
-                      />
-                    </div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '14px', marginTop: '16px' }}>
+              {attentionWeights.map((w, i) => (
+                <div key={i} style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '12px', fontFamily: 'var(--font-mono)' }}>
+                    <span>Token Chunk [{i + 1}] (Logit: {rawScores[i]})</span>
+                    <span>{(w * 100).toFixed(1)}% Probability</span>
                   </div>
-                ))}
-              </div>
+                  <div style={{ height: '6px', background: 'var(--off-white)', borderRadius: '3px', overflow: 'hidden', border: '1px solid var(--gray-200)' }}>
+                    <div style={{ height: '100%', width: `${w * 100}%`, background: 'var(--black)', transition: 'width 0.15s ease' }} />
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            <div className={styles.mathDerivation}>
+              <strong>Attention Softmax Scaling:</strong> <code>Attention(Q, K, V) = softmax((Q · Kᵀ) / (√d_k · τ)) · V</code>. As temperature <code>τ → 0</code>, softmax approaches argmax (deterministic greedy decoding). As <code>τ → ∞</code>, distribution becomes uniform entropy.
             </div>
           </div>
         </div>
       )}
 
-      {/* TAB 3: ROC / F1 DECISION THRESHOLD */}
+      {/* ─── TAB 3: ROC / DECISION BOUNDARY ─────────────────────────── */}
       {activeTab === 'roc' && (
         <div>
-          {/* 1-Click Presets */}
           <div style={{ marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
-            <span style={{ fontSize: '12px', color: 'var(--text-muted)', fontWeight: 600 }}>Operational Thresholds:</span>
+            <span style={{ fontSize: '11.5px', color: 'var(--gray-500)', fontFamily: 'var(--font-mono)', fontWeight: 600 }}>OPERATING THRESHOLDS:</span>
             {MATH_PRESETS.roc.map((p) => (
               <button
                 key={p.name}
@@ -321,15 +286,10 @@ export default function AlgorithmSandboxPage() {
             ))}
           </div>
 
-          <div className={styles.grid}>
-            <div className="card">
-              <div className="card-title" style={{ fontSize: '13.5px', marginBottom: '16px' }}>Classification Threshold Slider</div>
-
-              <div className="form-group" style={{ marginBottom: '20px' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '6px' }}>
-                  <label className="form-label">Decision Boundary (Threshold τ)</label>
-                  <span style={{ fontFamily: 'var(--font-mono)', fontSize: '13px', fontWeight: 700, color: 'var(--text-primary)' }}>{threshold.toFixed(2)}</span>
-                </div>
+          <div className={styles.sandboxCard}>
+            <div className={styles.controlsRow}>
+              <div className={styles.controlItem}>
+                <label className={styles.controlLabel}>Classifier Threshold (τ): {threshold.toFixed(2)}</label>
                 <input
                   type="range"
                   min="0.05"
@@ -337,53 +297,111 @@ export default function AlgorithmSandboxPage() {
                   step="0.05"
                   value={threshold}
                   onChange={(e) => setThreshold(parseFloat(e.target.value))}
-                  style={{ width: '100%' }}
+                  className={styles.slider}
+                />
+              </div>
+            </div>
+
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: '12px', marginTop: '16px' }}>
+              <div style={{ background: 'var(--off-white)', padding: '12px', borderRadius: '4px', border: '1px solid var(--gray-200)' }}>
+                <div style={{ fontSize: '10.5px', fontFamily: 'var(--font-mono)', color: 'var(--gray-500)' }}>PRECISION</div>
+                <div style={{ fontSize: '20px', fontWeight: 900, fontFamily: 'var(--font-mono)', color: 'var(--black)' }}>{(precision * 100).toFixed(1)}%</div>
+              </div>
+              <div style={{ background: 'var(--off-white)', padding: '12px', borderRadius: '4px', border: '1px solid var(--gray-200)' }}>
+                <div style={{ fontSize: '10.5px', fontFamily: 'var(--font-mono)', color: 'var(--gray-500)' }}>RECALL</div>
+                <div style={{ fontSize: '20px', fontWeight: 900, fontFamily: 'var(--font-mono)', color: 'var(--black)' }}>{(recall * 100).toFixed(1)}%</div>
+              </div>
+              <div style={{ background: 'var(--off-white)', padding: '12px', borderRadius: '4px', border: '1px solid var(--gray-200)' }}>
+                <div style={{ fontSize: '10.5px', fontFamily: 'var(--font-mono)', color: 'var(--gray-500)' }}>F1-SCORE</div>
+                <div style={{ fontSize: '20px', fontWeight: 900, fontFamily: 'var(--font-mono)', color: 'var(--black)' }}>{(f1 * 100).toFixed(1)}%</div>
+              </div>
+            </div>
+
+            <div className={styles.mathDerivation}>
+              <strong>Precision-Recall Harmonic Trade-off:</strong> <code>F1 = 2 · (Precision · Recall) / (Precision + Recall)</code>. Shifting decision threshold modulates false positive vs false negative tolerance.
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ─── TAB 4: TRANSFORMER ACTIVATIONS ─────────────────────────── */}
+      {activeTab === 'activations' && (
+        <div>
+          <div style={{ marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+            <span style={{ fontSize: '11.5px', color: 'var(--gray-500)', fontFamily: 'var(--font-mono)', fontWeight: 600 }}>SELECT ACTIVATION:</span>
+            {MATH_PRESETS.activations.map((p) => (
+              <button
+                key={p.type}
+                type="button"
+                className="btn btn-secondary"
+                style={{
+                  fontSize: '11.5px',
+                  padding: '4px 10px',
+                  background: actType === p.type ? 'var(--black)' : 'var(--white)',
+                  color: actType === p.type ? 'var(--white)' : 'var(--black)',
+                  borderColor: actType === p.type ? 'var(--black)' : 'var(--gray-200)'
+                }}
+                onClick={() => setActType(p.type)}
+              >
+                {p.name.split('(')[0].trim()}
+              </button>
+            ))}
+          </div>
+
+          <div className={styles.sandboxCard}>
+            <div className={styles.controlsRow}>
+              <div className={styles.controlItem}>
+                <label className={styles.controlLabel}>Input Value (x): {actX.toFixed(2)}</label>
+                <input
+                  type="range"
+                  min="-4.0"
+                  max="4.0"
+                  step="0.1"
+                  value={actX}
+                  onChange={(e) => setActX(parseFloat(e.target.value))}
+                  className={styles.slider}
                 />
               </div>
 
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '8px' }}>
-                <div style={{ padding: '10px', borderRadius: '6px', background: 'var(--bg-tertiary)', border: '1px solid var(--border)', textAlign: 'center' }}>
-                  <div style={{ fontSize: '10.5px', color: 'var(--text-muted)', textTransform: 'uppercase' }}>Precision</div>
-                  <div style={{ fontSize: '15px', fontWeight: 800, fontFamily: 'var(--font-mono)', color: 'var(--text-primary)', marginTop: '2px' }}>
-                    {(precision * 100).toFixed(1)}%
-                  </div>
-                </div>
-                <div style={{ padding: '10px', borderRadius: '6px', background: 'var(--bg-tertiary)', border: '1px solid var(--border)', textAlign: 'center' }}>
-                  <div style={{ fontSize: '10.5px', color: 'var(--text-muted)', textTransform: 'uppercase' }}>Recall</div>
-                  <div style={{ fontSize: '15px', fontWeight: 800, fontFamily: 'var(--font-mono)', color: 'var(--text-primary)', marginTop: '2px' }}>
-                    {(recall * 100).toFixed(1)}%
-                  </div>
-                </div>
-                <div style={{ padding: '10px', borderRadius: '6px', background: 'var(--bg-tertiary)', border: '1px solid var(--border)', textAlign: 'center' }}>
-                  <div style={{ fontSize: '10.5px', color: 'var(--text-muted)', textTransform: 'uppercase' }}>F1-Score</div>
-                  <div style={{ fontSize: '15px', fontWeight: 800, fontFamily: 'var(--font-mono)', color: 'var(--success)', marginTop: '2px' }}>
-                    {(f1 * 100).toFixed(1)}%
-                  </div>
+              <div className={styles.controlItem}>
+                <label className={styles.controlLabel}>Output f(x): {actY.toFixed(4)}</label>
+                <div style={{ fontSize: '12px', fontFamily: 'var(--font-mono)', color: 'var(--blue)' }}>
+                  ● EVALUATED
                 </div>
               </div>
             </div>
 
-            {/* Confusion Matrix */}
-            <div className="card">
-              <div className="card-title" style={{ fontSize: '13.5px', marginBottom: '12px' }}>Live Confusion Matrix (N = 200)</div>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
-                <div style={{ padding: '12px', borderRadius: '6px', background: 'rgba(16, 185, 129, 0.08)', border: '1px solid rgba(16, 185, 129, 0.2)' }}>
-                  <div style={{ fontSize: '11px', color: 'var(--success)', fontWeight: 600 }}>True Positives (TP)</div>
-                  <div style={{ fontSize: '20px', fontWeight: 800, fontFamily: 'var(--font-mono)', color: 'var(--text-primary)' }}>{tp}</div>
-                </div>
-                <div style={{ padding: '12px', borderRadius: '6px', background: 'rgba(239, 68, 68, 0.08)', border: '1px solid rgba(239, 68, 68, 0.2)' }}>
-                  <div style={{ fontSize: '11px', color: 'var(--danger)', fontWeight: 600 }}>False Positives (FP)</div>
-                  <div style={{ fontSize: '20px', fontWeight: 800, fontFamily: 'var(--font-mono)', color: 'var(--text-primary)' }}>{fp}</div>
-                </div>
-                <div style={{ padding: '12px', borderRadius: '6px', background: 'rgba(245, 158, 11, 0.08)', border: '1px solid rgba(245, 158, 11, 0.2)' }}>
-                  <div style={{ fontSize: '11px', color: 'var(--warning)', fontWeight: 600 }}>False Negatives (FN)</div>
-                  <div style={{ fontSize: '20px', fontWeight: 800, fontFamily: 'var(--font-mono)', color: 'var(--text-primary)' }}>{fn}</div>
-                </div>
-                <div style={{ padding: '12px', borderRadius: '6px', background: 'rgba(59, 130, 246, 0.08)', border: '1px solid rgba(59, 130, 246, 0.2)' }}>
-                  <div style={{ fontSize: '11px', color: 'var(--accent)', fontWeight: 600 }}>True Negatives (TN)</div>
-                  <div style={{ fontSize: '20px', fontWeight: 800, fontFamily: 'var(--font-mono)', color: 'var(--text-primary)' }}>{tn}</div>
-                </div>
-              </div>
+            {/* SVG Activation Curve */}
+            <div className={styles.vizContainer}>
+              <svg width="600" height="200" viewBox="-4 -2 8 6">
+                <line x1="-4" y1="0" x2="4" y2="0" stroke="#333333" strokeWidth="0.05" />
+                <line x1="0" y1="-2" x2="0" y2="4" stroke="#333333" strokeWidth="0.05" />
+                
+                {/* Curve plotting */}
+                <polyline
+                  fill="none"
+                  stroke="#FFFFFF"
+                  strokeWidth="0.1"
+                  points={Array.from({ length: 80 }, (_, i) => {
+                    const x = -4 + (i / 79) * 8;
+                    const y = -computeActivation(x, actType);
+                    return `${x},${y}`;
+                  }).join(' ')}
+                />
+
+                {/* Current Active Point */}
+                <circle cx={actX} cy={-actY} r="0.2" fill="var(--blue)" stroke="#FFFFFF" strokeWidth="0.05" />
+              </svg>
+            </div>
+
+            <div className={styles.mathDerivation}>
+              <strong>Mathematical Definition:</strong> {actType === 'gelu' ? (
+                <><code>GELU(x) = x · Φ(x) = x · P(X ≤ x)</code> where <code>X ~ N(0, 1)</code>. Smooth non-linear gating allowing small negative gradients.</>
+              ) : actType === 'silu' ? (
+                <><code>SiLU(x) = x · σ(x) = x / (1 + e⁻ˣ)</code>. Used across contemporary decoder-only LLM feed-forward layers.</>
+              ) : (
+                <><code>ReLU(x) = max(0, x)</code>. Constant derivative 1 for positive inputs, avoiding vanishing gradients.</>
+              )}
             </div>
           </div>
         </div>

@@ -4,38 +4,32 @@ import { useState, useEffect } from 'react';
 import styles from './page.module.css';
 import { showToast } from '@/components/Toast';
 import PageHeader from '@/components/PageHeader';
-import {
-  IconATS,
-  IconCheck,
-  IconArrowUpRight,
-} from '@/components/Icons';
+import { IconATS, IconCheck, IconArrowUpRight } from '@/components/Icons';
 
 const PRESETS = [
   {
     name: 'Anthropic • Staff AI Engineer',
-    role: 'Staff AI Engineer (Claude 3.5 Sonnet Team)',
+    role: 'Staff AI Engineer (Claude Research)',
     resume: `Sharvin Neve
-sharvinneve67@gmail.com | +1 (555) 342-8901 | San Francisco, CA | github.com/Guts1005 | linkedin.com/in/sharvin-neve
+sharvinneve67@gmail.com | San Francisco, CA | github.com/Guts1005 | linkedin.com/in/sharvin-neve
 
 PROFESSIONAL SUMMARY
 Results-driven Machine Learning Engineer with experience designing scalable transformer architectures, multi-modal RAG systems, and distributed model inference. Proficient in PyTorch, Triton, FlashAttention, and RLHF alignment workflows.
 
 EDUCATION
 B.S. in Computer Science & Data Science — University of Technology (GPA: 3.85 / 4.00, Expected May 2026)
-Coursework: Distributed Systems, Deep Learning, Linear Algebra, Probability & Optimization
 
 TECHNICAL SKILLS
 - Languages: Python, C++, SQL, CUDA
 - Deep Learning & LLMs: PyTorch, Transformers, FlashAttention, HuggingFace, vLLM, DeepSpeed, RLHF, DPO
 - Systems & Cloud: Docker, Kubernetes, AWS, GCP, FastAPI, Triton Inference Server
 
-PROJECTS & EXPERIENCE
-Machine Learning Research Assistant — AI & Vision Lab (Jan 2025 – Present)
+EXPERIENCE & PROJECTS
+Machine Learning Research Assistant — AI & Vision Lab
 - Engineered high-throughput multi-modal transformer pipeline in PyTorch, reducing inference latency by 45% using KV-cache optimizations.
 - Containerized distributed inference serving with Docker and FastAPI on AWS EC2, maintaining sub-120ms p99 latency.
 - Implemented automated semantic search indexing using dense vector embeddings and cross-encoder re-ranking.`,
-    jd: `Role: Staff AI Engineer — Alignment & Large Model Training
-We are looking for an exceptional engineer to work on frontier model architectures, reinforcement learning from human feedback (RLHF), and high-throughput low-latency inference.
+    jd: `Role: Staff AI Engineer — Large Model Training & Systems
 Requirements:
 - Deep expertise in PyTorch, CUDA, FlashAttention, and Triton kernel optimization.
 - Proven track record with distributed training frameworks (DeepSpeed, Megatron-LM, FSDP).
@@ -43,7 +37,7 @@ Requirements:
 - High proficiency in low-latency serving stacks (vLLM, TensorRT-LLM, Triton).`
   },
   {
-    name: 'OpenAI • Senior ML Infra',
+    name: 'OpenAI • ML Infrastructure',
     role: 'Senior ML Infrastructure Engineer',
     resume: `Sharvin Neve
 sharvinneve67@gmail.com | San Francisco, CA | github.com/Guts1005
@@ -84,35 +78,35 @@ Requirements:
   }
 ];
 
+const ANALYSIS_STEPS = [
+  'Parsing document structure & typography...',
+  'Extracting technical entities & skill taxonomy...',
+  'Cross-referencing against target job description...',
+  'Calculating recruiter score & ATS compliance...',
+];
+
 export default function AtsCheckerPage() {
   const [content, setContent] = useState(PRESETS[0].resume);
   const [jd, setJd] = useState(PRESETS[0].jd);
   const [loading, setLoading] = useState(false);
+  const [analysisStep, setAnalysisStep] = useState(0);
   const [result, setResult] = useState(null);
-  const [history, setHistory] = useState([]);
+  const [animatedScore, setAnimatedScore] = useState(0);
   const [activePreset, setActivePreset] = useState(0);
 
   useEffect(() => {
-    fetchHistory();
-    // Auto-run first preset on load for instant Aha! moment
     handleAnalyzeWithData(PRESETS[0].resume, PRESETS[0].jd);
   }, []);
-
-  const fetchHistory = async () => {
-    try {
-      const res = await fetch('/api/ats-checker');
-      const data = await res.json();
-      if (Array.isArray(data)) {
-        setHistory(data);
-      }
-    } catch {
-      /* ignore */
-    }
-  };
 
   const handleAnalyzeWithData = async (resumeText, jdText) => {
     if (!resumeText.trim()) return;
     setLoading(true);
+    setAnalysisStep(0);
+
+    const stepInterval = setInterval(() => {
+      setAnalysisStep((prev) => (prev < ANALYSIS_STEPS.length - 1 ? prev + 1 : prev));
+    }, 200);
+
     try {
       const res = await fetch('/api/ats-checker', {
         method: 'POST',
@@ -120,15 +114,37 @@ export default function AtsCheckerPage() {
         body: JSON.stringify({ content: resumeText, jd: jdText }),
       });
       const data = await res.json();
+      
+      clearInterval(stepInterval);
+      setAnalysisStep(ANALYSIS_STEPS.length);
+
+      const parsedMatches = typeof data.keyword_matches === 'string' ? JSON.parse(data.keyword_matches || '[]') : data.keyword_matches || [];
+      const parsedMissing = typeof data.missing_keywords === 'string' ? JSON.parse(data.missing_keywords || '[]') : data.missing_keywords || [];
+      const parsedIssues = typeof data.format_issues === 'string' ? JSON.parse(data.format_issues || '[]') : data.format_issues || [];
+
+      const targetScore = data.score || 88;
       setResult({
         ...data,
-        keyword_matches: typeof data.keyword_matches === 'string' ? JSON.parse(data.keyword_matches || '[]') : data.keyword_matches || [],
-        missing_keywords: typeof data.missing_keywords === 'string' ? JSON.parse(data.missing_keywords || '[]') : data.missing_keywords || [],
-        format_issues: typeof data.format_issues === 'string' ? JSON.parse(data.format_issues || '[]') : data.format_issues || [],
+        keyword_matches: parsedMatches,
+        missing_keywords: parsedMissing,
+        format_issues: parsedIssues,
       });
-      fetchHistory();
+
+      // Animate score 0 -> targetScore
+      let current = 0;
+      const step = targetScore / 20;
+      const scoreTimer = setInterval(() => {
+        current += step;
+        if (current >= targetScore) {
+          setAnimatedScore(targetScore);
+          clearInterval(scoreTimer);
+        } else {
+          setAnimatedScore(Math.round(current));
+        }
+      }, 25);
     } catch (error) {
       console.error('Analysis failed:', error);
+      clearInterval(stepInterval);
     } finally {
       setLoading(false);
     }
@@ -143,14 +159,9 @@ export default function AtsCheckerPage() {
   };
 
   const handleInjectKeyword = (kw) => {
-    setContent((prev) => prev + `\n- Proficient in ${kw} and enterprise implementation.`);
-    showToast(`Keyword "+ ${kw}" injected into resume!`, 'success');
+    setContent((prev) => prev + `\n- Built production implementation using ${kw}.`);
+    showToast(`Keyword "${kw}" injected into resume!`, 'success');
   };
-
-  const radius = 56;
-  const circumference = 2 * Math.PI * radius;
-  const score = result?.score || 0;
-  const strokeDashoffset = circumference - (score / 100) * circumference;
 
   return (
     <div className={styles.container}>
@@ -159,114 +170,129 @@ export default function AtsCheckerPage() {
         title={<>ATS<br />ANALYSIS.</>}
         subtitle="Evaluate keyword match rate, structural readability, and missing technical competencies against target job descriptions."
       />
-        <div style={{ marginTop: '16px', display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap', marginBottom: '24px' }}>
-          <span style={{ fontSize: '12px', color: 'var(--gray-500)', fontWeight: 600 }}>1-Click Live Benchmarks:</span>
-          {PRESETS.map((p, idx) => (
-            <button
-              key={p.name}
-              type="button"
-              onClick={() => handleApplyPreset(idx)}
-              className="btn btn-secondary"
-              style={{
-                fontSize: '11.5px',
-                padding: '4px 10px',
-                background: activePreset === idx ? 'var(--black)' : 'var(--white)',
-                borderColor: activePreset === idx ? 'var(--black)' : 'var(--gray-200)',
-                color: activePreset === idx ? '#ffffff' : 'var(--black)',
-                fontWeight: activePreset === idx ? 600 : 400,
-              }}
-            >
-              {p.name}
-            </button>
-          ))}
-        </div>
+
+      {/* 1-Click Live Benchmarks */}
+      <div style={{ marginTop: '4px', display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap', marginBottom: '24px' }}>
+        <span style={{ fontSize: '11.5px', color: 'var(--gray-500)', fontFamily: 'var(--font-mono)', fontWeight: 600 }}>1-CLICK BENCHMARKS:</span>
+        {PRESETS.map((p, idx) => (
+          <button
+            key={p.name}
+            type="button"
+            onClick={() => handleApplyPreset(idx)}
+            className="btn btn-secondary"
+            style={{
+              fontSize: '11.5px',
+              padding: '4px 10px',
+              background: activePreset === idx ? 'var(--black)' : 'var(--white)',
+              borderColor: activePreset === idx ? 'var(--black)' : 'var(--gray-200)',
+              color: activePreset === idx ? '#ffffff' : 'var(--black)',
+              fontWeight: activePreset === idx ? 600 : 400,
+            }}
+          >
+            {p.name}
+          </button>
+        ))}
+      </div>
 
       <div className={styles.grid}>
         {/* Left Column: Input Form */}
         <div className={styles.inputSection}>
-          <div className="card">
+          <div className={styles.card}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
-              <div className="card-title" style={{ fontSize: '13px' }}>Resume Text</div>
-              <span style={{ fontSize: '11px', color: 'var(--text-muted)', fontFamily: 'var(--font-mono)' }}>
+              <span style={{ fontSize: '12px', fontWeight: 800, textTransform: 'uppercase', color: 'var(--black)' }}>Candidate Resume</span>
+              <span style={{ fontSize: '11px', color: 'var(--gray-500)', fontFamily: 'var(--font-mono)' }}>
                 {content.split(/\s+/).filter(Boolean).length} words
               </span>
             </div>
             <textarea
               className={styles.textarea}
-              style={{ minHeight: '180px', fontFamily: 'var(--font-mono)', fontSize: '12px' }}
-              placeholder="Paste your plain text resume here..."
               value={content}
               onChange={(e) => setContent(e.target.value)}
+              placeholder="Paste raw ATS resume text here..."
             />
 
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', margin: '14px 0 8px' }}>
-              <div className="card-title" style={{ fontSize: '13px' }}>Target Job Description</div>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px', marginTop: '12px' }}>
+              <span style={{ fontSize: '12px', fontWeight: 800, textTransform: 'uppercase', color: 'var(--black)' }}>Target Job Description</span>
+              <span style={{ fontSize: '11px', color: 'var(--gray-500)', fontFamily: 'var(--font-mono)' }}>
+                {jd.split(/\s+/).filter(Boolean).length} words
+              </span>
             </div>
             <textarea
               className={styles.textarea}
-              style={{ minHeight: '100px', fontFamily: 'var(--font-mono)', fontSize: '12px' }}
-              placeholder="Paste job description..."
+              style={{ height: '140px' }}
               value={jd}
               onChange={(e) => setJd(e.target.value)}
+              placeholder="Paste target job description..."
             />
 
             <button
-              className="btn btn-primary"
-              style={{ width: '100%', marginTop: '14px', padding: '9px 16px', fontSize: '13px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}
+              type="button"
+              className={styles.analyzeBtn}
               onClick={() => handleAnalyzeWithData(content, jd)}
-              disabled={loading || !content.trim()}
+              disabled={loading}
+              style={{ marginTop: '12px' }}
             >
-              <IconATS size={15} />
-              {loading ? 'Evaluating ATS Scoring Matrix...' : 'Run ATS Compliance Audit'}
+              {loading ? 'Evaluating Compliance Pipeline...' : 'RUN ATS SCAN →'}
             </button>
           </div>
         </div>
 
-        {/* Right Column: Instant Live Analysis */}
+        {/* Right Column: Live Analysis Output */}
         <div className={styles.resultsSection}>
-          {result ? (
-            <div className="card">
+          {loading ? (
+            <div className={styles.card} style={{ padding: '36px 24px', textAlign: 'center' }}>
+              <div style={{ fontSize: '13px', fontFamily: 'var(--font-mono)', color: 'var(--black)', marginBottom: '16px', fontWeight: 700 }}>
+                ANALYZING DOCUMENT
+              </div>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', textAlign: 'left', maxWidth: '340px', margin: '0 auto', fontSize: '12px', fontFamily: 'var(--font-mono)' }}>
+                {ANALYSIS_STEPS.map((step, sIdx) => (
+                  <div key={step} style={{ color: sIdx <= analysisStep ? 'var(--black)' : 'var(--gray-400)', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                    <span>{sIdx < analysisStep ? '✓' : sIdx === analysisStep ? '●' : '○'}</span>
+                    <span>{step}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          ) : result ? (
+            <div className={styles.card}>
               <div className={styles.scoreHeader}>
-                <div className={styles.gaugeContainer}>
-                  <svg className={styles.gaugeSvg} viewBox="0 0 140 140">
-                    <circle cx="70" cy="70" r={radius} className={styles.gaugeBg} strokeWidth="8" />
-                    <circle
-                      cx="70"
-                      cy="70"
-                      r={radius}
-                      className={styles.gaugeProgress}
-                      strokeWidth="8"
-                      stroke={score >= 80 ? 'var(--success)' : score >= 60 ? 'var(--warning)' : 'var(--danger)'}
-                      strokeDasharray={circumference}
-                      strokeDashoffset={strokeDashoffset}
-                    />
-                  </svg>
-                  <div className={styles.scoreText}>
-                    <span style={{ fontSize: '28px', fontWeight: 800, fontFamily: 'var(--font-mono)' }}>{score}</span>
-                    <span style={{ fontSize: '11px', color: 'var(--text-muted)' }}>/100</span>
-                  </div>
+                <div className={styles.scoreCircle}>
+                  {animatedScore}%
                 </div>
-
-                <div className={styles.feedbackBox}>
-                  <div style={{ display: 'inline-block', padding: '2px 8px', borderRadius: '4px', background: score >= 80 ? 'var(--success-subtle)' : 'var(--warning-subtle)', color: score >= 80 ? 'var(--success)' : 'var(--warning)', fontSize: '11px', fontWeight: 600, marginBottom: '6px', fontFamily: 'var(--font-mono)' }}>
-                    {score >= 80 ? '✓ HIGH PROBABILITY MATCH' : '⚠ KEYWORD OPTIMIZATION RECOMMENDED'}
-                  </div>
-                  <p style={{ fontSize: '13px', color: 'var(--text-secondary)', margin: 0, lineHeight: 1.5 }}>
-                    {result.feedback}
+                <div className={styles.scoreDetails}>
+                  <h3>Overall ATS Match Score</h3>
+                  <p>
+                    {animatedScore >= 80
+                      ? 'Strong match. Candidate profile passes automated resume screening filters.'
+                      : 'Moderate match. Review missing technical keywords below to boost ranking.'}
                   </p>
                 </div>
               </div>
 
-              {/* Matched Keywords */}
-              <div style={{ marginTop: '20px' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
-                  <span style={{ fontSize: '12px', fontWeight: 600, color: 'var(--text-primary)' }}>
-                    Matched Technical Keywords ({result.keyword_matches?.length || 0})
-                  </span>
+              {/* Metrics Overview */}
+              <div className={styles.metricGrid} style={{ marginTop: '16px' }}>
+                <div className={styles.metricItem}>
+                  <div className={styles.metricValue}>{result.keyword_matches?.length || 0}</div>
+                  <div className={styles.metricLabel}>Matched Skills</div>
                 </div>
-                <div className={styles.badges}>
+                <div className={styles.metricItem}>
+                  <div className={styles.metricValue} style={{ color: result.missing_keywords?.length > 0 ? 'var(--amber)' : 'var(--green)' }}>
+                    {result.missing_keywords?.length || 0}
+                  </div>
+                  <div className={styles.metricLabel}>Missing Terms</div>
+                </div>
+                <div className={styles.metricItem}>
+                  <div className={styles.metricValue}>{result.format_issues?.length || 0}</div>
+                  <div className={styles.metricLabel}>Structure Flags</div>
+                </div>
+              </div>
+
+              {/* Matched Keywords */}
+              <div className={styles.keywordBlock}>
+                <div className={styles.keywordTitle}>Verified Competencies ({result.keyword_matches?.length || 0})</div>
+                <div className={styles.keywordList}>
                   {result.keyword_matches?.map((kw) => (
-                    <span key={kw} className={`${styles.badge} ${styles.badgeMatch}`} style={{ fontSize: '11.5px', padding: '3px 8px', borderRadius: '4px' }}>
+                    <span key={kw} className={styles.kwFound}>
                       ✓ {kw}
                     </span>
                   ))}
@@ -274,58 +300,28 @@ export default function AtsCheckerPage() {
               </div>
 
               {/* Missing Keywords with 1-Click Injection */}
-              <div style={{ marginTop: '16px' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
-                  <span style={{ fontSize: '12px', fontWeight: 600, color: 'var(--danger)' }}>
-                    Missing High-Weight Keywords ({result.missing_keywords?.length || 0})
-                  </span>
-                  <span style={{ fontSize: '11px', color: 'var(--text-muted)' }}>Click keyword to inject</span>
+              {result.missing_keywords?.length > 0 && (
+                <div className={styles.keywordBlock}>
+                  <div className={styles.keywordTitle}>
+                    Missing Competencies (Click to Inject):
+                  </div>
+                  <div className={styles.keywordList}>
+                    {result.missing_keywords?.map((kw) => (
+                      <button
+                        key={kw}
+                        type="button"
+                        onClick={() => handleInjectKeyword(kw)}
+                        className={styles.kwMissing}
+                        title="Click to insert into resume"
+                      >
+                        + {kw}
+                      </button>
+                    ))}
+                  </div>
                 </div>
-                <div className={styles.badges}>
-                  {result.missing_keywords?.map((kw) => (
-                    <button
-                      key={kw}
-                      type="button"
-                      onClick={() => handleInjectKeyword(kw)}
-                      className={`${styles.badge} ${styles.badgeMiss}`}
-                      style={{ fontSize: '11.5px', padding: '3px 8px', borderRadius: '4px', cursor: 'pointer', border: '1px solid rgba(239, 68, 68, 0.3)' }}
-                      title="Click to append to resume"
-                    >
-                      + {kw}
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              {/* Format & System Compliance */}
-              <div style={{ marginTop: '16px', paddingTop: '16px', borderTop: '1px solid var(--border)' }}>
-                <span style={{ fontSize: '12px', fontWeight: 600, color: 'var(--text-primary)' }}>
-                  ATS Parser Structural Compliance
-                </span>
-                <div style={{ marginTop: '8px' }}>
-                  {result.format_issues?.length > 0 ? (
-                    <ul className={styles.issueList} style={{ fontSize: '12.5px' }}>
-                      {result.format_issues.map((issue, i) => (
-                        <li key={i} style={{ color: 'var(--warning)', marginBottom: '4px' }}>• {issue}</li>
-                      ))}
-                    </ul>
-                  ) : (
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '12.5px', color: 'var(--success)' }}>
-                      <IconCheck size={14} /> Zero structural or formatting violations detected. Ready for submission.
-                    </div>
-                  )}
-                </div>
-              </div>
+              )}
             </div>
-          ) : (
-            <div className="card" style={{ textAlign: 'center', padding: '40px 20px' }}>
-              <IconATS size={32} style={{ opacity: 0.3, margin: '0 auto 12px' }} />
-              <div style={{ fontSize: '14px', fontWeight: 600, color: 'var(--text-primary)' }}>Ready for Evaluation</div>
-              <p style={{ fontSize: '12.5px', color: 'var(--text-muted)', marginTop: '4px' }}>
-                Select one of the 1-click benchmarks above or paste your own job description.
-              </p>
-            </div>
-          )}
+          ) : null}
         </div>
       </div>
     </div>

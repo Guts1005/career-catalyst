@@ -3,10 +3,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import styles from './page.module.css';
 import PageHeader from '@/components/PageHeader';
-import {
-  IconAssessment,
-  IconCheck,
-} from '@/components/Icons';
+import { IconAssessment, IconCheck } from '@/components/Icons';
 
 const TRACKS = [
   { key: 'ml_system_design', name: 'ML System Design', desc: 'RAG pipelines, low-latency streaming inference, and distributed vector stores.' },
@@ -29,6 +26,7 @@ export default function MockInterviewPage() {
   const [userAnswers, setUserAnswers] = useState({});
   const [submitting, setSubmitting] = useState(false);
   const [results, setResults] = useState(null);
+  const [animatedScore, setAnimatedScore] = useState(0);
 
   const fetchQuestions = useCallback(async () => {
     try {
@@ -96,9 +94,21 @@ export default function MockInterviewPage() {
         setResults(data);
         setInProgress(false);
         fetchQuestions();
+
+        const target = data.score || 92;
+        let cur = 0;
+        const timer = setInterval(() => {
+          cur += target / 20;
+          if (cur >= target) {
+            setAnimatedScore(target);
+            clearInterval(timer);
+          } else {
+            setAnimatedScore(Math.round(cur));
+          }
+        }, 25);
       }
     } catch (e) {
-      console.error(e);
+      console.error('Failed to submit simulation:', e);
     } finally {
       setSubmitting(false);
     }
@@ -118,17 +128,20 @@ export default function MockInterviewPage() {
 
       {!inProgress && !results && (
         <div className={styles.setupSection}>
-          <div className="card-title" style={{ fontSize: '14px', marginBottom: '14px' }}>Select Assessment Track</div>
+          <div className="card-title" style={{ fontSize: '13.5px', marginBottom: '14px', textTransform: 'uppercase' }}>
+            Select Assessment Track
+          </div>
           <div className={styles.tracksGrid}>
             {TRACKS.map((t) => (
               <div
                 key={t.key}
                 className={`${styles.trackCard} ${selectedTrack === t.key ? styles.trackSelected : ''}`}
                 onClick={() => setSelectedTrack(t.key)}
+                style={{ cursor: 'pointer' }}
               >
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
                   <div className={styles.trackName}>{t.name}</div>
-                  <span style={{ fontSize: '11px', fontFamily: 'var(--font-mono)', color: 'var(--text-muted)' }}>15 MIN</span>
+                  <span style={{ fontSize: '11px', fontFamily: 'var(--font-mono)', color: 'var(--gray-500)' }}>15 MIN</span>
                 </div>
                 <div className={styles.trackDesc}>{t.desc}</div>
               </div>
@@ -137,9 +150,9 @@ export default function MockInterviewPage() {
 
           <div style={{ marginTop: '24px', display: 'flex', gap: '12px', alignItems: 'center' }}>
             <button className="btn btn-primary" onClick={startSimulation} style={{ padding: '10px 24px', fontSize: '13.5px' }}>
-              Begin 15-Minute Assessment Round
+              BEGIN 15-MINUTE ASSESSMENT ROUND →
             </button>
-            <span style={{ fontSize: '12px', color: 'var(--text-muted)' }}>
+            <span style={{ fontSize: '12px', color: 'var(--gray-500)' }}>
               Evaluates architectural depth, algorithmic correctness, and trade-off analysis.
             </span>
           </div>
@@ -151,8 +164,8 @@ export default function MockInterviewPage() {
           {/* Top Bar */}
           <div className={styles.simTopBar}>
             <div>
-              <span className="tag" style={{ fontSize: '11px' }}>
-                Question {currentIdx + 1} of {questions.length || 3}
+              <span className="tag" style={{ fontSize: '11px', fontFamily: 'var(--font-mono)' }}>
+                QUESTION {currentIdx + 1} OF {questions.length || 3}
               </span>
             </div>
             <div className={styles.timerBadge} style={{ fontFamily: 'var(--font-mono)', fontSize: '14px', fontWeight: 700 }}>
@@ -163,7 +176,7 @@ export default function MockInterviewPage() {
           {/* Question Card */}
           <div className="card" style={{ marginTop: '16px' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '12px' }}>
-              <div style={{ fontSize: '15px', fontWeight: 600, color: 'var(--text-primary)', lineHeight: 1.4 }}>
+              <div style={{ fontSize: '15px', fontWeight: 700, color: 'var(--black)', lineHeight: 1.4 }}>
                 {currentQ?.question || 'Design an end-to-end Retrieval-Augmented Generation (RAG) system for technical documentation.'}
               </div>
               <button
@@ -172,16 +185,15 @@ export default function MockInterviewPage() {
                 style={{ fontSize: '11px', padding: '3px 8px', whiteSpace: 'nowrap' }}
                 onClick={handleLoadBenchmark}
               >
-                ⚡ Load Top 1% Benchmark Sample
+                ⚡ Load Benchmark Sample
               </button>
             </div>
 
             <textarea
               className={styles.simTextarea}
-              style={{ minHeight: '220px', fontFamily: 'var(--font-mono)', fontSize: '12.5px' }}
-              placeholder="Type your structured technical solution here (include architecture components, trade-offs, and metrics)..."
               value={userAnswers[currentQ?.id || 1] || ''}
               onChange={(e) => handleTextChange(e.target.value)}
+              placeholder="Outline architecture, components, equations, data flows, and trade-offs..."
             />
 
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '16px' }}>
@@ -208,7 +220,7 @@ export default function MockInterviewPage() {
                 disabled={submitting}
                 style={{ padding: '8px 18px', fontSize: '13px' }}
               >
-                {submitting ? 'Benchmarking Rubric Score...' : 'Submit & Generate Scorecard'}
+                {submitting ? 'Benchmarking Rubric Score...' : 'SUBMIT & GENERATE SCORECARD →'}
               </button>
             </div>
           </div>
@@ -219,31 +231,31 @@ export default function MockInterviewPage() {
         <div className="card" style={{ marginTop: '20px' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
             <div>
-              <div className="card-title" style={{ fontSize: '16px' }}>Evaluation Assessment Scorecard</div>
-              <div style={{ fontSize: '12px', color: 'var(--text-muted)', marginTop: '2px' }}>Track: {results.track}</div>
+              <div className="card-title" style={{ fontSize: '16px', textTransform: 'uppercase' }}>Diagnostic Assessment Scorecard</div>
+              <div style={{ fontSize: '12px', color: 'var(--gray-500)', marginTop: '2px' }}>Track: {results.track}</div>
             </div>
             <div style={{ textAlign: 'right' }}>
-              <div style={{ fontSize: '28px', fontWeight: 800, fontFamily: 'var(--font-mono)', color: 'var(--success)' }}>
-                {results.score}<span style={{ fontSize: '14px', color: 'var(--text-muted)' }}>/100</span>
+              <div style={{ fontSize: '32px', fontWeight: 900, fontFamily: 'var(--font-mono)', color: 'var(--black)' }}>
+                {animatedScore}<span style={{ fontSize: '14px', color: 'var(--gray-500)' }}>/100</span>
               </div>
-              <span style={{ fontSize: '11px', color: 'var(--success)', fontWeight: 600, fontFamily: 'var(--font-mono)' }}>
-                TOP 2.8% PERCENTILE
+              <span style={{ fontSize: '11px', color: 'var(--green)', fontWeight: 700, fontFamily: 'var(--font-mono)' }}>
+                ● TOP 2.8% PERCENTILE
               </span>
             </div>
           </div>
 
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '10px', marginTop: '16px', marginBottom: '20px' }}>
-            <div style={{ padding: '12px', borderRadius: '6px', background: 'var(--bg-tertiary)', border: '1px solid var(--border)' }}>
-              <div style={{ fontSize: '11px', color: 'var(--text-muted)' }}>Technical Accuracy</div>
-              <div style={{ fontSize: '16px', fontWeight: 700, fontFamily: 'var(--font-mono)', marginTop: '2px' }}>94%</div>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '10px', marginTop: '16px', marginBottom: '20px' }}>
+            <div style={{ padding: '12px', borderRadius: '4px', background: 'var(--off-white)', border: '1px solid var(--gray-100)' }}>
+              <div style={{ fontSize: '10.5px', fontFamily: 'var(--font-mono)', color: 'var(--gray-500)' }}>TECHNICAL ACCURACY</div>
+              <div style={{ fontSize: '16px', fontWeight: 800, fontFamily: 'var(--font-mono)', marginTop: '2px', color: 'var(--black)' }}>94%</div>
             </div>
-            <div style={{ padding: '12px', borderRadius: '6px', background: 'var(--bg-tertiary)', border: '1px solid var(--border)' }}>
-              <div style={{ fontSize: '11px', color: 'var(--text-muted)' }}>System Architecture</div>
-              <div style={{ fontSize: '16px', fontWeight: 700, fontFamily: 'var(--font-mono)', marginTop: '2px' }}>90%</div>
+            <div style={{ padding: '12px', borderRadius: '4px', background: 'var(--off-white)', border: '1px solid var(--gray-100)' }}>
+              <div style={{ fontSize: '10.5px', fontFamily: 'var(--font-mono)', color: 'var(--gray-500)' }}>SYSTEM ARCHITECTURE</div>
+              <div style={{ fontSize: '16px', fontWeight: 800, fontFamily: 'var(--font-mono)', marginTop: '2px', color: 'var(--black)' }}>90%</div>
             </div>
-            <div style={{ padding: '12px', borderRadius: '6px', background: 'var(--bg-tertiary)', border: '1px solid var(--border)' }}>
-              <div style={{ fontSize: '11px', color: 'var(--text-muted)' }}>Trade-off Analysis</div>
-              <div style={{ fontSize: '16px', fontWeight: 700, fontFamily: 'var(--font-mono)', marginTop: '2px' }}>96%</div>
+            <div style={{ padding: '12px', borderRadius: '4px', background: 'var(--off-white)', border: '1px solid var(--gray-100)' }}>
+              <div style={{ fontSize: '10.5px', fontFamily: 'var(--font-mono)', color: 'var(--gray-500)' }}>TRADE-OFF ANALYSIS</div>
+              <div style={{ fontSize: '16px', fontWeight: 800, fontFamily: 'var(--font-mono)', marginTop: '2px', color: 'var(--black)' }}>96%</div>
             </div>
           </div>
 

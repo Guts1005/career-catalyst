@@ -4,10 +4,7 @@ import { useState } from 'react';
 import styles from './page.module.css';
 import { showToast } from '@/components/Toast';
 import PageHeader from '@/components/PageHeader';
-import {
-  IconCoverLetter,
-  IconCheck,
-} from '@/components/Icons';
+import { IconCoverLetter, IconCheck } from '@/components/Icons';
 
 const ROLE_PRESETS = [
   {
@@ -91,6 +88,15 @@ export default function CoverLetterPage() {
     setTimeout(() => setCopiedLetter(false), 2000);
   };
 
+  const handleAddSnippet = (type) => {
+    if (type === 'impact') {
+      setCoverLetter((prev) => prev + '\n\nIn my previous architecture, I reduced inference latency by 45% while decreasing VRAM footprint by 32% across multi-node clusters.');
+    } else if (type === 'stack') {
+      setCoverLetter((prev) => prev + '\n\nMy primary technical stack centers on PyTorch, Triton kernel optimization, FlashAttention, and high-throughput vLLM serving.');
+    }
+    showToast('Contextual bullet injected into letter!', 'info');
+  };
+
   return (
     <div className={styles.container}>
       <PageHeader
@@ -99,25 +105,26 @@ export default function CoverLetterPage() {
         subtitle="An editorial writing surface for role-tailored cover letters and recruiter pitch messages."
       />
 
-      <div style={{ marginTop: '16px', display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap', marginBottom: '24px' }}>
-          <span style={{ fontSize: '12px', color: 'var(--gray-500)', fontWeight: 600 }}>Quick Role Presets:</span>
-          {ROLE_PRESETS.map((p) => (
-            <button
-              key={p.company}
-              type="button"
-              className="btn btn-secondary"
-              style={{ fontSize: '11.5px', padding: '4px 10px' }}
-              onClick={() => handleApplyPreset(p)}
-            >
-              {p.company} • {p.role.split('(')[0].trim()}
-            </button>
-          ))}
-        </div>
+      {/* 1-Click Quick Presets */}
+      <div style={{ marginTop: '4px', display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap', marginBottom: '24px' }}>
+        <span style={{ fontSize: '11.5px', color: 'var(--gray-500)', fontFamily: 'var(--font-mono)', fontWeight: 600 }}>QUICK ROLE PRESETS:</span>
+        {ROLE_PRESETS.map((p) => (
+          <button
+            key={p.company}
+            type="button"
+            className="btn btn-secondary"
+            style={{ fontSize: '11.5px', padding: '4px 10px' }}
+            onClick={() => handleApplyPreset(p)}
+          >
+            {p.company} • {p.role.split('(')[0].trim()}
+          </button>
+        ))}
+      </div>
 
       <div className={styles.layout}>
         {/* Left Form */}
         <div className="card">
-          <div className="card-title" style={{ fontSize: '13.5px', marginBottom: '14px' }}>Target Application Parameters</div>
+          <div className="card-title" style={{ fontSize: '13.5px', marginBottom: '14px', textTransform: 'uppercase' }}>Target Role Parameters</div>
           <form onSubmit={handleGenerate}>
             <div className="form-group" style={{ marginBottom: '12px' }}>
               <label className="form-label">Target Company</label>
@@ -142,82 +149,93 @@ export default function CoverLetterPage() {
             </div>
 
             <div className="form-group" style={{ marginBottom: '12px' }}>
-              <label className="form-label">Required Skills</label>
+              <label className="form-label">Key Required Competencies</label>
               <input
                 className="input"
                 value={requiredSkills}
                 onChange={(e) => setRequiredSkills(e.target.value)}
-                placeholder="PyTorch, Triton, FlashAttention"
+                placeholder="e.g. PyTorch, Triton, FlashAttention, Distributed Systems"
               />
             </div>
 
             <div className="form-group" style={{ marginBottom: '16px' }}>
-              <label className="form-label">Job Summary</label>
+              <label className="form-label">Job Description Summary</label>
               <textarea
                 className="input"
-                style={{ minHeight: '80px', fontFamily: 'inherit' }}
+                rows="4"
                 value={jobDescription}
                 onChange={(e) => setJobDescription(e.target.value)}
+                placeholder="Paste key responsibilities or requirements..."
               />
             </div>
 
             <button
               type="submit"
               className="btn btn-primary"
-              style={{ width: '100%', padding: '9px 16px', fontSize: '13px' }}
               disabled={loading}
+              style={{ width: '100%', padding: '10px 0', fontSize: '13px' }}
             >
-              {loading ? 'Synthesizing Tailored Pitch...' : 'Generate Pitch & Formal Letter'}
+              {loading ? 'Synthesizing STAR Application Pitch...' : 'GENERATE COVER PITCH →'}
             </button>
           </form>
         </div>
 
-        {/* Right Output */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-          {/* LinkedIn InMail Pitch */}
-          <div className="card">
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
-              <div className="card-title" style={{ fontSize: '13px' }}>LinkedIn / Recruiter InMail Pitch (100 words)</div>
-              {recruiterPitch && (
-                <button
-                  type="button"
-                  className="btn btn-secondary btn-sm"
-                  style={{ fontSize: '11px', padding: '2px 8px' }}
-                  onClick={handleCopyPitch}
-                >
-                  {copiedPitch ? '✓ Copied!' : 'Copy Pitch'}
-                </button>
-              )}
+        {/* Right Outputs */}
+        <div className={styles.outputs}>
+          {/* Recruiter Pitch Box */}
+          <div className={styles.pitchCard}>
+            <div className={styles.pitchHeader}>
+              <div>
+                <span className={styles.pitchTag}>LINKEDIN / INMAIL PITCH</span>
+                <span style={{ fontSize: '11px', fontFamily: 'var(--font-mono)', color: 'var(--gray-500)', marginLeft: '8px' }}>
+                  {recruiterPitch.split(/\s+/).filter(Boolean).length} words
+                </span>
+              </div>
+              <button
+                className="btn btn-secondary btn-sm"
+                onClick={handleCopyPitch}
+                disabled={!recruiterPitch}
+                style={{ fontSize: '11.5px', padding: '4px 10px' }}
+              >
+                {copiedPitch ? '✓ Copied' : 'Copy Pitch'}
+              </button>
             </div>
-            <textarea
-              className={styles.outputBox}
-              style={{ minHeight: '110px', fontSize: '12.5px' }}
-              readOnly
-              value={recruiterPitch || 'Click "Generate Pitch" or choose a preset to synthesize a tailored outreach note.'}
-            />
+            <div className={styles.pitchContent}>
+              {recruiterPitch || 'Generate a concise, high-converting LinkedIn DM or email to hiring managers.'}
+            </div>
           </div>
 
-          {/* Formal STAR Cover Letter */}
-          <div className="card">
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
-              <div className="card-title" style={{ fontSize: '13px' }}>Formal STAR Cover Letter</div>
-              {coverLetter && (
+          {/* Full Cover Letter Box */}
+          <div className={styles.letterCard}>
+            <div className={styles.letterHeader}>
+              <div>
+                <span className={styles.letterTag}>FORMAL APPLICATION LETTER</span>
+                <span style={{ fontSize: '11px', fontFamily: 'var(--font-mono)', color: 'var(--gray-500)', marginLeft: '8px' }}>
+                  {coverLetter.split(/\s+/).filter(Boolean).length} words
+                </span>
+              </div>
+              <div style={{ display: 'flex', gap: '6px' }}>
                 <button
                   type="button"
+                  onClick={() => handleAddSnippet('impact')}
                   className="btn btn-secondary btn-sm"
-                  style={{ fontSize: '11px', padding: '2px 8px' }}
-                  onClick={handleCopyLetter}
+                  style={{ fontSize: '11px', padding: '4px 8px' }}
                 >
-                  {copiedLetter ? '✓ Copied!' : 'Copy Letter'}
+                  + Add Metric
                 </button>
-              )}
+                <button
+                  className="btn btn-primary btn-sm"
+                  onClick={handleCopyLetter}
+                  disabled={!coverLetter}
+                  style={{ fontSize: '11.5px', padding: '4px 10px' }}
+                >
+                  {copiedLetter ? '✓ Copied' : 'Copy Letter'}
+                </button>
+              </div>
             </div>
-            <textarea
-              className={styles.outputBox}
-              style={{ minHeight: '190px', fontSize: '12.5px' }}
-              readOnly
-              value={coverLetter || 'Tailored formal letter referencing your real database projects, metrics, and certifications.'}
-            />
+            <div className={styles.letterContent}>
+              {coverLetter || 'Your formal tailored STAR cover letter with verified projects and impact metrics will be crafted here.'}
+            </div>
           </div>
         </div>
       </div>

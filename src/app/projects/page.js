@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import styles from './page.module.css';
 import { showToast } from '@/components/Toast';
 import PageHeader from '@/components/PageHeader';
@@ -9,7 +9,9 @@ export default function ProjectsPage() {
   const [projects, setProjects] = useState([]);
   const [statusFilter, setStatusFilter] = useState('all');
   const [showModal, setShowModal] = useState(false);
-  const [expandedProjectId, setExpandedProjectId] = useState(null);
+  const [selectedCaseStudy, setSelectedCaseStudy] = useState(null);
+  const [searchQuery, setSearchQuery] = useState('');
+  const searchInputRef = useRef(null);
   
   const initialForm = {
     name: '', description: '', status: 'planned', 
@@ -19,11 +21,25 @@ export default function ProjectsPage() {
   };
   const [formData, setFormData] = useState(initialForm);
   const [editId, setEditId] = useState(null);
-  const [newMilestoneName, setNewMilestoneName] = useState('');
 
   useEffect(() => {
     fetchProjects();
   }, [statusFilter]);
+
+  // Keyboard shortcut '/' to search
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (e.key === '/' && document.activeElement !== searchInputRef.current && !showModal && !selectedCaseStudy) {
+        e.preventDefault();
+        searchInputRef.current?.focus();
+      } else if (e.key === 'Escape') {
+        setSelectedCaseStudy(null);
+        setShowModal(false);
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [showModal, selectedCaseStudy]);
 
   const fetchProjects = async () => {
     try {
@@ -43,7 +59,8 @@ export default function ProjectsPage() {
     return Math.round((completed / milestones.length) * 100);
   };
 
-  const handleOpenModal = (project = null) => {
+  const handleOpenModal = (project = null, e = null) => {
+    if (e) e.stopPropagation();
     if (project) {
       setEditId(project.id);
       setFormData({
@@ -93,87 +110,24 @@ export default function ProjectsPage() {
   };
 
   const handleDelete = async (id, e) => {
-    e.stopPropagation();
+    if (e) e.stopPropagation();
     if (confirm('Are you sure you want to delete this project?')) {
       try {
         await fetch(`/api/projects/${id}`, { method: 'DELETE' });
         showToast('Project deleted from portfolio', 'info');
+        setSelectedCaseStudy(null);
         fetchProjects();
       } catch (err) {
-        console.error('Failed to delete', err);
+        console.error('Failed to delete project', err);
       }
     }
   };
 
-  const toggleMilestone = async (projectId, milestoneId, currentStatus) => {
-    try {
-      await fetch(`/api/projects/${projectId}/milestones`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ milestone_id: milestoneId, completed: !currentStatus })
-      });
-      showToast(!currentStatus ? 'Milestone marked as complete!' : 'Milestone reopened', 'info');
-      fetchProjects();
-    } catch (err) {
-      console.error('Failed to toggle milestone', err);
-    }
-  };
-
-  const addMilestone = async (projectId) => {
-    if (!newMilestoneName.trim()) return;
-    try {
-      await fetch(`/api/projects/${projectId}/milestones`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name: newMilestoneName })
-      });
-      setNewMilestoneName('');
-      fetchProjects();
-    } catch (err) {
-      console.error('Failed to add milestone', err);
-    }
-  };
-
-  const deleteMilestone = async (projectId, milestoneId) => {
-    try {
-      await fetch(`/api/projects/${projectId}/milestones`, {
-        method: 'DELETE',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ milestone_id: milestoneId })
-      });
-      fetchProjects();
-    } catch (err) {
-      console.error('Failed to delete milestone', err);
-    }
-  };
-
-  const addFormMilestone = () => {
-    setFormData({
-      ...formData,
-      milestones: [...formData.milestones, { name: '', due_date: '' }]
-    });
-  };
-
-  const updateFormMilestone = (index, field, value) => {
-    const newMs = [...formData.milestones];
-    newMs[index][field] = value;
-    setFormData({ ...formData, milestones: newMs });
-  };
-
-  const removeFormMilestone = (index) => {
-    const newMs = formData.milestones.filter((_, i) => i !== index);
-    setFormData({ ...formData, milestones: newMs });
-  };
-
-  const getStatusColor = (status) => {
-    switch(status) {
-      case 'completed': return styles.statusCompleted;
-      case 'in_progress': return styles.statusInProgress;
-      case 'planned': return styles.statusPlanned;
-      case 'paused': return styles.statusPaused;
-      default: return '';
-    }
-  };
+  const filteredProjects = projects.filter((p) => {
+    if (!searchQuery.trim()) return true;
+    const q = searchQuery.toLowerCase();
+    return p.name?.toLowerCase().includes(q) || p.tech_stack?.toLowerCase().includes(q) || p.description?.toLowerCase().includes(q);
+  });
 
   return (
     <div className={styles.container}>
@@ -183,219 +137,281 @@ export default function ProjectsPage() {
         subtitle="A structured archive of your production machine learning systems, architectures, and measurable outcomes."
         actions={
           <button className="btn btn-primary" onClick={() => handleOpenModal()} style={{ fontSize: '13px', padding: '8px 16px' }}>
-            + NEW PROJECT
+            + NEW ARCHITECTURE
           </button>
         }
       />
 
-      <div className={styles.filters}>
-        {['all', 'planned', 'in_progress', 'completed', 'paused'].map(status => (
-          <button 
-            key={status} 
-            className={`${styles.filterBtn} ${statusFilter === status ? styles.activeFilter : ''}`}
-            onClick={() => setStatusFilter(status)}
-          >
-            {status.replace('_', ' ').toUpperCase()}
-          </button>
-        ))}
+      {/* Filter and Search Bar */}
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px', gap: '12px', flexWrap: 'wrap' }}>
+        <div style={{ display: 'flex', gap: '6px' }}>
+          {['all', 'in_progress', 'completed', 'planned'].map((s) => (
+            <button
+              key={s}
+              type="button"
+              onClick={() => setStatusFilter(s)}
+              className={`btn ${statusFilter === s ? 'btn-primary' : 'btn-secondary'} btn-sm`}
+              style={{ textTransform: 'uppercase' }}
+            >
+              {s.replace('_', ' ')}
+            </button>
+          ))}
+        </div>
+
+        <div style={{ position: 'relative', maxWidth: '280px', width: '100%' }}>
+          <input
+            ref={searchInputRef}
+            type="text"
+            className="input"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            placeholder="Search projects... (/)"
+            style={{ fontSize: '12px', paddingRight: '28px' }}
+          />
+          <span style={{ position: 'absolute', right: '10px', top: '7px', fontSize: '10px', fontFamily: 'var(--font-mono)', color: 'var(--gray-400)' }}>
+            /
+          </span>
+        </div>
       </div>
 
-      {projects.length === 0 ? (
+      {/* Projects Grid */}
+      {filteredProjects.length === 0 ? (
         <div className={styles.emptyState}>
-          <h3 style={{ fontSize: '16px', fontWeight: 800, textTransform: 'uppercase', marginBottom: '6px' }}>No projects yet</h3>
-          <p style={{ color: 'var(--gray-600)', fontSize: '13px', marginBottom: '16px' }}>Your portfolio starts with one good project.</p>
+          <p style={{ fontSize: '13.5px', color: 'var(--gray-600)', marginBottom: '16px' }}>
+            No engineering projects found matching current criteria.
+          </p>
           <button className="btn btn-primary" onClick={() => handleOpenModal()}>
-            CREATE PROJECT →
+            CREATE FIRST ARCHITECTURE
           </button>
         </div>
       ) : (
         <div className={styles.grid}>
-          {projects.map(project => {
+          {filteredProjects.map((project, index) => {
             const progress = getProgress(project.milestones);
-            const isExpanded = expandedProjectId === project.id;
-            
             return (
-              <div 
-                key={project.id} 
-                className={`${styles.card} ${isExpanded ? styles.cardExpanded : ''}`}
-                onClick={() => setExpandedProjectId(isExpanded ? null : project.id)}
+              <div
+                key={project.id}
+                className={styles.card}
+                onClick={() => setSelectedCaseStudy(project)}
+                style={{ cursor: 'pointer' }}
               >
-                <div className={styles.cardHeader}>
-                  <div className={styles.cardTitleGroup}>
-                    <h3 className={styles.cardTitle}>{project.name}</h3>
-                    <span className={`${styles.statusBadge} ${getStatusColor(project.status)}`}>
-                      {project.status.replace('_', ' ')}
-                    </span>
-                  </div>
-                  <div className={styles.cardActions}>
-                    <button className={styles.iconBtn} onClick={(e) => { e.stopPropagation(); handleOpenModal(project); }}>
-                      ✎
-                    </button>
-                    <button className={styles.iconBtn} onClick={(e) => handleDelete(project.id, e)}>
-                      ×
-                    </button>
-                  </div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
+                  <span style={{ fontFamily: 'var(--font-mono)', fontSize: '11px', color: 'var(--gray-500)' }}>
+                    0{index + 1}
+                  </span>
+                  <span style={{ fontSize: '10.5px', fontFamily: 'var(--font-mono)', color: project.status === 'completed' ? 'var(--green)' : 'var(--blue)', fontWeight: 700, textTransform: 'uppercase' }}>
+                    ● {project.status.replace('_', ' ')}
+                  </span>
                 </div>
 
-                <p className={styles.description}>{project.description || 'No description provided.'}</p>
+                <h3 className={styles.cardTitle}>{project.name}</h3>
+
+                <p className={styles.description}>
+                  {project.description}
+                </p>
 
                 {project.tech_stack && (
-                  <div className={styles.tags}>
+                  <div className={styles.techStack}>
                     {project.tech_stack.split(',').map((tech, i) => (
-                      <span key={i} className={styles.tag}>{tech.trim()}</span>
+                      <span key={i} className={styles.techTag}>
+                        {tech.trim()}
+                      </span>
                     ))}
                   </div>
                 )}
 
-                <div className={styles.progressSection}>
-                  <div className={styles.progressHeader}>
-                    <span>Milestones</span>
-                    <span>{progress}%</span>
-                  </div>
+                <div className={styles.progressContainer} style={{ marginTop: '16px' }}>
                   <div className={styles.progressBar}>
-                    <div className={styles.progressFill} style={{ width: `${progress}%` }}></div>
+                    <div
+                      className={styles.progressFill}
+                      style={{
+                        width: project.status === 'completed' ? '100%' : `${progress}%`,
+                        background: 'var(--black)'
+                      }}
+                    />
                   </div>
                 </div>
-
-                <div className={styles.links}>
-                  {project.github_url && <a href={project.github_url} target="_blank" rel="noopener noreferrer" className={styles.link} onClick={e => e.stopPropagation()}>GitHub ↗</a>}
-                  {project.live_url && <a href={project.live_url} target="_blank" rel="noopener noreferrer" className={styles.link} onClick={e => e.stopPropagation()}>Live Demo ↗</a>}
-                </div>
-
-                {isExpanded && (
-                  <div className={styles.expandedContent} onClick={e => e.stopPropagation()}>
-                    <h4 className={styles.sectionTitle}>Milestones</h4>
-                    
-                    <div className={styles.milestoneList}>
-                      {project.milestones?.length === 0 ? (
-                        <p className={styles.noMilestones}>No milestones yet.</p>
-                      ) : (
-                        project.milestones?.map(ms => (
-                          <div key={ms.id} className={styles.milestoneItem}>
-                            <label className={styles.checkboxLabel}>
-                              <input 
-                                type="checkbox" 
-                                checked={!!ms.completed} 
-                                onChange={() => toggleMilestone(project.id, ms.id, !!ms.completed)}
-                              />
-                              <span className={!!ms.completed ? styles.completedText : ''}>{ms.name}</span>
-                            </label>
-                            <button className={styles.deleteMilestone} onClick={() => deleteMilestone(project.id, ms.id)}>
-                              ×
-                            </button>
-                          </div>
-                        ))
-                      )}
-                    </div>
-                    
-                    <div className={styles.addMilestone}>
-                      <input 
-                        type="text" 
-                        placeholder="New milestone..." 
-                        value={newMilestoneName}
-                        onChange={(e) => setNewMilestoneName(e.target.value)}
-                        onKeyDown={(e) => e.key === 'Enter' && addMilestone(project.id)}
-                        className={styles.input}
-                      />
-                      <button className={styles.secondaryBtn} onClick={() => addMilestone(project.id)}>
-                        Add
-                      </button>
-                    </div>
-
-                    {project.impact && (
-                      <div className={styles.impactSection}>
-                        <h4 className={styles.sectionTitle}>Project Impact</h4>
-                        <p className={styles.impactText}>{project.impact}</p>
-                      </div>
-                    )}
-                  </div>
-                )}
               </div>
             );
           })}
         </div>
       )}
 
-      {showModal && (
-        <div className={styles.modalOverlay} onClick={() => setShowModal(false)}>
-          <div className={styles.modal} onClick={e => e.stopPropagation()}>
-            <div className={styles.modalHeader}>
-              <h2>{editId ? 'Edit Project' : 'New Project'}</h2>
-              <button className={styles.closeBtn} onClick={() => setShowModal(false)}>×</button>
+      {/* ─── Case-Study Deep Dive Drawer / Modal ────────────────────── */}
+      {selectedCaseStudy && (
+        <div className="modal-overlay" onClick={() => setSelectedCaseStudy(null)}>
+          <div className="modal" style={{ maxWidth: '640px' }} onClick={(e) => e.stopPropagation()}>
+            <div className="modal-header">
+              <div>
+                <span style={{ fontSize: '10.5px', fontFamily: 'var(--font-mono)', color: 'var(--gray-500)', textTransform: 'uppercase' }}>
+                  SYSTEM ARCHITECTURE CASE STUDY
+                </span>
+                <h3 className="modal-title" style={{ fontSize: '18px', marginTop: '2px' }}>
+                  {selectedCaseStudy.name}
+                </h3>
+              </div>
+              <button className="modal-close" onClick={() => setSelectedCaseStudy(null)}>✕</button>
             </div>
-            
-            <form onSubmit={handleSubmit} className={styles.form}>
-              <div className={styles.formGrid}>
-                <div className={styles.formGroup}>
-                  <label>Project Name *</label>
-                  <input required className={styles.input} type="text" value={formData.name} onChange={e => setFormData({...formData, name: e.target.value})} />
+
+            <div className="modal-body" style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+              <div>
+                <div style={{ fontSize: '11px', fontFamily: 'var(--font-mono)', color: 'var(--gray-500)', marginBottom: '4px' }}>
+                  SYSTEM SUMMARY & ARCHITECTURE:
                 </div>
-                
-                <div className={styles.formGroup}>
-                  <label>Status</label>
-                  <select className={styles.input} value={formData.status} onChange={e => setFormData({...formData, status: e.target.value})}>
-                    <option value="planned">Planned</option>
-                    <option value="in_progress">In Progress</option>
-                    <option value="completed">Completed</option>
-                    <option value="paused">Paused</option>
-                  </select>
-                </div>
+                <p style={{ fontSize: '13.5px', color: 'var(--black)', lineHeight: 1.6 }}>
+                  {selectedCaseStudy.description}
+                </p>
               </div>
 
-              <div className={styles.formGroup}>
-                <label>Description</label>
-                <textarea className={styles.textarea} value={formData.description} onChange={e => setFormData({...formData, description: e.target.value})} rows={3}></textarea>
-              </div>
-
-              <div className={styles.formGrid}>
-                <div className={styles.formGroup}>
-                  <label>Tech Stack (comma separated)</label>
-                  <input className={styles.input} type="text" value={formData.tech_stack} onChange={e => setFormData({...formData, tech_stack: e.target.value})} placeholder="Python, PyTorch, Pandas..." />
-                </div>
-                <div className={styles.formGroup}>
-                  <label>Category</label>
-                  <input className={styles.input} type="text" value={formData.category} onChange={e => setFormData({...formData, category: e.target.value})} placeholder="NLP, Computer Vision..." />
-                </div>
-              </div>
-
-              <div className={styles.formGrid}>
-                <div className={styles.formGroup}>
-                  <label>GitHub URL</label>
-                  <input className={styles.input} type="url" value={formData.github_url} onChange={e => setFormData({...formData, github_url: e.target.value})} />
-                </div>
-                <div className={styles.formGroup}>
-                  <label>Live Demo URL</label>
-                  <input className={styles.input} type="url" value={formData.live_url} onChange={e => setFormData({...formData, live_url: e.target.value})} />
-                </div>
-              </div>
-
-              <div className={styles.formGroup}>
-                <label>Impact / Results</label>
-                <textarea className={styles.textarea} value={formData.impact} onChange={e => setFormData({...formData, impact: e.target.value})} rows={2} placeholder="Achieved 95% accuracy..."></textarea>
-              </div>
-
-              {!editId && (
-                <div className={styles.formGroup}>
-                  <label>Initial Milestones</label>
-                  {formData.milestones.map((ms, idx) => (
-                    <div key={idx} className={styles.milestoneInputRow}>
-                      <input 
-                        className={styles.input} 
-                        type="text" 
-                        placeholder="Milestone name" 
-                        value={ms.name} 
-                        onChange={e => updateFormMilestone(idx, 'name', e.target.value)} 
-                      />
-                      <button type="button" className={styles.iconBtn} onClick={() => removeFormMilestone(idx)}>×</button>
-                    </div>
-                  ))}
-                  <button type="button" className={styles.secondaryBtn} onClick={addFormMilestone}>+ Add Milestone</button>
+              {selectedCaseStudy.impact && (
+                <div style={{ background: 'var(--off-white)', padding: '12px', borderRadius: '4px', border: '1px solid var(--gray-100)' }}>
+                  <div style={{ fontSize: '10.5px', fontFamily: 'var(--font-mono)', color: 'var(--green)', fontWeight: 700 }}>
+                    MEASURABLE OUTCOME / STAR IMPACT:
+                  </div>
+                  <div style={{ fontSize: '13px', color: 'var(--black)', marginTop: '4px' }}>
+                    {selectedCaseStudy.impact}
+                  </div>
                 </div>
               )}
 
-              <div className={styles.modalFooter}>
-                <button type="button" className={styles.secondaryBtn} onClick={() => setShowModal(false)}>Cancel</button>
-                <button type="submit" className={styles.primaryBtn}>Save Project</button>
+              {selectedCaseStudy.tech_stack && (
+                <div>
+                  <div style={{ fontSize: '11px', fontFamily: 'var(--font-mono)', color: 'var(--gray-500)', marginBottom: '6px' }}>
+                    ENGINEERING STACK:
+                  </div>
+                  <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
+                    {selectedCaseStudy.tech_stack.split(',').map((tech) => (
+                      <span key={tech} style={{ fontSize: '11px', background: 'var(--off-white)', border: '1px solid var(--gray-200)', padding: '3px 8px', borderRadius: '3px', fontFamily: 'var(--font-mono)' }}>
+                        {tech.trim()}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+
+            <div className="modal-footer" style={{ display: 'flex', justifyContent: 'space-between' }}>
+              <button
+                type="button"
+                onClick={(e) => handleDelete(selectedCaseStudy.id, e)}
+                style={{ background: 'transparent', border: 'none', color: 'var(--red)', fontSize: '12px', fontFamily: 'var(--font-mono)', cursor: 'pointer' }}
+              >
+                DELETE PROJECT
+              </button>
+
+              <div style={{ display: 'flex', gap: '8px' }}>
+                <button
+                  type="button"
+                  className="btn btn-secondary btn-sm"
+                  onClick={() => {
+                    const curr = selectedCaseStudy;
+                    setSelectedCaseStudy(null);
+                    handleOpenModal(curr);
+                  }}
+                >
+                  EDIT DETAILS
+                </button>
+                {selectedCaseStudy.github_url && (
+                  <a href={selectedCaseStudy.github_url} target="_blank" rel="noreferrer" className="btn btn-primary btn-sm">
+                    VIEW REPO ↗
+                  </a>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Edit/Create Form Modal */}
+      {showModal && (
+        <div className="modal-overlay" onClick={() => setShowModal(false)}>
+          <div className="modal" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-header">
+              <h3 className="modal-title">{editId ? 'Edit Project' : 'New Project'}</h3>
+              <button className="modal-close" onClick={() => setShowModal(false)}>✕</button>
+            </div>
+            
+            <form onSubmit={handleSubmit}>
+              <div className="modal-body">
+                <div className="form-group">
+                  <label className="form-label">Project Title *</label>
+                  <input
+                    type="text"
+                    required
+                    className="input"
+                    value={formData.name}
+                    onChange={e => setFormData({...formData, name: e.target.value})}
+                    placeholder="e.g. Distributed LLM Serving Engine"
+                  />
+                </div>
+
+                <div className="form-group">
+                  <label className="form-label">Technical Description *</label>
+                  <textarea
+                    required
+                    className="input"
+                    rows="3"
+                    value={formData.description}
+                    onChange={e => setFormData({...formData, description: e.target.value})}
+                    placeholder="Describe problem, architecture and implementation details..."
+                  />
+                </div>
+
+                <div className="grid-2">
+                  <div className="form-group">
+                    <label className="form-label">Status</label>
+                    <select
+                      className="input"
+                      value={formData.status}
+                      onChange={e => setFormData({...formData, status: e.target.value})}
+                    >
+                      <option value="planned">Planned</option>
+                      <option value="in_progress">In Progress</option>
+                      <option value="completed">Completed</option>
+                    </select>
+                  </div>
+                  <div className="form-group">
+                    <label className="form-label">Category</label>
+                    <input
+                      type="text"
+                      className="input"
+                      value={formData.category}
+                      onChange={e => setFormData({...formData, category: e.target.value})}
+                      placeholder="e.g. MLOps / Systems"
+                    />
+                  </div>
+                </div>
+
+                <div className="form-group">
+                  <label className="form-label">Tech Stack (comma-separated)</label>
+                  <input
+                    type="text"
+                    className="input"
+                    value={formData.tech_stack}
+                    onChange={e => setFormData({...formData, tech_stack: e.target.value})}
+                    placeholder="e.g. PyTorch, Triton, FastAPI, Docker"
+                  />
+                </div>
+
+                <div className="form-group">
+                  <label className="form-label">Measurable Impact / STAR Metric</label>
+                  <input
+                    type="text"
+                    className="input"
+                    value={formData.impact}
+                    onChange={e => setFormData({...formData, impact: e.target.value})}
+                    placeholder="e.g. Reduced p99 latency by 45% via KV-cache optimizations"
+                  />
+                </div>
+              </div>
+
+              <div className="modal-footer">
+                <button type="button" className="btn btn-secondary" onClick={() => setShowModal(false)}>
+                  Cancel
+                </button>
+                <button type="submit" className="btn btn-primary">
+                  {editId ? 'Save Changes' : 'Create Architecture'}
+                </button>
               </div>
             </form>
           </div>

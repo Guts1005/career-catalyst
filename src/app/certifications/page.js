@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import styles from './page.module.css';
 import { showToast } from '@/components/Toast';
 import PageHeader from '@/components/PageHeader';
@@ -12,6 +12,8 @@ export default function CertificationsPage() {
   const [search, setSearch] = useState('');
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingCert, setEditingCert] = useState(null);
+  const [selectedPreview, setSelectedPreview] = useState(null);
+  const searchInputRef = useRef(null);
   
   const [formData, setFormData] = useState({
     name: '',
@@ -29,6 +31,21 @@ export default function CertificationsPage() {
   useEffect(() => {
     fetchCertifications();
   }, [filter, search]);
+
+  // Keyboard shortcut '/'
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (e.key === '/' && document.activeElement !== searchInputRef.current && !isModalOpen && !selectedPreview) {
+        e.preventDefault();
+        searchInputRef.current?.focus();
+      } else if (e.key === 'Escape') {
+        setSelectedPreview(null);
+        setIsModalOpen(false);
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isModalOpen, selectedPreview]);
 
   const fetchCertifications = async () => {
     setLoading(true);
@@ -57,7 +74,8 @@ export default function CertificationsPage() {
     }));
   };
 
-  const openModal = (cert = null) => {
+  const openModal = (cert = null, e = null) => {
+    if (e) e.stopPropagation();
     if (cert) {
       setEditingCert(cert);
       setFormData({
@@ -100,95 +118,36 @@ export default function CertificationsPage() {
     try {
       const url = editingCert ? `/api/certifications/${editingCert.id}` : '/api/certifications';
       const method = editingCert ? 'PUT' : 'POST';
-
+      
       const res = await fetch(url, {
         method,
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(formData)
       });
-
+      
       if (res.ok) {
-        showToast(editingCert ? 'Certification updated successfully!' : 'New credential added to portfolio!', 'success');
+        showToast(editingCert ? 'Certification updated!' : 'Certification recorded!', 'success');
         closeModal();
         fetchCertifications();
       }
     } catch (error) {
       console.error('Failed to save certification:', error);
-      showToast('Failed to save certification', 'error');
+      showToast('Error saving certification', 'error');
     }
   };
 
-  const deleteCertification = async (id) => {
-    if (!window.confirm('Are you sure you want to delete this certification?')) return;
-    
+  const deleteCertification = async (id, e) => {
+    if (e) e.stopPropagation();
+    if (!confirm('Remove this credential from archive?')) return;
     try {
       const res = await fetch(`/api/certifications/${id}`, { method: 'DELETE' });
       if (res.ok) {
-        showToast('Certification removed', 'info');
+        showToast('Credential removed', 'info');
+        setSelectedPreview(null);
         fetchCertifications();
       }
     } catch (error) {
       console.error('Failed to delete certification:', error);
-    }
-  };
-
-  const updateProgress = async (id, currentProgress) => {
-    const newProgress = prompt('Enter new progress (0-100):', currentProgress);
-    if (newProgress === null) return;
-    
-    const parsed = parseInt(newProgress, 10);
-    if (isNaN(parsed) || parsed < 0 || parsed > 100) {
-      alert('Please enter a valid number between 0 and 100');
-      return;
-    }
-
-    try {
-      const status = parsed === 100 ? 'completed' : (parsed > 0 ? 'in_progress' : 'planned');
-      const res = await fetch(`/api/certifications/${id}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ progress: parsed, status })
-      });
-
-      if (res.ok) {
-        showToast(`Progress updated to ${parsed}%`, 'info');
-        fetchCertifications();
-      }
-    } catch (error) {
-      console.error('Failed to update progress:', error);
-    }
-  };
-
-  const markAsComplete = async (id) => {
-    try {
-      const res = await fetch(`/api/certifications/${id}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ progress: 100, status: 'completed' })
-      });
-
-      if (res.ok) {
-        showToast('Credential marked 100% Completed & Verified!', 'success');
-        fetchCertifications();
-      }
-    } catch (error) {
-      console.error('Failed to complete certification:', error);
-    }
-  };
-
-  const formatStatus = (status) => {
-    switch (status) {
-      case 'in_progress': return 'In Progress';
-      case 'completed': return 'Completed';
-      default: return 'Planned';
-    }
-  };
-  
-  const getStatusClass = (status) => {
-    switch (status) {
-      case 'in_progress': return styles.statusInProgress;
-      case 'completed': return styles.statusCompleted;
-      default: return styles.statusPlanned;
     }
   };
 
@@ -200,264 +159,273 @@ export default function CertificationsPage() {
         subtitle="A verified record of your technical certifications, specializations, and professional qualifications."
         actions={
           <button className="btn btn-primary" onClick={() => openModal()} style={{ fontSize: '13px', padding: '8px 16px' }}>
-            + ADD CREDENTIAL
+            + RECORD CREDENTIAL
           </button>
         }
       />
 
-      <div className={styles.controls}>
-        <div className={styles.tabs}>
-          {['all', 'planned', 'in_progress', 'completed'].map((tab) => (
+      {/* Filter and Search Bar */}
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px', gap: '12px', flexWrap: 'wrap' }}>
+        <div style={{ display: 'flex', gap: '6px' }}>
+          {['all', 'completed', 'in_progress', 'planned'].map((s) => (
             <button
-              key={tab}
-              className={`${styles.tab} ${filter === tab ? styles.activeTab : ''}`}
-              onClick={() => setFilter(tab)}
+              key={s}
+              type="button"
+              onClick={() => setFilter(s)}
+              className={`btn ${filter === s ? 'btn-primary' : 'btn-secondary'} btn-sm`}
+              style={{ textTransform: 'uppercase' }}
             >
-              {tab.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase())}
+              {s.replace('_', ' ')}
             </button>
           ))}
         </div>
-        <div className={styles.search}>
-          <svg className={styles.searchIcon} width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-            <circle cx="11" cy="11" r="8"></circle>
-            <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
-          </svg>
+
+        <div style={{ position: 'relative', maxWidth: '280px', width: '100%' }}>
           <input
+            ref={searchInputRef}
             type="text"
-            className={styles.searchInput}
-            placeholder="Search certifications..."
+            className="input"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
+            placeholder="Search credentials... (/)"
+            style={{ fontSize: '12px', paddingRight: '28px' }}
           />
+          <span style={{ position: 'absolute', right: '10px', top: '7px', fontSize: '10px', fontFamily: 'var(--font-mono)', color: 'var(--gray-400)' }}>
+            /
+          </span>
         </div>
       </div>
 
-      {loading ? (
-        <div style={{ textAlign: 'center', padding: '3rem', color: 'var(--text-muted)' }}>Loading...</div>
-      ) : certifications.length === 0 ? (
-        <div className={styles.emptyState}>
-          <div className={styles.emptyStateIcon}>🏆</div>
-          <h3>No certifications found</h3>
-          <p>Add a new certification goal to start tracking your progress.</p>
-        </div>
-      ) : (
-        <div className={styles.grid}>
-          {certifications.map((cert) => (
-            <div key={cert.id} className={styles.card}>
-              <div className={styles.cardHeader}>
+      {/* Certifications Grid */}
+      <div className={styles.grid}>
+        {certifications.map((cert, index) => (
+          <div
+            key={cert.id}
+            className={styles.card}
+            onClick={() => setSelectedPreview(cert)}
+            style={{ cursor: 'pointer' }}
+          >
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
+              <span style={{ fontFamily: 'var(--font-mono)', fontSize: '11px', color: 'var(--gray-500)' }}>
+                0{index + 1}
+              </span>
+              <span style={{ fontSize: '10.5px', fontFamily: 'var(--font-mono)', color: cert.status === 'completed' ? 'var(--green)' : 'var(--blue)', fontWeight: 700, textTransform: 'uppercase' }}>
+                ● {cert.status.replace('_', ' ')}
+              </span>
+            </div>
+
+            <h3 className={styles.cardTitle}>{cert.name}</h3>
+
+            <div style={{ fontSize: '12px', color: 'var(--gray-600)', fontFamily: 'var(--font-mono)', marginTop: '4px' }}>
+              {cert.provider}
+            </div>
+
+            {cert.category && (
+              <span style={{ display: 'inline-block', fontSize: '11px', fontFamily: 'var(--font-mono)', color: 'var(--black)', background: 'var(--off-white)', padding: '2px 6px', borderRadius: '3px', marginTop: '8px', border: '1px solid var(--gray-100)' }}>
+                {cert.category}
+              </span>
+            )}
+
+            <div className={styles.progressContainer} style={{ marginTop: '16px' }}>
+              <div className={styles.progressBar}>
+                <div
+                  className={styles.progressFill}
+                  style={{
+                    width: `${cert.progress}%`,
+                    background: 'var(--black)'
+                  }}
+                />
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {/* ─── Document / Credential Preview Drawer ───────────────────── */}
+      {selectedPreview && (
+        <div className="modal-overlay" onClick={() => setSelectedPreview(null)}>
+          <div className="modal" style={{ maxWidth: '580px' }} onClick={(e) => e.stopPropagation()}>
+            <div className="modal-header">
+              <div>
+                <span style={{ fontSize: '10.5px', fontFamily: 'var(--font-mono)', color: 'var(--gray-500)', textTransform: 'uppercase' }}>
+                  VERIFIED CREDENTIAL RECORD
+                </span>
+                <h3 className="modal-title" style={{ fontSize: '18px', marginTop: '2px' }}>
+                  {selectedPreview.name}
+                </h3>
+              </div>
+              <button className="modal-close" onClick={() => setSelectedPreview(null)}>✕</button>
+            </div>
+
+            <div className="modal-body" style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '10px' }}>
+                <div style={{ background: 'var(--off-white)', padding: '10px', borderRadius: '4px', border: '1px solid var(--gray-100)' }}>
+                  <div style={{ fontSize: '10px', fontFamily: 'var(--font-mono)', color: 'var(--gray-500)' }}>ISSUER</div>
+                  <div style={{ fontSize: '12.5px', fontWeight: 700, marginTop: '2px' }}>{selectedPreview.provider}</div>
+                </div>
+                <div style={{ background: 'var(--off-white)', padding: '10px', borderRadius: '4px', border: '1px solid var(--gray-100)' }}>
+                  <div style={{ fontSize: '10px', fontFamily: 'var(--font-mono)', color: 'var(--gray-500)' }}>STATUS</div>
+                  <div style={{ fontSize: '12.5px', fontWeight: 700, marginTop: '2px', textTransform: 'uppercase' }}>{selectedPreview.status}</div>
+                </div>
+                <div style={{ background: 'var(--off-white)', padding: '10px', borderRadius: '4px', border: '1px solid var(--gray-100)' }}>
+                  <div style={{ fontSize: '10px', fontFamily: 'var(--font-mono)', color: 'var(--gray-500)' }}>EFFORT</div>
+                  <div style={{ fontSize: '12.5px', fontWeight: 700, marginTop: '2px' }}>{selectedPreview.estimated_hours || 40} Hours</div>
+                </div>
+              </div>
+
+              {selectedPreview.notes && (
                 <div>
-                  <h3 className={styles.cardTitle}>
-                    {cert.url ? (
-                      <a href={cert.url} target="_blank" rel="noopener noreferrer" style={{ color: 'inherit', textDecoration: 'none' }}>
-                        {cert.name}
-                      </a>
-                    ) : (
-                      cert.name
-                    )}
-                  </h3>
-                  <p className={styles.provider}>{cert.provider}</p>
-                </div>
-                <div className={styles.actions}>
-                  <button className={styles.actionBtn} onClick={() => openModal(cert)} title="Edit">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                      <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
-                      <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
-                    </svg>
-                  </button>
-                  <button className={`${styles.actionBtn} ${styles.deleteBtn}`} onClick={() => deleteCertification(cert.id)} title="Delete">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                      <polyline points="3 6 5 6 21 6"></polyline>
-                      <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
-                    </svg>
-                  </button>
-                </div>
-              </div>
-              
-              <div className={styles.badges}>
-                <span className={`${styles.badge} ${getStatusClass(cert.status)}`}>
-                  {formatStatus(cert.status)}
-                </span>
-                <span className={`${styles.badge} ${cert.priority === 'high' ? styles.priorityHigh : cert.priority === 'medium' ? styles.priorityMedium : styles.priorityLow}`}>
-                  Priority: {cert.priority}
-                </span>
-              </div>
-
-              <div className={styles.progressSection}>
-                <div className={styles.progressHeader}>
-                  <span>Progress</span>
-                  <span>{cert.progress}%</span>
-                </div>
-                <div className={styles.progressBarContainer} onClick={() => updateProgress(cert.id, cert.progress)}>
-                  <div className={styles.progressBar} style={{ width: `${cert.progress}%` }}></div>
-                </div>
-              </div>
-
-              <div className={styles.meta}>
-                {cert.deadline && (
-                  <div className={styles.metaItem}>
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                      <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
-                      <line x1="16" y1="2" x2="16" y2="6"></line>
-                      <line x1="8" y1="2" x2="8" y2="6"></line>
-                      <line x1="3" y1="10" x2="21" y2="10"></line>
-                    </svg>
-                    <span>{new Date(cert.deadline).toLocaleDateString()}</span>
+                  <div style={{ fontSize: '11px', fontFamily: 'var(--font-mono)', color: 'var(--gray-500)', marginBottom: '4px' }}>
+                    CURRICULUM SYLLABUS & COMPETENCY NOTES:
                   </div>
-                )}
-                {cert.estimated_hours > 0 && (
-                  <div className={styles.metaItem}>
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                      <circle cx="12" cy="12" r="10"></circle>
-                      <polyline points="12 6 12 12 16 14"></polyline>
-                    </svg>
-                    <span>{cert.estimated_hours} hrs</span>
+                  <div style={{ fontSize: '13px', color: 'var(--black)', background: 'var(--off-white)', padding: '12px', borderRadius: '4px', border: '1px solid var(--gray-100)', lineHeight: 1.6 }}>
+                    {selectedPreview.notes}
                   </div>
-                )}
-              </div>
-
-              {cert.status !== 'completed' && (
-                <button className={styles.completeBtn} onClick={() => markAsComplete(cert.id)}>
-                  Mark as Complete
-                </button>
+                </div>
               )}
             </div>
-          ))}
+
+            <div className="modal-footer" style={{ display: 'flex', justifyContent: 'space-between' }}>
+              <button
+                type="button"
+                onClick={(e) => deleteCertification(selectedPreview.id, e)}
+                style={{ background: 'transparent', border: 'none', color: 'var(--red)', fontSize: '12px', fontFamily: 'var(--font-mono)', cursor: 'pointer' }}
+              >
+                REMOVE CREDENTIAL
+              </button>
+
+              <div style={{ display: 'flex', gap: '8px' }}>
+                <button
+                  type="button"
+                  className="btn btn-secondary btn-sm"
+                  onClick={() => {
+                    const curr = selectedPreview;
+                    setSelectedPreview(null);
+                    openModal(curr);
+                  }}
+                >
+                  EDIT RECORD
+                </button>
+                {selectedPreview.url && (
+                  <a href={selectedPreview.url} target="_blank" rel="noreferrer" className="btn btn-primary btn-sm">
+                    VERIFY CREDENTIAL ↗
+                  </a>
+                )}
+              </div>
+            </div>
+          </div>
         </div>
       )}
 
+      {/* Edit/Create Form Modal */}
       {isModalOpen && (
-        <div className={styles.modalOverlay} onClick={closeModal}>
-          <div className={styles.modal} onClick={e => e.stopPropagation()}>
-            <div className={styles.modalHeader}>
-              <h2>{editingCert ? 'Edit Certification' : 'Add Certification'}</h2>
-              <button className={styles.closeBtn} onClick={closeModal}>&times;</button>
+        <div className="modal-overlay" onClick={closeModal}>
+          <div className="modal" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-header">
+              <h3 className="modal-title">{editingCert ? 'Edit Credential' : 'Record New Credential'}</h3>
+              <button className="modal-close" onClick={closeModal}>✕</button>
             </div>
-            
+
             <form onSubmit={saveCertification}>
-              <div className={styles.modalContent}>
-                <div className={styles.formGroup}>
-                  <label htmlFor="name">Certification Name *</label>
+              <div className="modal-body">
+                <div className="form-group">
+                  <label className="form-label">Certification Name *</label>
                   <input
                     type="text"
-                    id="name"
                     name="name"
+                    required
+                    className="input"
                     value={formData.name}
                     onChange={handleInputChange}
-                    required
+                    placeholder="e.g. AWS Certified Machine Learning — Specialty"
                   />
                 </div>
-                
-                <div className={styles.formGroup}>
-                  <label htmlFor="provider">Provider *</label>
-                  <input
-                    type="text"
-                    id="provider"
-                    name="provider"
-                    value={formData.provider}
-                    onChange={handleInputChange}
-                    required
-                  />
-                </div>
-                
-                <div className={styles.formGroup}>
-                  <label htmlFor="url">URL</label>
-                  <input
-                    type="url"
-                    id="url"
-                    name="url"
-                    value={formData.url}
-                    onChange={handleInputChange}
-                  />
-                </div>
-                
-                <div className={styles.formRow}>
-                  <div className={styles.formGroup}>
-                    <label htmlFor="status">Status</label>
-                    <select id="status" name="status" value={formData.status} onChange={handleInputChange}>
+
+                <div className="grid-2">
+                  <div className="form-group">
+                    <label className="form-label">Issuing Organization *</label>
+                    <input
+                      type="text"
+                      name="provider"
+                      required
+                      className="input"
+                      value={formData.provider}
+                      onChange={handleInputChange}
+                      placeholder="e.g. Amazon Web Services"
+                    />
+                  </div>
+                  <div className="form-group">
+                    <label className="form-label">Status</label>
+                    <select
+                      name="status"
+                      className="input"
+                      value={formData.status}
+                      onChange={handleInputChange}
+                    >
                       <option value="planned">Planned</option>
                       <option value="in_progress">In Progress</option>
                       <option value="completed">Completed</option>
                     </select>
                   </div>
-                  
-                  <div className={styles.formGroup}>
-                    <label htmlFor="progress">Progress (%)</label>
+                </div>
+
+                <div className="grid-2">
+                  <div className="form-group">
+                    <label className="form-label">Completion Progress (%)</label>
                     <input
                       type="number"
-                      id="progress"
                       name="progress"
                       min="0"
                       max="100"
+                      className="input"
                       value={formData.progress}
                       onChange={handleInputChange}
                     />
                   </div>
-                </div>
-                
-                <div className={styles.formRow}>
-                  <div className={styles.formGroup}>
-                    <label htmlFor="priority">Priority</label>
-                    <select id="priority" name="priority" value={formData.priority} onChange={handleInputChange}>
-                      <option value="low">Low</option>
-                      <option value="medium">Medium</option>
-                      <option value="high">High</option>
-                    </select>
-                  </div>
-                  
-                  <div className={styles.formGroup}>
-                    <label htmlFor="estimated_hours">Estimated Hours</label>
+                  <div className="form-group">
+                    <label className="form-label">Estimated Hours</label>
                     <input
                       type="number"
-                      id="estimated_hours"
                       name="estimated_hours"
                       min="0"
+                      className="input"
                       value={formData.estimated_hours}
                       onChange={handleInputChange}
                     />
                   </div>
                 </div>
-                
-                <div className={styles.formRow}>
-                  <div className={styles.formGroup}>
-                    <label htmlFor="deadline">Deadline</label>
-                    <input
-                      type="date"
-                      id="deadline"
-                      name="deadline"
-                      value={formData.deadline}
-                      onChange={handleInputChange}
-                    />
-                  </div>
-                  
-                  <div className={styles.formGroup}>
-                    <label htmlFor="category">Category</label>
-                    <input
-                      type="text"
-                      id="category"
-                      name="category"
-                      placeholder="e.g. Machine Learning"
-                      value={formData.category}
-                      onChange={handleInputChange}
-                    />
-                  </div>
+
+                <div className="form-group">
+                  <label className="form-label">Verification URL / Badge Link</label>
+                  <input
+                    type="url"
+                    name="url"
+                    className="input"
+                    value={formData.url}
+                    onChange={handleInputChange}
+                    placeholder="https://credly.com/badges/..."
+                  />
                 </div>
-                
-                <div className={styles.formGroup}>
-                  <label htmlFor="notes">Notes</label>
+
+                <div className="form-group">
+                  <label className="form-label">Curriculum / Syllabus Notes</label>
                   <textarea
-                    id="notes"
                     name="notes"
+                    className="input"
                     rows="3"
                     value={formData.notes}
                     onChange={handleInputChange}
-                  ></textarea>
+                    placeholder="Key concepts covered (e.g. SageMaker, Feature Store, Hyperparameter Tuning)..."
+                  />
                 </div>
               </div>
-              
-              <div className={styles.modalFooter}>
-                <button type="button" className={styles.cancelBtn} onClick={closeModal}>Cancel</button>
-                <button type="submit" className={styles.saveBtn}>
-                  {editingCert ? 'Update' : 'Save'} Certification
+
+              <div className="modal-footer">
+                <button type="button" className="btn btn-secondary" onClick={closeModal}>
+                  Cancel
+                </button>
+                <button type="submit" className="btn btn-primary">
+                  {editingCert ? 'Save Changes' : 'Record Credential'}
                 </button>
               </div>
             </form>

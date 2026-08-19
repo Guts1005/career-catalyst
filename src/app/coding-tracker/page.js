@@ -1,14 +1,10 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import styles from './page.module.css';
 import { showToast } from '@/components/Toast';
 import PageHeader from '@/components/PageHeader';
-import {
-  IconCoding,
-  IconCheck,
-  IconArrowUpRight,
-} from '@/components/Icons';
+import { IconCoding, IconCheck, IconArrowUpRight } from '@/components/Icons';
 
 const PLATFORMS = ['All', 'LeetCode', 'Kaggle', 'StrataScratch', 'HackerRank'];
 
@@ -19,6 +15,9 @@ export default function CodingTrackerPage() {
   const [loading, setLoading] = useState(true);
   const [selectedPlatform, setSelectedPlatform] = useState('All');
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [expandedId, setExpandedId] = useState(null);
+  const [search, setSearch] = useState('');
+  const searchInputRef = useRef(null);
 
   // Form
   const [title, setTitle] = useState('');
@@ -49,6 +48,20 @@ export default function CodingTrackerPage() {
   useEffect(() => {
     fetchData();
   }, [fetchData]);
+
+  // Keyboard shortcut '/'
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (e.key === '/' && document.activeElement !== searchInputRef.current && !isModalOpen) {
+        e.preventDefault();
+        searchInputRef.current?.focus();
+      } else if (e.key === 'Escape') {
+        setIsModalOpen(false);
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isModalOpen]);
 
   const handleAddProblem = async (e) => {
     e.preventDefault();
@@ -96,14 +109,11 @@ export default function CodingTrackerPage() {
     }
   };
 
-  if (loading) {
-    return (
-      <div className="loading" style={{ minHeight: '60vh' }}>
-        <div className="loadingSpinner" />
-        <p style={{ color: 'var(--text-muted)', fontSize: '13px', marginTop: '12px' }}>Loading Coding & Kaggle Hub...</p>
-      </div>
-    );
-  }
+  const filteredProblems = problems.filter((p) => {
+    if (!search.trim()) return true;
+    const q = search.toLowerCase();
+    return p.title?.toLowerCase().includes(q) || p.category?.toLowerCase().includes(q) || p.platform?.toLowerCase().includes(q);
+  });
 
   return (
     <div className={styles.container}>
@@ -127,18 +137,18 @@ export default function CodingTrackerPage() {
         {profiles.map((p) => (
           <div key={p.id} className={styles.profileCard}>
             <div className={styles.profileHeader}>
-              <div className={styles.platformTitle} style={{ fontSize: '14px', fontWeight: 600 }}>
+              <div className={styles.platformTitle} style={{ fontSize: '14px', fontWeight: 700 }}>
                 {p.platform}
               </div>
               {p.streak_days > 0 && (
                 <span className={styles.streakBadge} style={{ fontFamily: 'var(--font-mono)', fontSize: '11px' }}>
-                  • {p.streak_days} Day Streak
+                  ● {p.streak_days} Day Streak
                 </span>
               )}
             </div>
 
-            <div style={{ fontSize: '12.5px', color: 'var(--text-secondary)' }}>
-              Handle: <strong style={{ color: 'var(--text-primary)', fontFamily: 'var(--font-mono)' }}>@{p.handle}</strong>
+            <div style={{ fontSize: '12.5px', color: 'var(--gray-600)' }}>
+              Handle: <strong style={{ color: 'var(--black)', fontFamily: 'var(--font-mono)' }}>@{p.handle}</strong>
             </div>
 
             <div className={styles.profileStats}>
@@ -157,117 +167,100 @@ export default function CodingTrackerPage() {
         ))}
       </div>
 
-      {/* Difficulty Breakdown Row */}
-      <div className={styles.diffRow}>
-        <div className={styles.diffPill}>
-          <div>
-            <div style={{ fontSize: '11px', color: 'var(--text-muted)', textTransform: 'uppercase' }}>Easy Problems</div>
-            <div className={styles.diffEasyVal} style={{ fontFamily: 'var(--font-mono)' }}>{stats?.easy_solved || 0}</div>
-          </div>
-          <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: 'var(--success)' }} />
-        </div>
-
-        <div className={styles.diffPill}>
-          <div>
-            <div style={{ fontSize: '11px', color: 'var(--text-muted)', textTransform: 'uppercase' }}>Medium Problems</div>
-            <div className={styles.diffMedVal} style={{ fontFamily: 'var(--font-mono)' }}>{stats?.medium_solved || 0}</div>
-          </div>
-          <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: 'var(--warning)' }} />
-        </div>
-
-        <div className={styles.diffPill}>
-          <div>
-            <div style={{ fontSize: '11px', color: 'var(--text-muted)', textTransform: 'uppercase' }}>Hard Problems</div>
-            <div className={styles.diffHardVal} style={{ fontFamily: 'var(--font-mono)' }}>{stats?.hard_solved || 0}</div>
-          </div>
-          <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: 'var(--danger)' }} />
-        </div>
-
-        <div className={styles.diffPill}>
-          <div>
-            <div style={{ fontSize: '11px', color: 'var(--text-muted)', textTransform: 'uppercase' }}>Total Solved</div>
-            <div style={{ fontSize: '20px', fontWeight: 800, fontFamily: 'var(--font-mono)', color: 'var(--text-primary)' }}>{stats?.total_solved || 0}</div>
-          </div>
-          <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: 'var(--accent)' }} />
-        </div>
-      </div>
-
-      {/* Platform Filter Tabs */}
-      <div className={styles.filterBar}>
-        <div className={styles.filterTabs}>
-          {PLATFORMS.map((plat) => (
+      {/* Filter and Search Bar */}
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', margin: '24px 0 16px 0', gap: '12px', flexWrap: 'wrap' }}>
+        <div style={{ display: 'flex', gap: '6px' }}>
+          {PLATFORMS.map((p) => (
             <button
-              key={plat}
-              className={`${styles.fTab} ${selectedPlatform === plat ? styles.active : ''}`}
-              onClick={() => setSelectedPlatform(plat)}
-              style={{ fontSize: '12px' }}
+              key={p}
+              type="button"
+              className={`btn ${selectedPlatform === p ? 'btn-primary' : 'btn-secondary'} btn-sm`}
+              onClick={() => setSelectedPlatform(p)}
+              style={{ textTransform: 'uppercase' }}
             >
-              {plat}
+              {p}
             </button>
           ))}
         </div>
+
+        <div style={{ position: 'relative', maxWidth: '280px', width: '100%' }}>
+          <input
+            ref={searchInputRef}
+            type="text"
+            className="input"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            placeholder="Search problems... (/)"
+            style={{ fontSize: '12px', paddingRight: '28px' }}
+          />
+          <span style={{ position: 'absolute', right: '10px', top: '7px', fontSize: '10px', fontFamily: 'var(--font-mono)', color: 'var(--gray-400)' }}>
+            /
+          </span>
+        </div>
       </div>
 
-      {/* Problems Table */}
+      {/* Problems Ledger Table */}
       <div className={styles.tableCard}>
-        <table className={styles.probTable}>
+        <table className={styles.problemTable}>
           <thead>
             <tr>
-              <th>Status</th>
-              <th>Problem Name</th>
+              <th>#</th>
+              <th>Problem Title</th>
               <th>Platform</th>
               <th>Category</th>
               <th>Difficulty</th>
-              <th>Actions</th>
+              <th>Status</th>
+              <th>Action</th>
             </tr>
           </thead>
           <tbody>
-            {problems.length === 0 ? (
+            {filteredProblems.length === 0 ? (
               <tr>
-                <td colSpan="6" style={{ textAlign: 'center', padding: '30px', color: 'var(--text-muted)', fontSize: '12.5px' }}>
-                  No solved problems logged yet for this filter.
+                <td colSpan={7} style={{ textAlign: 'center', padding: '32px', color: 'var(--gray-500)' }}>
+                  No coding problems logged in this category.
                 </td>
               </tr>
             ) : (
-              problems.map((p) => (
-                <tr key={p.id}>
-                  <td>
-                    <span className={styles.solvedIcon}>✓ Solved</span>
-                  </td>
-                  <td>
-                    {p.url ? (
-                      <a href={p.url} target="_blank" rel="noopener noreferrer" className={styles.probLink}>
-                        {p.title} ↗
-                      </a>
-                    ) : (
-                      <strong style={{ color: 'var(--text-primary)', fontSize: '13px' }}>{p.title}</strong>
-                    )}
-                    {p.solution_notes && <div className={styles.notesText}>{p.solution_notes}</div>}
-                  </td>
-                  <td style={{ fontSize: '12.5px' }}>{p.platform}</td>
-                  <td style={{ fontSize: '12.5px', color: 'var(--text-muted)' }}>{p.category}</td>
-                  <td>
-                    <span
-                      className={`${styles.diffTag} ${
-                        p.difficulty === 'easy' ? styles.tagEasy : p.difficulty === 'hard' ? styles.tagHard : styles.tagMedium
-                      }`}
-                      style={{ textTransform: 'capitalize', fontSize: '10.5px' }}
-                    >
-                      {p.difficulty}
-                    </span>
-                  </td>
-                  <td>
-                    <button
-                      className={styles.delBtn}
-                      onClick={() => handleDeleteProblem(p.id, p.title)}
-                      title="Delete record"
-                      style={{ fontSize: '11px' }}
-                    >
-                      Delete
-                    </button>
-                  </td>
-                </tr>
-              ))
+              filteredProblems.map((prob, i) => {
+                const isExpanded = expandedId === prob.id;
+                return (
+                  <tr key={prob.id} onClick={() => setExpandedId(isExpanded ? null : prob.id)} style={{ cursor: 'pointer' }}>
+                    <td style={{ fontFamily: 'var(--font-mono)', fontSize: '11px', color: 'var(--gray-400)' }}>
+                      0{i + 1}
+                    </td>
+                    <td>
+                      <div style={{ fontWeight: 700, color: 'var(--black)' }}>{prob.title}</div>
+                      {isExpanded && prob.solution_notes && (
+                        <div style={{ marginTop: '8px', padding: '8px', background: 'var(--off-white)', borderRadius: '4px', fontSize: '12px', color: 'var(--gray-600)', border: '1px solid var(--gray-100)' }}>
+                          <strong>Solution Takeaway:</strong> {prob.solution_notes}
+                        </div>
+                      )}
+                    </td>
+                    <td>
+                      <span className={styles.platformBadge}>{prob.platform}</span>
+                    </td>
+                    <td>
+                      <span style={{ fontSize: '12px', color: 'var(--gray-600)' }}>{prob.category}</span>
+                    </td>
+                    <td>
+                      <span className={`${styles.diffBadge} ${styles[prob.difficulty]}`}>
+                        {prob.difficulty}
+                      </span>
+                    </td>
+                    <td>
+                      <span className={styles.solvedBadge}>✓ SOLVED</span>
+                    </td>
+                    <td onClick={(e) => e.stopPropagation()}>
+                      <button
+                        onClick={() => handleDeleteProblem(prob.id, prob.title)}
+                        style={{ background: 'none', border: 'none', color: 'var(--red)', fontSize: '11px', cursor: 'pointer', fontFamily: 'var(--font-mono)' }}
+                      >
+                        ✕
+                      </button>
+                    </td>
+                  </tr>
+                );
+              })
             )}
           </tbody>
         </table>
@@ -278,76 +271,74 @@ export default function CodingTrackerPage() {
         <div className="modal-overlay" onClick={() => setIsModalOpen(false)}>
           <div className="modal" onClick={(e) => e.stopPropagation()}>
             <div className="modal-header">
-              <div className="modal-title" style={{ fontSize: '14px', fontWeight: 600 }}>Log Solved Problem</div>
-              <button className="modal-close" onClick={() => setIsModalOpen(false)}>×</button>
+              <h3 className="modal-title">Log Solved Problem</h3>
+              <button className="modal-close" onClick={() => setIsModalOpen(false)}>✕</button>
             </div>
+
             <form onSubmit={handleAddProblem}>
               <div className="modal-body">
                 <div className="form-group">
                   <label className="form-label">Problem Title *</label>
                   <input
-                    className="input"
+                    type="text"
                     required
+                    className="input"
                     value={title}
                     onChange={(e) => setTitle(e.target.value)}
-                    placeholder="e.g. Backpropagation from Scratch, Two Sum, Attention Softmax"
+                    placeholder="e.g. 146. LRU Cache / Gradient Descent Optimizer"
                   />
                 </div>
+
                 <div className="grid-2">
                   <div className="form-group">
                     <label className="form-label">Platform</label>
-                    <select className="select" value={platform} onChange={(e) => setPlatform(e.target.value)}>
+                    <select className="input" value={platform} onChange={(e) => setPlatform(e.target.value)}>
                       <option value="LeetCode">LeetCode</option>
                       <option value="Kaggle">Kaggle</option>
                       <option value="StrataScratch">StrataScratch</option>
                       <option value="HackerRank">HackerRank</option>
-                      <option value="CodeSignal">CodeSignal</option>
+                      <option value="Other">Other</option>
                     </select>
                   </div>
                   <div className="form-group">
                     <label className="form-label">Difficulty</label>
-                    <select className="select" value={difficulty} onChange={(e) => setDifficulty(e.target.value)}>
+                    <select className="input" value={difficulty} onChange={(e) => setDifficulty(e.target.value)}>
                       <option value="easy">Easy</option>
                       <option value="medium">Medium</option>
                       <option value="hard">Hard</option>
                     </select>
                   </div>
                 </div>
+
                 <div className="form-group">
-                  <label className="form-label">Category</label>
+                  <label className="form-label">Category / Domain</label>
                   <input
+                    type="text"
                     className="input"
                     value={category}
                     onChange={(e) => setCategory(e.target.value)}
-                    placeholder="e.g. Dynamic Programming, Loss Functions, SQL Windows"
+                    placeholder="e.g. Transformers / Graph BFS / Two-Pointers"
                   />
                 </div>
+
                 <div className="form-group">
-                  <label className="form-label">Problem URL</label>
-                  <input
-                    className="input"
-                    value={url}
-                    onChange={(e) => setUrl(e.target.value)}
-                    placeholder="https://leetcode.com/problems/..."
-                  />
-                </div>
-                <div className="form-group">
-                  <label className="form-label">Key Algorithmic Insight / Complexity</label>
+                  <label className="form-label">Key Algorithm Notes & Invariants</label>
                   <textarea
                     className="input"
-                    style={{ minHeight: '60px', fontFamily: 'inherit' }}
+                    rows="3"
                     value={solutionNotes}
                     onChange={(e) => setSolutionNotes(e.target.value)}
-                    placeholder="O(N log K) using min-heap. Edge cases around empty tensors."
+                    placeholder="O(1) dictionary + doubly linked list invariant..."
                   />
                 </div>
               </div>
+
               <div className="modal-footer">
                 <button type="button" className="btn btn-secondary" onClick={() => setIsModalOpen(false)}>
                   Cancel
                 </button>
                 <button type="submit" className="btn btn-primary">
-                  Save Problem Record
+                  Record Problem
                 </button>
               </div>
             </form>

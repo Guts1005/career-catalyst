@@ -4,16 +4,21 @@ import { useState, useEffect, useMemo } from 'react';
 import styles from './page.module.css';
 import { showToast } from '@/components/Toast';
 import PageHeader from '@/components/PageHeader';
-import {
-  IconSkills,
-  IconCheck,
-} from '@/components/Icons';
+import { IconSkills, IconCheck } from '@/components/Icons';
+
+const ROLE_PROFILES = [
+  { id: 'senior_ml', name: 'Senior ML Engineer', desc: 'Focus on Triton kernels, distributed training, and low-latency inference.' },
+  { id: 'rag_architect', name: 'LLM Systems Architect', desc: 'Focus on hybrid search, vector indices, cross-encoders, and evaluation.' },
+  { id: 'data_infra', name: 'Data Infrastructure Lead', desc: 'Focus on distributed data pipelines, Kafka streaming, and Spark orchestration.' },
+];
 
 export default function SkillsPage() {
   const [skills, setSkills] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [selectedRole, setSelectedRole] = useState('senior_ml');
   const [filterCategory, setFilterCategory] = useState('All');
   const [sortBy, setSortBy] = useState('gap');
+  const [hoveredNode, setHoveredNode] = useState(null);
 
   const [newSkill, setNewSkill] = useState({
     name: '',
@@ -43,6 +48,11 @@ export default function SkillsPage() {
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleRoleChange = (roleId) => {
+    setSelectedRole(roleId);
+    showToast(`Target role calibrated: ${ROLE_PROFILES.find(r => r.id === roleId)?.name}`, 'info');
   };
 
   const handleUpdateLevel = async (id, level, name) => {
@@ -99,99 +109,127 @@ export default function SkillsPage() {
   const groupedSkills = useMemo(() => {
     const groups = {};
     filteredAndSortedSkills.forEach((skill) => {
-      if (!groups[skill.category]) groups[skill.category] = [];
+      if (!groups[skill.category]) {
+        groups[skill.category] = [];
+      }
       groups[skill.category].push(skill);
     });
     return groups;
   }, [filteredAndSortedSkills]);
 
-  const categoryAverages = useMemo(() => {
-    const avgs = {};
-    Object.entries(groupedSkills).forEach(([cat, catSkills]) => {
-      const total = catSkills.reduce((sum, s) => sum + s.current_level, 0);
-      avgs[cat] = Math.round(total / (catSkills.length || 1));
-    });
-    return avgs;
-  }, [groupedSkills]);
-
   const overallGap = useMemo(() => {
-    if (skills.length === 0) return 0;
-    const total = skills.reduce((sum, s) => sum + s.current_level, 0);
-    return Math.round(total / skills.length);
+    if (!skills.length) return 0;
+    const totalCurrent = skills.reduce((sum, s) => sum + s.current_level, 0);
+    const totalTarget = skills.reduce((sum, s) => sum + s.target_level, 0);
+    return Math.round((totalCurrent / Math.max(1, totalTarget)) * 100);
   }, [skills]);
 
-  const getStatusClass = (current, target) => {
-    const ratio = current / target;
-    if (ratio >= 0.8) return styles.status_mastered;
-    if (ratio >= 0.4) return styles.status_warning;
-    return styles.status_poor;
-  };
+  const highPriorityCount = useMemo(() => {
+    return skills.filter((s) => s.target_level - s.current_level > 20).length;
+  }, [skills]);
 
+  // Render Interactive Constellation Radar
   const renderRadarChart = () => {
-    const catKeys = Object.keys(groupedSkills);
-    if (catKeys.length < 3) return <div className={styles.categoryProgressText}>Add more categories for radar chart</div>;
+    const categoryAverages = {};
+    skills.forEach((s) => {
+      if (!categoryAverages[s.category]) {
+        categoryAverages[s.category] = { total: 0, count: 0 };
+      }
+      categoryAverages[s.category].total += (s.current_level / s.target_level) * 100;
+      categoryAverages[s.category].count += 1;
+    });
 
-    const size = 300;
+    const catKeys = Object.keys(categoryAverages);
+    if (catKeys.length < 3) return null;
+
+    const numPoints = catKeys.length;
+    const size = 320;
     const center = size / 2;
-    const radius = size / 2.5;
+    const radius = 100;
+
+    const getCoordinates = (index, value) => {
+      const angle = (Math.PI * 2 / numPoints) * index - Math.PI / 2;
+      const r = (value / 100) * radius;
+      return {
+        x: center + r * Math.cos(angle),
+        y: center + r * Math.sin(angle),
+        labelX: center + (radius + 24) * Math.cos(angle),
+        labelY: center + (radius + 24) * Math.sin(angle),
+      };
+    };
 
     const points = catKeys.map((cat, i) => {
-      const angle = (Math.PI * 2 * i) / catKeys.length - Math.PI / 2;
-      const score = (categoryAverages[cat] || 0) / 100;
+      const avg = Math.round(categoryAverages[cat].total / categoryAverages[cat].count);
       return {
-        x: center + radius * score * Math.cos(angle),
-        y: center + radius * score * Math.sin(angle),
-        labelX: center + (radius + 25) * Math.cos(angle),
-        labelY: center + (radius + 25) * Math.sin(angle),
+        ...getCoordinates(i, avg),
         label: cat,
+        value: avg,
       };
     });
 
     const pathData = points.map((p, i) => `${i === 0 ? 'M' : 'L'} ${p.x} ${p.y}`).join(' ') + ' Z';
 
-    const maxPoints = catKeys.map((cat, i) => {
-      const angle = (Math.PI * 2 * i) / catKeys.length - Math.PI / 2;
-      return {
-        x: center + radius * Math.cos(angle),
-        y: center + radius * Math.sin(angle),
-      };
-    });
-    const maxPathData = maxPoints.map((p, i) => `${i === 0 ? 'M' : 'L'} ${p.x} ${p.y}`).join(' ') + ' Z';
-
     return (
-      <svg width="100%" height="100%" viewBox={`0 0 ${size} ${size}`}>
-        <path d={maxPathData} fill="none" stroke="var(--border-light)" strokeWidth="1" />
-        {[0.2, 0.4, 0.6, 0.8].map((scale) => {
-          const webPoints = catKeys.map((cat, i) => {
-            const angle = (Math.PI * 2 * i) / catKeys.length - Math.PI / 2;
-            return {
-              x: center + radius * scale * Math.cos(angle),
-              y: center + radius * scale * Math.sin(angle),
-            };
-          });
-          const webPath = webPoints.map((p, i) => `${i === 0 ? 'M' : 'L'} ${p.x} ${p.y}`).join(' ') + ' Z';
-          return <path key={scale} d={webPath} fill="none" stroke="var(--border-light)" strokeWidth="0.5" strokeDasharray="2 2" />;
-        })}
-        {maxPoints.map((p, i) => (
-          <line key={`axis-${i}`} x1={center} y1={center} x2={p.x} y2={p.y} stroke="var(--border-light)" strokeWidth="1" />
+      <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`}>
+        {/* Background Grid Circles */}
+        {[0.25, 0.5, 0.75, 1.0].map((ratio) => (
+          <circle
+            key={ratio}
+            cx={center}
+            cy={center}
+            r={radius * ratio}
+            fill="none"
+            stroke="var(--gray-100)"
+            strokeWidth="1"
+          />
         ))}
-        <path d={pathData} fill="var(--accent-subtle)" stroke="var(--accent)" strokeWidth="2" />
+
+        {/* Radial Axis Lines */}
         {points.map((p, i) => (
-          <circle key={`pt-${i}`} cx={p.x} cy={p.y} r="4" fill="var(--accent)" />
+          <line
+            key={i}
+            x1={center}
+            y1={center}
+            x2={p.x}
+            y2={p.y}
+            stroke="var(--gray-200)"
+            strokeWidth="1"
+          />
         ))}
+
+        {/* Data Area Polygon */}
+        <path
+          d={pathData}
+          fill="rgba(10, 10, 10, 0.06)"
+          stroke="var(--black)"
+          strokeWidth="1.5"
+        />
+
+        {/* Interactive Data Points */}
         {points.map((p, i) => (
-          <text
-            key={`lbl-${i}`}
-            x={p.labelX}
-            y={p.labelY}
-            fill="var(--text-secondary)"
-            fontSize="10"
-            textAnchor="middle"
-            dominantBaseline="middle"
-            fontFamily="var(--font-mono)"
-          >
-            {p.label} ({categoryAverages[catKeys[i]]}%)
-          </text>
+          <g key={i} onMouseEnter={() => setHoveredNode(p)} onMouseLeave={() => setHoveredNode(null)}>
+            <circle
+              cx={p.x}
+              cy={p.y}
+              r="4"
+              fill="var(--black)"
+              stroke="var(--white)"
+              strokeWidth="1.5"
+              style={{ cursor: 'pointer' }}
+            />
+            <text
+              x={p.labelX}
+              y={p.labelY}
+              textAnchor="middle"
+              dominantBaseline="central"
+              fontSize="10"
+              fontWeight="600"
+              fill="var(--gray-600)"
+              fontFamily="var(--font-mono)"
+            >
+              {p.label.substring(0, 12)} ({p.value}%)
+            </text>
+          </g>
         ))}
       </svg>
     );
@@ -205,162 +243,160 @@ export default function SkillsPage() {
         subtitle="Identify the highest-impact competencies and technical deltas to improve for your target engineering roles."
       />
 
-      <div className={styles.summaryCards}>
-        <div className={styles.summaryCard}>
-          <span className={styles.summaryLabel}>Total Skills Tracked</span>
-          <span className={styles.summaryValue} style={{ fontFamily: 'var(--font-mono)' }}>{skills.length}</span>
+      {/* ─── Target Role Calibrator ─────────────────────────────────── */}
+      <div style={{ marginBottom: '16px' }}>
+        <div style={{ fontSize: '11px', fontFamily: 'var(--font-mono)', color: 'var(--gray-500)', marginBottom: '8px', textTransform: 'uppercase' }}>
+          Calibrate Against Target Engineering Role:
         </div>
-        <div className={styles.summaryCard}>
-          <span className={styles.summaryLabel}>Overall Proficiency</span>
-          <span className={styles.summaryValue} style={{ fontFamily: 'var(--font-mono)' }}>{overallGap}%</span>
-        </div>
-        <div className={styles.summaryCard}>
-          <span className={styles.summaryLabel}>Specialization Categories</span>
-          <span className={styles.summaryValue} style={{ fontFamily: 'var(--font-mono)' }}>{Object.keys(groupedSkills).length}</span>
+        <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+          {ROLE_PROFILES.map((r) => (
+            <button
+              key={r.id}
+              type="button"
+              onClick={() => handleRoleChange(r.id)}
+              style={{
+                background: selectedRole === r.id ? 'var(--black)' : 'var(--white)',
+                color: selectedRole === r.id ? 'var(--white)' : 'var(--black)',
+                border: '1px solid',
+                borderColor: selectedRole === r.id ? 'var(--black)' : 'var(--gray-200)',
+                borderRadius: '4px',
+                padding: '6px 12px',
+                fontSize: '12px',
+                fontFamily: 'var(--font-mono)',
+                cursor: 'pointer',
+                transition: 'all 0.15s ease',
+              }}
+            >
+              {r.name}
+            </button>
+          ))}
         </div>
       </div>
 
+      {/* Summary KPI Cards */}
+      <div className={styles.summaryCards}>
+        <div className={styles.summaryCard}>
+          <span className={styles.summaryLabel}>Total Competencies</span>
+          <span className={styles.summaryValue}>{skills.length}</span>
+        </div>
+        <div className={styles.summaryCard}>
+          <span className={styles.summaryLabel}>Overall Proficiency</span>
+          <span className={styles.summaryValue}>{overallGap}%</span>
+        </div>
+        <div className={styles.summaryCard}>
+          <span className={styles.summaryLabel}>High-Priority Deltas</span>
+          <span className={styles.summaryValue} style={{ color: highPriorityCount > 0 ? 'var(--amber)' : 'var(--black)' }}>
+            {highPriorityCount}
+          </span>
+        </div>
+      </div>
+
+      {/* Radar Map & Node Inspection */}
       {Object.keys(groupedSkills).length >= 3 && filterCategory === 'All' && (
         <div className={styles.radarContainer}>
           <div className={styles.radarWrapper}>
             {renderRadarChart()}
           </div>
+          {hoveredNode && (
+            <div style={{ position: 'absolute', bottom: '16px', right: '16px', background: 'var(--black)', color: 'var(--white)', padding: '10px 14px', borderRadius: '4px', fontSize: '11.5px', fontFamily: 'var(--font-mono)' }}>
+              <div>DOMAIN: {hoveredNode.label}</div>
+              <div>MASTERY: {hoveredNode.value}%</div>
+            </div>
+          )}
         </div>
       )}
 
+      {/* Filter and Sort Controls */}
       <div className={styles.controls}>
-        <select
-          className={styles.select}
-          value={filterCategory}
-          onChange={(e) => setFilterCategory(e.target.value)}
-        >
-          {categories.map((c) => (
-            <option key={c} value={c}>{c}</option>
-          ))}
-        </select>
+        <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+          <span style={{ fontSize: '11px', fontFamily: 'var(--font-mono)', color: 'var(--gray-500)' }}>CATEGORY:</span>
+          <select
+            value={filterCategory}
+            onChange={(e) => setFilterCategory(e.target.value)}
+            className={styles.select}
+          >
+            {categories.map((c) => (
+              <option key={c} value={c}>{c}</option>
+            ))}
+          </select>
+        </div>
 
-        <select
-          className={styles.select}
-          value={sortBy}
-          onChange={(e) => setSortBy(e.target.value)}
-        >
-          <option value="gap">Sort by Gap (Largest First)</option>
-          <option value="importance">Sort by Importance</option>
-          <option value="name">Sort by Name</option>
-        </select>
+        <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+          <span style={{ fontSize: '11px', fontFamily: 'var(--font-mono)', color: 'var(--gray-500)' }}>SORT BY:</span>
+          <select
+            value={sortBy}
+            onChange={(e) => setSortBy(e.target.value)}
+            className={styles.select}
+          >
+            <option value="gap">Largest Gap Delta</option>
+            <option value="importance">Priority Importance</option>
+            <option value="name">Alphabetical</option>
+          </select>
+        </div>
       </div>
 
-      <form className={styles.addForm} onSubmit={handleAddSkill}>
-        <h3 className={styles.categoryTitle} style={{ fontSize: '13.5px', marginBottom: '12px' }}>Add Technical Skill</h3>
-        <div className={styles.formGrid}>
-          <div className={styles.formGroup}>
-            <label className={styles.formLabel}>Skill Name</label>
-            <input
-              required
-              className={styles.input}
-              type="text"
-              value={newSkill.name}
-              onChange={(e) => setNewSkill({ ...newSkill, name: e.target.value })}
-              placeholder="e.g. PyTorch, Triton, CUDA"
-            />
-          </div>
-          <div className={styles.formGroup}>
-            <label className={styles.formLabel}>Category</label>
-            <input
-              required
-              className={styles.input}
-              type="text"
-              value={newSkill.category}
-              onChange={(e) => setNewSkill({ ...newSkill, category: e.target.value })}
-              placeholder="e.g. Deep Learning, Systems, MLOps"
-            />
-          </div>
-          <div className={styles.formGroup}>
-            <label className={styles.formLabel}>Priority / Weight</label>
-            <select
-              className={styles.select}
-              value={newSkill.importance}
-              onChange={(e) => setNewSkill({ ...newSkill, importance: e.target.value })}
-            >
-              <option value="low">Low</option>
-              <option value="medium">Medium</option>
-              <option value="high">High</option>
-              <option value="critical">Critical</option>
-            </select>
-          </div>
-        </div>
-        <button type="submit" className={styles.button} style={{ fontSize: '12.5px', padding: '7px 16px', marginTop: '10px' }}>
-          Add Skill to Radar
-        </button>
-      </form>
+      {/* Skill List with Real-time Progress Adjusters */}
+      <div className={styles.skillsGrid}>
+        {Object.entries(groupedSkills).map(([category, catSkills]) => {
+          const catTotal = catSkills.reduce((sum, s) => sum + s.current_level, 0);
+          const catTarget = catSkills.reduce((sum, s) => sum + s.target_level, 0);
+          const catProgress = Math.round((catTotal / Math.max(1, catTarget)) * 100);
 
-      {loading ? (
-        <div style={{ color: 'var(--text-muted)', fontSize: '13px', padding: '20px' }}>Loading competencies...</div>
-      ) : (
-        <div className={styles.skillsGrid}>
-          {Object.entries(groupedSkills).map(([category, catSkills]) => (
+          return (
             <div key={category} className={styles.categorySection}>
               <div className={styles.categoryHeader}>
-                <h2 className={styles.categoryTitle} style={{ fontSize: '14px' }}>{category}</h2>
-                <div className={styles.categoryProgress}>
-                  <span className={styles.categoryProgressText} style={{ fontFamily: 'var(--font-mono)' }}>
-                    {categoryAverages[category]}% Complete
-                  </span>
-                </div>
+                <span className={styles.categoryTitle}>{category}</span>
+                <span className={styles.categoryProgressText}>{catProgress}% DOMAIN MASTERY</span>
               </div>
 
               <div className={styles.skillList}>
-                {catSkills.map((skill) => (
-                  <div key={skill.id} className={styles.skillCard}>
-                    <div className={styles.skillHeader}>
-                      <h3 className={styles.skillName} style={{ fontSize: '13.5px' }}>{skill.name}</h3>
-                      <span className={`${styles.importanceBadge} ${styles['importance_' + skill.importance]}`} style={{ fontSize: '10.5px', textTransform: 'uppercase' }}>
-                        {skill.importance}
-                      </span>
-                    </div>
+                {catSkills.map((skill) => {
+                  const gap = skill.target_level - skill.current_level;
+                  const isHighGap = gap > 20;
 
-                    <div className={styles.skillBars}>
-                      <div className={styles.barRow}>
-                        <div className={styles.barLabel}>
-                          <span>Target ({skill.target_level}%)</span>
-                        </div>
-                        <div className={styles.barTrack} style={{ height: '4px' }}>
-                          <div className={`${styles.barFill} ${styles.targetFill}`} style={{ width: `${skill.target_level}%` }} />
+                  return (
+                    <div key={skill.id} className={styles.skillCard}>
+                      <div className={styles.skillHeader}>
+                        <span className={styles.skillName}>{skill.name}</span>
+                        <span className={`${styles.importanceBadge} ${isHighGap ? styles.importance_critical : styles.importance_medium}`}>
+                          {isHighGap ? '● HIGH DELTA' : '● ON TRACK'}
+                        </span>
+                      </div>
+
+                      <div className={styles.skillBars}>
+                        <div className={styles.barRow}>
+                          <div className={styles.barLabel}>
+                            <span>Proficiency</span>
+                            <span>{skill.current_level}% / {skill.target_level}%</span>
+                          </div>
+                          <div className={styles.barTrack}>
+                            <div
+                              className={styles.barFill}
+                              style={{ width: `${(skill.current_level / skill.target_level) * 100}%` }}
+                            />
+                          </div>
                         </div>
                       </div>
 
-                      <div className={styles.barRow}>
-                        <div className={styles.barLabel}>
-                          <span>Current ({skill.current_level}%)</span>
-                          <span style={{ fontFamily: 'var(--font-mono)' }}>{skill.target_level - skill.current_level}% Gap</span>
-                        </div>
-                        <div className={styles.barTrack} style={{ height: '4px' }}>
-                          <div
-                            className={`${styles.barFill} ${getStatusClass(skill.current_level, skill.target_level)}`}
-                            style={{ width: `${skill.current_level}%` }}
-                          />
-                        </div>
+                      <div className={styles.sliderContainer}>
+                        <span className={styles.sliderLabel}>Adjust:</span>
+                        <input
+                          type="range"
+                          min="0"
+                          max="100"
+                          value={skill.current_level}
+                          onChange={(e) => handleUpdateLevel(skill.id, e.target.value, skill.name)}
+                          className={styles.slider}
+                        />
                       </div>
                     </div>
-
-                    <div className={styles.sliderContainer} style={{ marginTop: '10px' }}>
-                      <input
-                        type="range"
-                        className={styles.slider}
-                        min="0"
-                        max={skill.target_level}
-                        value={skill.current_level}
-                        onChange={(e) => handleUpdateLevel(skill.id, e.target.value, skill.name)}
-                      />
-                      <span className={styles.sliderLabel} style={{ fontSize: '10.5px' }}>Adjust Level</span>
-                    </div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             </div>
-          ))}
-        </div>
-      )}
+          );
+        })}
+      </div>
     </div>
   );
 }

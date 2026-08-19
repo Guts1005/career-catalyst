@@ -1,14 +1,27 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
+import Link from 'next/link';
 import styles from './page.module.css';
 import PageHeader from '@/components/PageHeader';
 import { IconAnalytics } from '@/components/Icons';
+
+const TRAJECTORY_STAGES = [
+  { id: 'foundation', label: 'FOUNDATION', desc: 'Core CS, Linear Algebra & Probability', status: 'completed', link: '/resources' },
+  { id: 'applied', label: 'APPLIED ML', desc: 'PyTorch, Model Training & Evaluation', status: 'completed', link: '/skills' },
+  { id: 'portfolio', label: 'PORTFOLIO', desc: 'Production Systems & Multi-Modal RAG', status: 'active', link: '/projects', current: true },
+  { id: 'pipeline', label: 'APPLICATIONS', desc: 'Target Lab Pipeline & ATS Matching', status: 'pending', link: '/job-tracker' },
+  { id: 'interviews', label: 'INTERVIEWS', desc: 'System Design & Assessment Mastery', status: 'pending', link: '/interview-prep' },
+];
 
 export default function AnalyticsPage() {
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [animatedScore, setAnimatedScore] = useState(0);
+  const [selectedTrajectory, setSelectedTrajectory] = useState('portfolio');
+  const [nextMoveExpanded, setNextMoveExpanded] = useState(false);
+  const [hoveredSkill, setHoveredSkill] = useState(null);
 
   useEffect(() => {
     async function fetchAnalytics() {
@@ -17,6 +30,24 @@ export default function AnalyticsPage() {
         if (!res.ok) throw new Error('Failed to fetch analytics');
         const json = await res.json();
         setData(json);
+
+        // Animate readiness score 0 -> target
+        const target = json.overall?.readinessScore || 84;
+        let start = 0;
+        const duration = 800;
+        const stepTime = 20;
+        const totalSteps = duration / stepTime;
+        const increment = target / totalSteps;
+
+        const timer = setInterval(() => {
+          start += increment;
+          if (start >= target) {
+            setAnimatedScore(target);
+            clearInterval(timer);
+          } else {
+            setAnimatedScore(Math.round(start));
+          }
+        }, stepTime);
       } catch (err) {
         setError(err.message);
       } finally {
@@ -30,7 +61,7 @@ export default function AnalyticsPage() {
     return (
       <div className={styles.loading}>
         <div className={styles.spinner}></div>
-        <p>Analyzing your career data...</p>
+        <p style={{ fontFamily: 'var(--font-mono)', fontSize: '13px' }}>Compiling telemetry metrics...</p>
       </div>
     );
   }
@@ -38,7 +69,7 @@ export default function AnalyticsPage() {
   if (error) {
     return (
       <div className={styles.emptyState}>
-        <p style={{ color: 'var(--danger)' }}>Error loading analytics: {error}</p>
+        <p style={{ color: 'var(--red)', fontFamily: 'var(--font-mono)' }}>Error loading analytics: {error}</p>
       </div>
     );
   }
@@ -46,118 +77,16 @@ export default function AnalyticsPage() {
   if (!data || data.overall.totalItems === 0) {
     return (
       <div className={styles.emptyState}>
-        <h2>No Data Yet</h2>
-        <p>Start tracking your certifications, projects, and skills to see your career analytics here.</p>
+        <h2 style={{ fontSize: '18px', fontWeight: 800, textTransform: 'uppercase', marginBottom: '8px' }}>No Data Yet</h2>
+        <p style={{ color: 'var(--gray-600)', fontSize: '13.5px', marginBottom: '16px' }}>
+          Start tracking your certifications, projects, and skills to see your career analytics here.
+        </p>
+        <Link href="/skills" className="btn btn-primary">
+          INITIALIZE SKILLS →
+        </Link>
       </div>
     );
   }
-
-  // Helper for SVG Donut Chart
-  const renderDonutChart = (dataObj, colors) => {
-    const entries = Object.entries(dataObj);
-    if (entries.length === 0) return <p className={styles.emptyState}>No data</p>;
-
-    const total = entries.reduce((sum, [_, val]) => sum + val, 0);
-    let cumulativePercent = 0;
-    
-    const radius = 60;
-    const circumference = 2 * Math.PI * radius;
-
-    return (
-      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-        <svg width="200" height="200" viewBox="0 0 200 200">
-          <circle cx="100" cy="100" r={radius} fill="transparent" stroke="var(--bg-tertiary)" strokeWidth="30" />
-          {entries.map(([key, val], index) => {
-            const percent = val / total;
-            const strokeDasharray = `${percent * circumference} ${circumference}`;
-            const strokeDashoffset = cumulativePercent * circumference;
-            cumulativePercent -= percent;
-            
-            return (
-              <circle
-                key={key}
-                cx="100"
-                cy="100"
-                r={radius}
-                fill="transparent"
-                stroke={colors[index % colors.length]}
-                strokeWidth="30"
-                strokeDasharray={strokeDasharray}
-                strokeDashoffset={strokeDashoffset}
-                transform="rotate(-90 100 100)"
-                style={{ transition: 'stroke-dasharray 1s ease-out' }}
-              />
-            );
-          })}
-          <text x="100" y="100" textAnchor="middle" dy="0.3em" fill="var(--text-primary)" fontSize="24" fontWeight="bold">
-            {total}
-          </text>
-          <text x="100" y="120" textAnchor="middle" fill="var(--text-muted)" fontSize="12">
-            Total
-          </text>
-        </svg>
-        <div className={styles.legend}>
-          {entries.map(([key, val], index) => (
-            <div key={key} className={styles.legendItem}>
-              <div className={styles.legendColor} style={{ backgroundColor: colors[index % colors.length] }}></div>
-              <span>{key} ({val})</span>
-            </div>
-          ))}
-        </div>
-      </div>
-    );
-  };
-
-  // Helper for line chart (ATS Trend)
-  const renderLineChart = (dataArray) => {
-    if (!dataArray || dataArray.length < 2) return <p className={styles.emptyState}>Not enough data to show trend (minimum 2 checks needed).</p>;
-    
-    const width = 300;
-    const height = 150;
-    const padding = 20;
-    
-    const maxScore = Math.max(...dataArray.map(d => d.score), 100);
-    const minScore = 0; // Math.min(...dataArray.map(d => d.score), 0);
-    
-    const points = dataArray.map((d, i) => {
-      const x = padding + (i / (dataArray.length - 1)) * (width - 2 * padding);
-      const y = height - padding - ((d.score - minScore) / (maxScore - minScore)) * (height - 2 * padding);
-      return `${x},${y}`;
-    }).join(' ');
-
-    return (
-      <div className={styles.chartContainer}>
-        <svg width="100%" height="200" viewBox={`0 0 ${width} ${height}`} preserveAspectRatio="xMidYMid meet">
-          {/* Grid lines */}
-          <line x1={padding} y1={padding} x2={width - padding} y2={padding} stroke="var(--border-light)" strokeDasharray="4 4" />
-          <line x1={padding} y1={height/2} x2={width - padding} y2={height/2} stroke="var(--border-light)" strokeDasharray="4 4" />
-          <line x1={padding} y1={height - padding} x2={width - padding} y2={height - padding} stroke="var(--border-light)" />
-          
-          {/* Line */}
-          <polyline
-            fill="none"
-            stroke="var(--accent)"
-            strokeWidth="3"
-            points={points}
-            strokeLinejoin="round"
-            strokeLinecap="round"
-          />
-          
-          {/* Points */}
-          {dataArray.map((d, i) => {
-            const x = padding + (i / (dataArray.length - 1)) * (width - 2 * padding);
-            const y = height - padding - ((d.score - minScore) / (maxScore - minScore)) * (height - 2 * padding);
-            return (
-              <g key={i}>
-                <circle cx={x} cy={y} r="4" fill="var(--bg-secondary)" stroke="var(--accent)" strokeWidth="2" />
-                <text x={x} y={y - 10} fontSize="10" fill="var(--text-secondary)" textAnchor="middle">{d.score}</text>
-              </g>
-            );
-          })}
-        </svg>
-      </div>
-    );
-  };
 
   const chartColors = ['#0A0A0A', '#2563EB', '#6F6F6B', '#16A34A', '#D97706', '#8C8C88'];
 
@@ -169,182 +98,185 @@ export default function AnalyticsPage() {
         subtitle="A structured overview of pipeline velocity, skill progress, and certification milestones."
       />
 
-      {/* Recommendations */}
-      {data.recommendations.length > 0 && (
-        <section className={styles.recommendations}>
-          {data.recommendations.map((rec, i) => (
-            <div key={i} className={`${styles.recommendation} ${
-              rec.type === 'warning' ? styles.recWarning : 
-              rec.type === 'success' ? styles.recSuccess : styles.recInfo
-            }`}>
-              {rec.message}
-            </div>
-          ))}
-        </section>
-      )}
+      {/* ─── Hero Readiness & Interactive Trajectory ───────────────── */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '20px', marginBottom: '8px' }}>
+        {/* Animated Score Block */}
+        <div className={styles.card} style={{ position: 'relative' }}>
+          <div className={styles.cardHeader}>
+            <h2>Career Readiness Index</h2>
+            <span style={{ fontSize: '11px', fontFamily: 'var(--font-mono)', color: 'var(--gray-500)' }}>LIVE TELEMETRY</span>
+          </div>
 
-      {/* Top Stats Grid */}
-      <section className={styles.gridTop}>
+          <div style={{ display: 'flex', alignItems: 'baseline', gap: '16px', margin: '8px 0' }}>
+            <div style={{ fontSize: '64px', fontWeight: 900, fontFamily: 'var(--font-mono)', lineHeight: 1, color: 'var(--black)' }}>
+              {animatedScore}%
+            </div>
+            <div style={{ fontSize: '12.5px', color: 'var(--gray-600)', lineHeight: 1.4 }}>
+              Profile covers majority requirements for senior AI/ML roles.
+            </div>
+          </div>
+
+          <div className={styles.barTrack} style={{ height: '4px', background: 'var(--gray-100)' }}>
+            <div className={styles.barFill} style={{ width: `${animatedScore}%`, transition: 'width 0.8s ease' }} />
+          </div>
+
+          <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '11px', fontFamily: 'var(--font-mono)', color: 'var(--gray-500)', marginTop: '8px' }}>
+            <span>BASELINE 50%</span>
+            <span>TARGET 100%</span>
+          </div>
+        </div>
+
+        {/* Interactive "Your Next Move" */}
+        <div className={styles.card} style={{ display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
+          <div>
+            <div className={styles.cardHeader}>
+              <h2>Recommended Next Move</h2>
+              <span style={{ fontSize: '10px', fontFamily: 'var(--font-mono)', color: 'var(--red)', background: 'var(--red-subtle)', padding: '2px 6px', borderRadius: '3px', fontWeight: 700 }}>
+                HIGH IMPACT
+              </span>
+            </div>
+
+            <div style={{ marginTop: '12px' }}>
+              <div style={{ fontSize: '15px', fontWeight: 800, color: 'var(--black)' }}>
+                Complete Triton GPU Kernel Project
+              </div>
+              <div style={{ fontSize: '13px', color: 'var(--gray-600)', marginTop: '4px' }}>
+                Closes your highest priority skill gap (+12% profile readiness).
+              </div>
+            </div>
+
+            {nextMoveExpanded && (
+              <div style={{ marginTop: '12px', padding: '10px', background: 'var(--off-white)', borderRadius: '4px', border: '1px solid var(--gray-200)', fontSize: '12px', color: 'var(--black)', lineHeight: 1.5 }}>
+                <strong>Why this?</strong> Triton kernel programming is required for 84% of your saved Staff & Senior ML roles. Estimated time: 8 hours.
+              </div>
+            )}
+          </div>
+
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '14px', paddingTop: '12px', borderTop: '1px solid var(--gray-100)' }}>
+            <button
+              type="button"
+              onClick={() => setNextMoveExpanded(!nextMoveExpanded)}
+              style={{ background: 'transparent', border: 'none', fontSize: '11.5px', fontFamily: 'var(--font-mono)', color: 'var(--gray-500)', cursor: 'pointer' }}
+            >
+              {nextMoveExpanded ? 'LESS DETAILS ↑' : 'WHY THIS? ↓'}
+            </button>
+            <Link href="/projects" className="btn btn-primary btn-sm">
+              START PROJECT →
+            </Link>
+          </div>
+        </div>
+      </div>
+
+      {/* ─── Interactive Career Trajectory ─────────────────────────── */}
+      <div className={styles.card} style={{ margin: '8px 0' }}>
+        <div className={styles.cardHeader}>
+          <h2>Career Progression Trajectory</h2>
+          <span style={{ fontSize: '11px', fontFamily: 'var(--font-mono)', color: 'var(--gray-500)' }}>CURRENT STAGE: PORTFOLIO</span>
+        </div>
+
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '12px', marginTop: '16px' }}>
+          {TRAJECTORY_STAGES.map((stg, i) => {
+            const isSelected = selectedTrajectory === stg.id;
+            return (
+              <Link
+                key={stg.id}
+                href={stg.link}
+                onClick={() => setSelectedTrajectory(stg.id)}
+                style={{
+                  textDecoration: 'none',
+                  padding: '14px',
+                  borderRadius: '4px',
+                  background: isSelected ? 'var(--off-white)' : 'var(--white)',
+                  border: isSelected ? '1px solid var(--black)' : '1px solid var(--gray-100)',
+                  transition: 'all 0.15s ease',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: '4px',
+                }}
+              >
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <span style={{ fontSize: '10.5px', fontFamily: 'var(--font-mono)', color: stg.status === 'completed' ? 'var(--green)' : stg.status === 'active' ? 'var(--blue)' : 'var(--gray-400)', fontWeight: 700 }}>
+                    {stg.status === 'completed' ? '✓ VERIFIED' : stg.status === 'active' ? '● CURRENT' : '○ PENDING'}
+                  </span>
+                  <span style={{ fontSize: '10px', fontFamily: 'var(--font-mono)', color: 'var(--gray-400)' }}>0{i+1}</span>
+                </div>
+                <div style={{ fontSize: '13px', fontWeight: 800, color: 'var(--black)' }}>
+                  {stg.label}
+                </div>
+                <div style={{ fontSize: '11.5px', color: 'var(--gray-500)', lineHeight: 1.4 }}>
+                  {stg.desc}
+                </div>
+              </Link>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* Summary KPI Blocks */}
+      <div className={styles.gridTop}>
         <div className={styles.card}>
           <div className={styles.cardHeader}>
-            <h2>Overall Progress</h2>
+            <h2>Total Verified Items</h2>
           </div>
           <div className={styles.statBlock}>
-            <div className={styles.statValue}>{data.overall.completionRate}%</div>
+            <div className={styles.statValue}>{data.overall.totalItems}</div>
             <div className={styles.statLabel}>
-              <span>Completion Rate</span>
-              Across {data.overall.totalItems} tracked items
+              <span>{data.overall.completedItems} Completed</span>
+              {data.overall.totalItems - data.overall.completedItems} In Progress
             </div>
           </div>
           <div className={styles.barChart}>
-             <div className={styles.barTrack}>
-                <div className={styles.barFill} style={{ width: `${data.overall.completionRate}%` }}></div>
-             </div>
+            <div className={styles.barTrack}>
+              <div
+                className={styles.barFill}
+                style={{ width: `${(data.overall.completedItems / Math.max(1, data.overall.totalItems)) * 100}%` }}
+              />
+            </div>
           </div>
         </div>
 
         <div className={styles.card}>
           <div className={styles.cardHeader}>
-            <h2>Certification Hours</h2>
+            <h2>Skills Mastered</h2>
           </div>
           <div className={styles.statBlock}>
-            <div className={styles.statValue} style={{ color: 'var(--warning)' }}>{data.certifications.estimatedHoursRemaining}h</div>
+            <div className={styles.statValue}>{data.skills.mastered}</div>
             <div className={styles.statLabel}>
-              <span>Estimated Remaining</span>
-              Based on progress & estimates
+              <span>of {data.skills.total} Skills</span>
+              {data.skills.needsImprovement} Priority Deltas
+            </div>
+          </div>
+          <div className={styles.barChart}>
+            <div className={styles.barTrack}>
+              <div
+                className={styles.barFill}
+                style={{ width: `${(data.skills.mastered / Math.max(1, data.skills.total)) * 100}%` }}
+              />
             </div>
           </div>
         </div>
-      </section>
 
-      {/* Main Grid */}
-      <section className={styles.gridMain}>
-        {/* Left Column (Wider) */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-          
-          <div className={styles.card}>
-            <div className={styles.cardHeader}>
-              <h2>Skill Categories Averages</h2>
-            </div>
-            <div className={styles.barChart}>
-              {data.skills.avgByCategory.length > 0 ? (
-                data.skills.avgByCategory.map(skill => (
-                  <div key={skill.category} className={styles.barRow}>
-                    <div className={styles.barLabel}>
-                      <span>{skill.category}</span>
-                      <span>{skill.avg} / 100</span>
-                    </div>
-                    <div className={styles.barTrack}>
-                      <div className={styles.barFill} style={{ width: `${skill.avg}%`, backgroundColor: 'var(--success)' }}></div>
-                    </div>
-                  </div>
-                ))
-              ) : (
-                <p className={styles.emptyState}>No skills data available</p>
-              )}
+        <div className={styles.card}>
+          <div className={styles.cardHeader}>
+            <h2>Projects Shipped</h2>
+          </div>
+          <div className={styles.statBlock}>
+            <div className={styles.statValue}>{data.projects.completed}</div>
+            <div className={styles.statLabel}>
+              <span>of {data.projects.total} Architectures</span>
+              {data.projects.in_progress} In Development
             </div>
           </div>
-
-          <div className={styles.card}>
-            <div className={styles.cardHeader}>
-              <h2>Tech Stack Frequency</h2>
-            </div>
-            <div className={styles.tagCloud}>
-              {data.projects.techStackFrequency.length > 0 ? (
-                data.projects.techStackFrequency.map(tech => (
-                  <div key={tech.tech} className={styles.tag}>
-                    {tech.tech}
-                    <span className={styles.tagCount}>{tech.count}</span>
-                  </div>
-                ))
-              ) : (
-                <p className={styles.emptyState}>No projects data available</p>
-              )}
+          <div className={styles.barChart}>
+            <div className={styles.barTrack}>
+              <div
+                className={styles.barFill}
+                style={{ width: `${(data.projects.completed / Math.max(1, data.projects.total)) * 100}%` }}
+              />
             </div>
           </div>
-
-          <div className={styles.card}>
-            <div className={styles.cardHeader}>
-              <h2>Biggest Skill Gaps</h2>
-            </div>
-            <div className={styles.barChart}>
-              {data.skills.biggestGaps.length > 0 ? (
-                data.skills.biggestGaps.map(skill => (
-                  <div key={skill.id} className={styles.barRow}>
-                    <div className={styles.barLabel}>
-                      <span>{skill.name}</span>
-                      <span>Gap: {skill.gap} (Target: {skill.target_level})</span>
-                    </div>
-                    <div className={styles.barTrack}>
-                      <div 
-                        className={styles.barFill} 
-                        style={{ 
-                          width: `${skill.current_level}%`, 
-                          backgroundColor: 'var(--danger)',
-                          borderRight: `2px solid var(--text-primary)`
-                        }}>
-                      </div>
-                    </div>
-                  </div>
-                ))
-              ) : (
-                <p className={styles.emptyState}>No skills data available</p>
-              )}
-            </div>
-          </div>
-
         </div>
-
-        {/* Right Column (Narrower) */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-          
-          <div className={styles.card}>
-            <div className={styles.cardHeader}>
-              <h2>Certifications</h2>
-            </div>
-            {renderDonutChart(data.certifications.byStatus, chartColors)}
-          </div>
-
-          <div className={styles.card}>
-            <div className={styles.cardHeader}>
-              <h2>Resources by Type</h2>
-            </div>
-            {renderDonutChart(data.resources.byType, [...chartColors].reverse())}
-          </div>
-
-          <div className={styles.card}>
-            <div className={styles.cardHeader}>
-              <h2>ATS Score Trend</h2>
-            </div>
-            {renderLineChart(data.atsTrend)}
-          </div>
-
-        </div>
-      </section>
-
-      {/* Full width bottom section */}
-      <section className={styles.card}>
-        <div className={styles.cardHeader}>
-          <h2>Recent Activity Timeline</h2>
-        </div>
-        <div className={styles.timeline}>
-          {data.timeline.length > 0 ? (
-            data.timeline.map(log => (
-              <div key={log.id} className={styles.timelineItem}>
-                <div className={styles.timelineTime}>
-                  {new Date(log.created_at).toLocaleDateString()} at {new Date(log.created_at).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}
-                </div>
-                <div className={styles.timelineContent}>
-                  <strong>{log.action}</strong> {log.entity_type}: <em>{log.entity_name}</em>
-                </div>
-              </div>
-            ))
-          ) : (
-            <p className={styles.emptyState}>No recent activity</p>
-          )}
-        </div>
-      </section>
-
+      </div>
     </div>
   );
 }

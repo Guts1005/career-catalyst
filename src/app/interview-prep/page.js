@@ -1,13 +1,10 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import styles from './page.module.css';
 import { showToast } from '@/components/Toast';
 import PageHeader from '@/components/PageHeader';
-import {
-  IconInterview,
-  IconCheck,
-} from '@/components/Icons';
+import { IconInterview, IconCheck } from '@/components/Icons';
 
 const CATEGORIES = [
   'All',
@@ -25,6 +22,7 @@ export default function InterviewPrepPage() {
   const [selectedCategory, setSelectedCategory] = useState('All');
   const [expandedId, setExpandedId] = useState(null);
   const [search, setSearch] = useState('');
+  const searchInputRef = useRef(null);
 
   const fetchQuestions = useCallback(async () => {
     try {
@@ -48,6 +46,18 @@ export default function InterviewPrepPage() {
   useEffect(() => {
     fetchQuestions();
   }, [fetchQuestions]);
+
+  // Keyboard shortcut '/' to search
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (e.key === '/' && document.activeElement !== searchInputRef.current) {
+        e.preventDefault();
+        searchInputRef.current?.focus();
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, []);
 
   const handleUpdateStatus = async (questionId, newStatus) => {
     try {
@@ -103,7 +113,7 @@ export default function InterviewPrepPage() {
         subtitle="A structured index of technical problems across Machine Learning, Transformer architectures, and System Design."
       />
 
-      {/* Progress Cards */}
+      {/* Progress KPIs */}
       <div className={styles.statsRow}>
         <div className={styles.statCard}>
           <div className={styles.statVal} style={{ fontFamily: 'var(--font-mono)' }}>{stats?.total_questions || 0}</div>
@@ -111,108 +121,126 @@ export default function InterviewPrepPage() {
         </div>
 
         <div className={styles.statCard}>
-          <div className={styles.statVal} style={{ fontFamily: 'var(--font-mono)', color: 'var(--success)' }}>
-            {stats?.mastered_count || 0} <span style={{ fontSize: '12px', color: 'var(--text-muted)' }}>({masteryPercent}%)</span>
+          <div className={styles.statVal} style={{ fontFamily: 'var(--font-mono)', color: 'var(--green)' }}>
+            {stats?.mastered_count || 0} <span style={{ fontSize: '12px', color: 'var(--gray-500)' }}>({masteryPercent}%)</span>
           </div>
           <div className={styles.statLabel}>Mastered Solutions</div>
         </div>
 
         <div className={styles.statCard}>
-          <div className={styles.statVal} style={{ fontFamily: 'var(--font-mono)', color: 'var(--warning)' }}>
+          <div className={styles.statVal} style={{ fontFamily: 'var(--font-mono)', color: 'var(--amber)' }}>
             {stats?.reviewing_count || 0}
           </div>
           <div className={styles.statLabel}>In Active Review</div>
         </div>
-
-        <div className={styles.statCard}>
-          <div className={styles.statVal} style={{ fontFamily: 'var(--font-mono)' }}>
-            {stats?.unprepared_count || 0}
-          </div>
-          <div className={styles.statLabel}>Unprepared</div>
-        </div>
       </div>
 
-      {/* Filter and Search Bar */}
-      <div className={styles.filterBar}>
-        <div className={styles.categoryPills}>
+      {/* Filters and Search */}
+      <div className={styles.filterSection}>
+        <div className={styles.categories}>
           {CATEGORIES.map((cat) => (
             <button
               key={cat}
-              className={`${styles.pill} ${selectedCategory === cat ? styles.active : ''}`}
+              className={`${styles.catBtn} ${selectedCategory === cat ? styles.catActive : ''}`}
               onClick={() => setSelectedCategory(cat)}
-              style={{ fontSize: '12px' }}
             >
               {cat}
             </button>
           ))}
         </div>
 
-        <input
-          className="input"
-          style={{ maxWidth: '280px', fontSize: '12.5px' }}
-          placeholder="Filter by keyword or topic..."
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-        />
+        <div className={styles.searchWrapper}>
+          <input
+            ref={searchInputRef}
+            type="text"
+            className={styles.searchInput}
+            placeholder="Search problems by keyword or concept... (/)"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+          />
+        </div>
       </div>
 
-      {/* Question Cards */}
+      {/* Question List */}
       <div className={styles.questionList}>
-        {filteredQuestions.map((q) => {
-          const isExpanded = expandedId === q.id;
-          const diffClass =
-            q.difficulty === 'easy'
-              ? styles.diffEasy
-              : q.difficulty === 'hard'
-              ? styles.diffHard
-              : styles.diffMedium;
-
-          return (
-            <div key={q.id} className={styles.qCard}>
-              <div
-                className={styles.qCardHeader}
-                onClick={() => setExpandedId(isExpanded ? null : q.id)}
-              >
-                <div>
-                  <div className={styles.qMeta}>
-                    <span className={styles.categoryTag} style={{ fontSize: '11px' }}>{q.category}</span>
-                    <span className={`${styles.difficultyTag} ${diffClass}`} style={{ fontSize: '10.5px', textTransform: 'uppercase' }}>
-                      {q.difficulty}
+        {filteredQuestions.length === 0 ? (
+          <div className={styles.emptyState}>No matching questions found in category.</div>
+        ) : (
+          filteredQuestions.map((q, idx) => {
+            const isExpanded = expandedId === q.id;
+            return (
+              <div key={q.id} className={`${styles.questionCard} ${isExpanded ? styles.cardExpanded : ''}`}>
+                <div
+                  className={styles.cardHeader}
+                  onClick={() => setExpandedId(isExpanded ? null : q.id)}
+                  style={{ cursor: 'pointer' }}
+                >
+                  <div className={styles.qLeft}>
+                    <span className={styles.qIndex} style={{ fontFamily: 'var(--font-mono)' }}>
+                      0{idx + 1}
                     </span>
-                    {q.tags && <span style={{ fontSize: '11px', color: 'var(--text-muted)' }}>• {q.tags}</span>}
+                    <div>
+                      <div className={styles.qTitle}>{q.question}</div>
+                      <div className={styles.qMeta}>
+                        <span className={`${styles.difficultyBadge} ${styles[q.difficulty]}`}>
+                          {q.difficulty}
+                        </span>
+                        <span className={styles.metaCategory}>{q.category}</span>
+                        {q.tags && (
+                          <span className={styles.metaTags}>
+                            {q.tags.split(',').map((t) => (
+                              <span key={t} className={styles.tag}>
+                                {t.trim()}
+                              </span>
+                            ))}
+                          </span>
+                        )}
+                      </div>
+                    </div>
                   </div>
-                  <h3 className={styles.qTitle} style={{ fontSize: '14px', marginTop: '6px' }}>{q.question}</h3>
+
+                  <div className={styles.qRight}>
+                    <span className={`${styles.statusPill} ${styles[q.user_status || 'unseen']}`}>
+                      {q.user_status === 'mastered' ? '● MASTERED' : q.user_status === 'reviewing' ? '● REVIEWING' : '○ PRACTICE'}
+                    </span>
+                    <button className={styles.expandToggle} type="button">
+                      {isExpanded ? '↑ LESS' : '↓ EXAMINE'}
+                    </button>
+                  </div>
                 </div>
 
-                <div className={styles.qStatusWrap} onClick={(e) => e.stopPropagation()}>
-                  <select
-                    className={styles.statusSelect}
-                    value={q.user_status || 'unprepared'}
-                    onChange={(e) => handleUpdateStatus(q.id, e.target.value)}
-                    style={{ fontSize: '11.5px' }}
-                  >
-                    <option value="unprepared">Unprepared</option>
-                    <option value="reviewing">In Review</option>
-                    <option value="mastered">✓ Mastered</option>
-                  </select>
-                </div>
+                {isExpanded && (
+                  <div className={styles.cardBody}>
+                    <div className={styles.answerSection}>
+                      <div className={styles.sectionHeader}>TECHNICAL SOLUTION & SYSTEM ARCHITECTURE</div>
+                      <div className={styles.answerContent}>{q.answer}</div>
+                    </div>
+
+                    <div className={styles.actionRow}>
+                      <div className={styles.statusButtons}>
+                        <span style={{ fontSize: '11px', fontFamily: 'var(--font-mono)', color: 'var(--gray-500)', marginRight: '8px' }}>
+                          UPDATE STATUS:
+                        </span>
+                        <button
+                          className={`btn ${q.user_status === 'mastered' ? 'btn-primary' : 'btn-secondary'} btn-sm`}
+                          onClick={() => handleUpdateStatus(q.id, 'mastered')}
+                        >
+                          ✓ Mastered
+                        </button>
+                        <button
+                          className={`btn ${q.user_status === 'reviewing' ? 'btn-primary' : 'btn-secondary'} btn-sm`}
+                          onClick={() => handleUpdateStatus(q.id, 'reviewing')}
+                        >
+                          Reviewing
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                )}
               </div>
-
-              {isExpanded && (
-                <div className={styles.qCardBody}>
-                  <div className={styles.answerSection}>
-                    <div style={{ fontSize: '11px', fontWeight: 600, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.04em', marginBottom: '6px' }}>
-                      Structured Model Solution & Key Trade-offs:
-                    </div>
-                    <div className={styles.answerText} style={{ fontSize: '13px', lineHeight: 1.6 }}>
-                      {q.answer}
-                    </div>
-                  </div>
-                </div>
-              )}
-            </div>
-          );
-        })}
+            );
+          })
+        )}
       </div>
     </div>
   );
