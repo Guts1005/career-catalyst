@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import styles from './page.module.css';
 import { showToast } from '@/components/Toast';
+import PageHeader from '@/components/PageHeader';
 import {
   IconResume,
   IconCertifications,
@@ -159,38 +160,30 @@ export default function ResumeBuilderPage() {
 
   return (
     <div className={styles.container}>
-      {/* Header */}
-      <div className={styles.header}>
-        <div>
-          <div style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', padding: '2px 8px', borderRadius: '4px', background: 'var(--bg-tertiary)', border: '1px solid var(--border)', fontSize: '11px', color: 'var(--text-muted)', marginBottom: '8px', fontFamily: 'var(--font-mono)' }}>
-            <IconResume size={13} />
-            ATS RESUME COMPILER
-          </div>
-          <h1 className={styles.headerTitle} style={{ letterSpacing: '-0.03em', fontSize: '24px', fontWeight: 700 }}>
-            Resume Editor & PDF Exporter
-          </h1>
-          <p className={styles.headerSubtitle} style={{ color: 'var(--text-secondary)', fontSize: '13.5px', marginTop: '4px' }}>
-            Fine-tune an ATS-optimized Machine Learning resume synced live with your verified credentials and project metrics.
-          </p>
-        </div>
-        <div className={styles.headerActions} style={{ display: 'flex', gap: '8px' }}>
-          <button
-            className="btn btn-secondary"
-            onClick={handleSave}
-            disabled={saving}
-            style={{ fontSize: '12.5px', padding: '7px 14px' }}
-          >
-            {saving ? 'Saving...' : saveSuccess ? '✓ Saved' : 'Save Changes'}
-          </button>
-          <button
-            className="btn btn-primary"
-            onClick={handlePrint}
-            style={{ fontSize: '12.5px', padding: '7px 14px' }}
-          >
-            Export PDF / Print
-          </button>
-        </div>
-      </div>
+      <PageHeader
+        chapter="INDEX / 01"
+        title={<>RESUME<br />STUDIO.</>}
+        subtitle="A clean writing surface for an ATS-optimized technical resume synced live with your verified portfolio and metrics."
+        actions={
+          <>
+            <button
+              className="btn btn-secondary"
+              onClick={handleSave}
+              disabled={saving}
+              style={{ fontSize: '13px', padding: '8px 16px' }}
+            >
+              {saving ? 'Saving...' : saveSuccess ? '✓ Saved' : 'SAVE CHANGES'}
+            </button>
+            <button
+              className="btn btn-primary"
+              onClick={handlePrint}
+              style={{ fontSize: '13px', padding: '8px 16px' }}
+            >
+              EXPORT PDF / PRINT
+            </button>
+          </>
+        }
+      />
 
       <div className={styles.builderGrid}>
         {/* Editor Controls */}

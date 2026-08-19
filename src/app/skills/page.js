@@ -3,6 +3,7 @@
 import { useState, useEffect, useMemo } from 'react';
 import styles from './page.module.css';
 import { showToast } from '@/components/Toast';
+import PageHeader from '@/components/PageHeader';
 import {
   IconSkills,
   IconCheck,
@@ -198,21 +199,11 @@ export default function SkillsPage() {
 
   return (
     <div className={styles.container}>
-      {/* Header */}
-      <div className={styles.header}>
-        <div>
-          <div style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', padding: '2px 8px', borderRadius: '4px', background: 'var(--bg-tertiary)', border: '1px solid var(--border)', fontSize: '11px', color: 'var(--text-muted)', marginBottom: '8px', fontFamily: 'var(--font-mono)' }}>
-            <IconSkills size={13} />
-            COMPETENCY MATRIX & RADAR
-          </div>
-          <h1 className={styles.title} style={{ letterSpacing: '-0.03em', fontSize: '24px', fontWeight: 700 }}>
-            Skill Gap Map & Proficiency Radar
-          </h1>
-          <p className={styles.subtitle} style={{ color: 'var(--text-secondary)', fontSize: '13.5px', marginTop: '4px' }}>
-            Map technical mastery across Deep Learning, Distributed Systems, ML Ops, and Data Infrastructure.
-          </p>
-        </div>
-      </div>
+      <PageHeader
+        chapter="TECHNICAL CORE / 05"
+        title={<>SKILL<br />GAP MAP.</>}
+        subtitle="Identify the highest-impact competencies and technical deltas to improve for your target engineering roles."
+      />
 
       <div className={styles.summaryCards}>
         <div className={styles.summaryCard}>

@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import styles from './page.module.css';
 import { showToast } from '@/components/Toast';
+import PageHeader from '@/components/PageHeader';
 import {
   IconBlueprints,
   IconCheck,
@@ -73,21 +74,11 @@ export default function ProjectGeneratorPage() {
 
   return (
     <div className={styles.container}>
-      {/* Header */}
-      <div className={styles.header}>
-        <div>
-          <div style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', padding: '2px 8px', borderRadius: '4px', background: 'var(--bg-tertiary)', border: '1px solid var(--border)', fontSize: '11px', color: 'var(--text-muted)', marginBottom: '8px', fontFamily: 'var(--font-mono)' }}>
-            <IconBlueprints size={13} />
-            SYSTEM ARCHITECTURES & STAR FORMULAS
-          </div>
-          <h1 className={styles.title} style={{ letterSpacing: '-0.03em', fontSize: '24px', fontWeight: 700 }}>
-            Project Blueprints & STAR Resume Bullets
-          </h1>
-          <p className={styles.subtitle} style={{ color: 'var(--text-secondary)', fontSize: '13.5px', marginTop: '4px' }}>
-            Production-ready ML architectures with pre-crafted STAR impact bullet points ready to sync into your resume and portfolio.
-          </p>
-        </div>
-      </div>
+      <PageHeader
+        chapter="PORTFOLIO / 02"
+        title={<>SYSTEM<br />BLUEPRINTS.</>}
+        subtitle="Production-grade ML architectures and STAR impact formulas ready to import directly into your portfolio."
+      />
 
       {/* Domain Selection Bar */}
       <div className={styles.domainTabs}>

@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import styles from './page.module.css';
+import PageHeader from '@/components/PageHeader';
 import { IconAnalytics } from '@/components/Icons';
 
 export default function AnalyticsPage() {
@@ -158,22 +159,15 @@ export default function AnalyticsPage() {
     );
   };
 
-  const chartColors = ['#4f8cff', '#34d399', '#fbbf24', '#f87171', '#c084fc', '#f472b6'];
+  const chartColors = ['#0A0A0A', '#2563EB', '#6F6F6B', '#16A34A', '#D97706', '#8C8C88'];
 
   return (
     <div className={styles.container}>
-      <header className={styles.header}>
-        <div>
-          <div style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', padding: '2px 8px', borderRadius: '4px', background: 'var(--bg-tertiary)', border: '1px solid var(--border)', fontSize: '11px', color: 'var(--text-muted)', marginBottom: '8px', fontFamily: 'var(--font-mono)' }}>
-            <IconAnalytics size={13} />
-            METRICS & PIPELINE VELOCITY
-          </div>
-          <h1 style={{ letterSpacing: '-0.03em', fontSize: '24px', fontWeight: 700 }}>Career Analytics & Insights</h1>
-          <p style={{ color: 'var(--text-secondary)', fontSize: '13.5px', marginTop: '4px' }}>
-            Data visualization across pipeline completion velocity, certification investment, and skill distribution.
-          </p>
-        </div>
-      </header>
+      <PageHeader
+        chapter="INDEX / 02"
+        title={<>CAREER<br />ANALYTICS.</>}
+        subtitle="A structured overview of pipeline velocity, skill progress, and certification milestones."
+      />
 
       {/* Recommendations */}
       {data.recommendations.length > 0 && (

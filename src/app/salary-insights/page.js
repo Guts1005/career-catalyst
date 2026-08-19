@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import styles from './page.module.css';
 import { showToast } from '@/components/Toast';
+import PageHeader from '@/components/PageHeader';
 import {
   IconSalary,
   IconCheck,
@@ -69,21 +70,11 @@ export default function SalaryInsightsPage() {
 
   return (
     <div className={styles.container}>
-      {/* Header */}
-      <div className={styles.header}>
-        <div>
-          <div style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', padding: '2px 8px', borderRadius: '4px', background: 'var(--bg-tertiary)', border: '1px solid var(--border)', fontSize: '11px', color: 'var(--text-muted)', marginBottom: '8px', fontFamily: 'var(--font-mono)' }}>
-            <IconSalary size={13} />
-            COMPENSATION INTELLIGENCE
-          </div>
-          <h1 className={styles.title} style={{ letterSpacing: '-0.03em', fontSize: '24px', fontWeight: 700 }}>
-            Compensation Benchmarks & Negotiation Strategy
-          </h1>
-          <p className={styles.subtitle} style={{ color: 'var(--text-secondary)', fontSize: '13.5px', marginTop: '4px' }}>
-            Evaluate total compensation percentiles across top tech hubs and generate structured counter-offer scripts.
-          </p>
-        </div>
-      </div>
+      <PageHeader
+        chapter="OPPORTUNITIES / 04"
+        title={<>SALARY<br />INTELLIGENCE.</>}
+        subtitle="Understand market benchmarks and compensation percentiles across technical specializations before you make your next move."
+      />
 
       <div className={styles.grid}>
         {/* Market Benchmark Table */}

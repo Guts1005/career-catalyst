@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import styles from './page.module.css';
 import { showToast } from '@/components/Toast';
+import PageHeader from '@/components/PageHeader';
 import {
   IconJobs,
   IconCheck,
@@ -134,28 +135,20 @@ export default function JobTrackerPage() {
 
   return (
     <div className={styles.container}>
-      {/* Header */}
-      <div className={styles.header}>
-        <div>
-          <div style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', padding: '2px 8px', borderRadius: '4px', background: 'var(--bg-tertiary)', border: '1px solid var(--border)', fontSize: '11px', color: 'var(--text-muted)', marginBottom: '8px', fontFamily: 'var(--font-mono)' }}>
-            <IconJobs size={13} />
-            APPLICATION TRACKER & KANBAN
-          </div>
-          <h1 className={styles.title} style={{ letterSpacing: '-0.03em', fontSize: '24px', fontWeight: 700 }}>
-            Job Pipeline & Role Matcher
-          </h1>
-          <p className={styles.subtitle} style={{ color: 'var(--text-secondary)', fontSize: '13.5px', marginTop: '4px' }}>
-            Manage target AI/ML engineering applications from initial outreach through technical rounds and offers.
-          </p>
-        </div>
-        <button
-          className="btn btn-primary"
-          onClick={() => setIsModalOpen(true)}
-          style={{ fontSize: '12.5px', padding: '8px 16px', display: 'flex', alignItems: 'center', gap: '6px' }}
-        >
-          + Add Target Role
-        </button>
-      </div>
+      <PageHeader
+        chapter="OPPORTUNITIES / 03"
+        title={<>APPLICATION<br />PIPELINE.</>}
+        subtitle="Track target AI, Machine Learning, and Data Science roles from initial outreach through technical rounds and final offers."
+        actions={
+          <button
+            className="btn btn-primary"
+            onClick={() => setIsModalOpen(true)}
+            style={{ fontSize: '13px', padding: '8px 16px' }}
+          >
+            + ADD TARGET ROLE
+          </button>
+        }
+      />
 
       {/* Kanban Board */}
       <div className={styles.boardContainer}>

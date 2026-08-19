@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import styles from './page.module.css';
+import PageHeader from '@/components/PageHeader';
 import {
   IconSandbox,
   IconAnalytics,
@@ -73,17 +74,11 @@ export default function AlgorithmSandboxPage() {
 
   return (
     <div className={styles.container}>
-      {/* Header */}
-      <div className={styles.header}>
-        <div style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', padding: '2px 8px', borderRadius: '4px', background: 'var(--bg-tertiary)', border: '1px solid var(--border)', fontSize: '11px', color: 'var(--text-muted)', marginBottom: '8px', fontFamily: 'var(--font-mono)' }}>
-          <IconSandbox size={13} />
-          INTERACTIVE MATHEMATICAL ENGINE
-        </div>
-        <h1 style={{ letterSpacing: '-0.03em', fontSize: '24px', fontWeight: 700 }}>Algorithm & Loss Surface Sandbox</h1>
-        <p style={{ color: 'var(--text-secondary)', fontSize: '13.5px', marginTop: '4px' }}>
-          Real-time computational visualizers for deep learning optimization, self-attention temperature scaling, and ROC/PR trade-offs.
-        </p>
-      </div>
+      <PageHeader
+        chapter="TECHNICAL CORE / 09"
+        title={<>MATH<br />SANDBOX.</>}
+        subtitle="An interactive technical workspace for exploring gradient descent dynamics, attention scaling, and loss surfaces."
+      />
 
       {/* Tabs */}
       <div className="tabs" style={{ marginBottom: '20px' }}>

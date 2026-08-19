@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import styles from './page.module.css';
 import { showToast } from '@/components/Toast';
+import PageHeader from '@/components/PageHeader';
 
 const TYPE_ICONS = {
   course: '📖',
@@ -229,12 +230,16 @@ export default function ResourcesPage() {
 
   return (
     <div className={styles.container}>
-      <header className={styles.header}>
-        <h1 className={styles.title}>Learning Resources</h1>
-        <button className={styles.addButton} onClick={() => handleOpenModal()}>
-          <span>+</span> Add Resource
-        </button>
-      </header>
+      <PageHeader
+        chapter="TECHNICAL CORE / 06"
+        title={<>READING<br />INDEX.</>}
+        subtitle="A curated bibliography of machine learning papers, reference textbooks, and technical documentation."
+        actions={
+          <button className="btn btn-primary" onClick={() => handleOpenModal()} style={{ fontSize: '13px', padding: '8px 16px' }}>
+            + ADD RESOURCE
+          </button>
+        }
+      />
 
       <div className={styles.statsGrid}>
         <div className={styles.statCard}>

@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import styles from './page.module.css';
+import PageHeader from '@/components/PageHeader';
 import {
   IconAssessment,
   IconCheck,
@@ -109,17 +110,11 @@ export default function MockInterviewPage() {
 
   return (
     <div className={styles.container}>
-      {/* Header */}
-      <div className={styles.header}>
-        <div style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', padding: '2px 8px', borderRadius: '4px', background: 'var(--bg-tertiary)', border: '1px solid var(--border)', fontSize: '11px', color: 'var(--text-muted)', marginBottom: '8px', fontFamily: 'var(--font-mono)' }}>
-          <IconAssessment size={13} />
-          TECHNICAL EVALUATION SIMULATOR
-        </div>
-        <h1 style={{ letterSpacing: '-0.03em', fontSize: '24px', fontWeight: 700 }}>Technical Interview Assessment</h1>
-        <p style={{ color: 'var(--text-secondary)', fontSize: '13.5px', marginTop: '4px' }}>
-          Timed technical diagnostic rounds with automated rubric grading and candidate percentile benchmarking.
-        </p>
-      </div>
+      <PageHeader
+        chapter="TECHNICAL CORE / 08"
+        title={<>MOCK<br />ASSESSMENT.</>}
+        subtitle="A focused examination environment designed to simulate rigorous technical interview rounds under realistic time constraints."
+      />
 
       {!inProgress && !results && (
         <div className={styles.setupSection}>

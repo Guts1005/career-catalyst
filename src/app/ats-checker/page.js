@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import styles from './page.module.css';
 import { showToast } from '@/components/Toast';
+import PageHeader from '@/components/PageHeader';
 import {
   IconATS,
   IconCheck,
@@ -153,20 +154,13 @@ export default function AtsCheckerPage() {
 
   return (
     <div className={styles.container}>
-      {/* Header */}
-      <div className={styles.header}>
-        <div style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', padding: '2px 8px', borderRadius: '4px', background: 'var(--bg-tertiary)', border: '1px solid var(--border)', fontSize: '11px', color: 'var(--text-muted)', marginBottom: '8px', fontFamily: 'var(--font-mono)' }}>
-          <IconATS size={13} />
-          ATS OPTIMIZATION ENGINE
-        </div>
-        <h1 style={{ letterSpacing: '-0.03em', fontSize: '24px', fontWeight: 700 }}>ATS Resume Scanner & Keyword Matcher</h1>
-        <p style={{ color: 'var(--text-secondary)', fontSize: '13.5px', marginTop: '4px' }}>
-          Simulate enterprise ATS filters (Workday, Greenhouse, Lever) and optimize keyword density for top AI/ML engineering roles.
-        </p>
-
-        {/* 1-Click Instant Presets */}
-        <div style={{ marginTop: '16px', display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
-          <span style={{ fontSize: '12px', color: 'var(--text-muted)', fontWeight: 600 }}>1-Click Live Benchmarks:</span>
+      <PageHeader
+        chapter="OPPORTUNITIES / 06"
+        title={<>ATS<br />ANALYSIS.</>}
+        subtitle="Evaluate keyword match rate, structural readability, and missing technical competencies against target job descriptions."
+      />
+        <div style={{ marginTop: '16px', display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap', marginBottom: '24px' }}>
+          <span style={{ fontSize: '12px', color: 'var(--gray-500)', fontWeight: 600 }}>1-Click Live Benchmarks:</span>
           {PRESETS.map((p, idx) => (
             <button
               key={p.name}
@@ -176,9 +170,9 @@ export default function AtsCheckerPage() {
               style={{
                 fontSize: '11.5px',
                 padding: '4px 10px',
-                background: activePreset === idx ? 'var(--bg-active)' : 'var(--bg-secondary)',
-                borderColor: activePreset === idx ? 'var(--accent)' : 'var(--border)',
-                color: activePreset === idx ? '#ffffff' : 'var(--text-secondary)',
+                background: activePreset === idx ? 'var(--black)' : 'var(--white)',
+                borderColor: activePreset === idx ? 'var(--black)' : 'var(--gray-200)',
+                color: activePreset === idx ? '#ffffff' : 'var(--black)',
                 fontWeight: activePreset === idx ? 600 : 400,
               }}
             >
@@ -186,7 +180,6 @@ export default function AtsCheckerPage() {
             </button>
           ))}
         </div>
-      </div>
 
       <div className={styles.grid}>
         {/* Left Column: Input Form */}

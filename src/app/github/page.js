@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import styles from './page.module.css';
 import { showToast } from '@/components/Toast';
+import PageHeader from '@/components/PageHeader';
 import {
   IconGitHub,
   IconCheck,
@@ -167,20 +168,11 @@ export default function GithubAnalyzer() {
   return (
     <div className={styles.container}>
       {/* Header */}
-      <header className={styles.header}>
-        <div>
-          <div style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', padding: '2px 8px', borderRadius: '4px', background: 'var(--bg-tertiary)', border: '1px solid var(--border)', fontSize: '11px', color: 'var(--text-muted)', marginBottom: '8px', fontFamily: 'var(--font-mono)' }}>
-            <IconGitHub size={13} />
-            GITHUB REPOSITORY & CODE SYNC
-          </div>
-          <h1 className={styles.title} style={{ letterSpacing: '-0.03em', fontSize: '24px', fontWeight: 700 }}>
-            GitHub Repository Sync & Language Metrics
-          </h1>
-          <p className={styles.subtitle} style={{ color: 'var(--text-secondary)', fontSize: '13.5px', marginTop: '4px' }}>
-            Analyze public repositories, evaluate language distributions, and import top projects into your verified portfolio with 1 click.
-          </p>
-        </div>
-      </header>
+      <PageHeader
+        chapter="TECHNICAL CORE / 11"
+        title={<>GITHUB<br />CODE SYNC.</>}
+        subtitle="Analyze public repositories, evaluate programming language distributions, and import top projects into your verified portfolio."
+      />
 
       <form onSubmit={handleAnalyze} className={styles.searchForm}>
         <input

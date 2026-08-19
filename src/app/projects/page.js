@@ -1,7 +1,9 @@
 'use client';
+
 import { useState, useEffect } from 'react';
 import styles from './page.module.css';
 import { showToast } from '@/components/Toast';
+import PageHeader from '@/components/PageHeader';
 
 export default function ProjectsPage() {
   const [projects, setProjects] = useState([]);
@@ -175,15 +177,16 @@ export default function ProjectsPage() {
 
   return (
     <div className={styles.container}>
-      <div className={styles.header}>
-        <div>
-          <h1 className={styles.title}>Portfolio Projects</h1>
-          <p className={styles.subtitle}>Track your DS/ML/AI projects and milestones.</p>
-        </div>
-        <button className={styles.primaryBtn} onClick={() => handleOpenModal()}>
-          + New Project
-        </button>
-      </div>
+      <PageHeader
+        chapter="PORTFOLIO / 01"
+        title={<>WHAT<br />YOU'VE BUILT.</>}
+        subtitle="A structured archive of your production machine learning systems, architectures, and measurable outcomes."
+        actions={
+          <button className="btn btn-primary" onClick={() => handleOpenModal()} style={{ fontSize: '13px', padding: '8px 16px' }}>
+            + NEW PROJECT
+          </button>
+        }
+      />
 
       <div className={styles.filters}>
         {['all', 'planned', 'in_progress', 'completed', 'paused'].map(status => (
@@ -199,11 +202,10 @@ export default function ProjectsPage() {
 
       {projects.length === 0 ? (
         <div className={styles.emptyState}>
-          <div className={styles.emptyIcon}>🚀</div>
-          <h3>No projects found</h3>
-          <p>Start tracking your data science projects by adding your first one.</p>
-          <button className={styles.primaryBtn} onClick={() => handleOpenModal()}>
-            Add Project
+          <h3 style={{ fontSize: '16px', fontWeight: 800, textTransform: 'uppercase', marginBottom: '6px' }}>No projects yet</h3>
+          <p style={{ color: 'var(--gray-600)', fontSize: '13px', marginBottom: '16px' }}>Your portfolio starts with one good project.</p>
+          <button className="btn btn-primary" onClick={() => handleOpenModal()}>
+            CREATE PROJECT →
           </button>
         </div>
       ) : (

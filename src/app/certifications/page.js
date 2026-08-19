@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import styles from './page.module.css';
 import { showToast } from '@/components/Toast';
+import PageHeader from '@/components/PageHeader';
 
 export default function CertificationsPage() {
   const [certifications, setCertifications] = useState([]);
@@ -193,19 +194,16 @@ export default function CertificationsPage() {
 
   return (
     <div className={styles.container}>
-      <header className={styles.header}>
-        <div>
-          <h1>Certifications</h1>
-          <p>Track your professional growth and credential goals</p>
-        </div>
-        <button className={styles.addButton} onClick={() => openModal()}>
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <line x1="12" y1="5" x2="12" y2="19"></line>
-            <line x1="5" y1="12" x2="19" y2="12"></line>
-          </svg>
-          Add Certification
-        </button>
-      </header>
+      <PageHeader
+        chapter="TECHNICAL CORE / 04"
+        title={<>CREDENTIAL<br />ARCHIVE.</>}
+        subtitle="A verified record of your technical certifications, specializations, and professional qualifications."
+        actions={
+          <button className="btn btn-primary" onClick={() => openModal()} style={{ fontSize: '13px', padding: '8px 16px' }}>
+            + ADD CREDENTIAL
+          </button>
+        }
+      />
 
       <div className={styles.controls}>
         <div className={styles.tabs}>

@@ -129,6 +129,7 @@ export default function Sidebar() {
       )}
 
       <aside
+        className={isOpen ? 'open' : ''}
         style={{
           width: 'var(--sidebar-width)',
           flexShrink: 0,

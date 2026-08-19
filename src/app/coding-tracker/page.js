@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import styles from './page.module.css';
 import { showToast } from '@/components/Toast';
+import PageHeader from '@/components/PageHeader';
 import {
   IconCoding,
   IconCheck,
@@ -106,28 +107,20 @@ export default function CodingTrackerPage() {
 
   return (
     <div className={styles.container}>
-      {/* Header */}
-      <div className={styles.header}>
-        <div>
-          <div style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', padding: '2px 8px', borderRadius: '4px', background: 'var(--bg-tertiary)', border: '1px solid var(--border)', fontSize: '11px', color: 'var(--text-muted)', marginBottom: '8px', fontFamily: 'var(--font-mono)' }}>
-            <IconCoding size={13} />
-            ALGORITHMIC PRACTICE & COMPETITIONS
-          </div>
-          <h1 className={styles.title} style={{ letterSpacing: '-0.03em', fontSize: '24px', fontWeight: 700 }}>
-            Coding Tracker & Competitive ML Practice
-          </h1>
-          <p className={styles.subtitle} style={{ color: 'var(--text-secondary)', fontSize: '13.5px', marginTop: '4px' }}>
-            Track algorithm practice, LeetCode data structures, and Kaggle competition benchmarks.
-          </p>
-        </div>
-        <button
-          className="btn btn-primary"
-          onClick={() => setIsModalOpen(true)}
-          style={{ fontSize: '12.5px', padding: '8px 16px' }}
-        >
-          + Log Solved Problem
-        </button>
-      </div>
+      <PageHeader
+        chapter="TECHNICAL CORE / 10"
+        title={<>CODING<br />LEDGER.</>}
+        subtitle="A developer activity journal tracking competitive coding, algorithmic mastery, and platform progress."
+        actions={
+          <button
+            className="btn btn-primary"
+            onClick={() => setIsModalOpen(true)}
+            style={{ fontSize: '13px', padding: '8px 16px' }}
+          >
+            + LOG SOLVED PROBLEM
+          </button>
+        }
+      />
 
       {/* Profiles Showcase */}
       <div className={styles.profilesGrid}>

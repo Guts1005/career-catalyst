@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import styles from './page.module.css';
 import { showToast } from '@/components/Toast';
+import PageHeader from '@/components/PageHeader';
 import {
   IconInterview,
   IconCheck,
@@ -96,21 +97,11 @@ export default function InterviewPrepPage() {
 
   return (
     <div className={styles.container}>
-      {/* Header */}
-      <div className={styles.header}>
-        <div>
-          <div style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', padding: '2px 8px', borderRadius: '4px', background: 'var(--bg-tertiary)', border: '1px solid var(--border)', fontSize: '11px', color: 'var(--text-muted)', marginBottom: '8px', fontFamily: 'var(--font-mono)' }}>
-            <IconInterview size={13} />
-            TECHNICAL INTERVIEW BANK
-          </div>
-          <h1 className={styles.title} style={{ letterSpacing: '-0.03em', fontSize: '24px', fontWeight: 700 }}>
-            Machine Learning & System Design Question Bank
-          </h1>
-          <p className={styles.subtitle} style={{ color: 'var(--text-secondary)', fontSize: '13.5px', marginTop: '4px' }}>
-            50+ curated high-yield interview questions across Deep Learning, Transformer architectures, and ML Systems.
-          </p>
-        </div>
-      </div>
+      <PageHeader
+        chapter="TECHNICAL CORE / 07"
+        title={<>QUESTION<br />BANK.</>}
+        subtitle="A structured index of technical problems across Machine Learning, Transformer architectures, and System Design."
+      />
 
       {/* Progress Cards */}
       <div className={styles.statsRow}>

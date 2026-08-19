@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import styles from './page.module.css';
 import { showToast } from '@/components/Toast';
+import PageHeader from '@/components/PageHeader';
 import {
   IconCoverLetter,
   IconCheck,
@@ -92,20 +93,14 @@ export default function CoverLetterPage() {
 
   return (
     <div className={styles.container}>
-      {/* Header */}
-      <div className={styles.header}>
-        <div style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', padding: '2px 8px', borderRadius: '4px', background: 'var(--bg-tertiary)', border: '1px solid var(--border)', fontSize: '11px', color: 'var(--text-muted)', marginBottom: '8px', fontFamily: 'var(--font-mono)' }}>
-          <IconCoverLetter size={13} />
-          OUTREACH & PITCH GENERATOR
-        </div>
-        <h1 style={{ letterSpacing: '-0.03em', fontSize: '24px', fontWeight: 700 }}>Tailored Cover Letter & Recruiter Pitch</h1>
-        <p style={{ color: 'var(--text-secondary)', fontSize: '13.5px', marginTop: '4px' }}>
-          Generate high-converting STAR cover letters and LinkedIn InMail notes customized with your verified projects and metrics.
-        </p>
+      <PageHeader
+        chapter="OPPORTUNITIES / 05"
+        title={<>COVER PITCH<br />& LETTERS.</>}
+        subtitle="An editorial writing surface for role-tailored cover letters and recruiter pitch messages."
+      />
 
-        {/* 1-Click Presets */}
-        <div style={{ marginTop: '16px', display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
-          <span style={{ fontSize: '12px', color: 'var(--text-muted)', fontWeight: 600 }}>Quick Role Presets:</span>
+      <div style={{ marginTop: '16px', display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap', marginBottom: '24px' }}>
+          <span style={{ fontSize: '12px', color: 'var(--gray-500)', fontWeight: 600 }}>Quick Role Presets:</span>
           {ROLE_PRESETS.map((p) => (
             <button
               key={p.company}
@@ -118,7 +113,6 @@ export default function CoverLetterPage() {
             </button>
           ))}
         </div>
-      </div>
 
       <div className={styles.layout}>
         {/* Left Form */}
