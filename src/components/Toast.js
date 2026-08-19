@@ -30,10 +30,9 @@ export default function ToastContainer() {
 
   return (
     <div
+      className="toast-container"
       style={{
         position: 'fixed',
-        bottom: '24px',
-        right: '24px',
         zIndex: 9999,
         display: 'flex',
         flexDirection: 'column',

@@ -40,6 +40,10 @@
   font-weight: 600;
   font-size: 13px;
   cursor: pointer;
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   transition: background-color 0.15s ease;
 }
 
@@ -49,22 +53,27 @@
 
 .filters {
   display: flex;
-  gap: 4px;
+  gap: 6px;
   margin-bottom: 24px;
   overflow-x: auto;
+  padding-bottom: 6px;
+  -webkit-overflow-scrolling: touch;
 }
 
 .filterBtn {
   background: transparent;
   color: var(--text-secondary);
   border: 1px solid var(--border-strong);
-  border-radius: 4px;
-  padding: 6px 12px;
+  border-radius: 20px;
+  padding: 8px 14px;
   font-size: 11.5px;
   font-family: var(--font-mono);
   font-weight: 600;
   cursor: pointer;
   white-space: nowrap;
+  min-height: 38px;
+  display: inline-flex;
+  align-items: center;
   transition: all 0.15s ease;
 }
 
@@ -94,8 +103,14 @@
 
 .grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(360px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
   gap: 16px;
+}
+
+@media (max-width: 768px) {
+  .grid {
+    grid-template-columns: 1fr;
+  }
 }
 
 .card {
@@ -108,6 +123,12 @@
   justify-content: space-between;
   color: var(--text-primary);
   transition: border-color 0.15s ease;
+}
+
+@media (max-width: 768px) {
+  .card {
+    padding: 18px;
+  }
 }
 
 .card:hover {

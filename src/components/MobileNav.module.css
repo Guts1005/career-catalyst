@@ -1,0 +1,232 @@
+/* ─── Mobile Bottom Navigation (Visible on < 900px) ───────────────── */
+
+.bottomNav {
+  display: none;
+}
+
+@media (max-width: 900px) {
+  .bottomNav {
+    display: block;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    z-index: 90;
+    background: var(--bg-surface);
+    border-top: 1px solid var(--border);
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+    box-shadow: 0 -4px 16px rgba(0, 0, 0, 0.08);
+  }
+}
+
+.tabContainer {
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+  height: 60px;
+  max-width: 600px;
+  margin: 0 auto;
+  padding: 0 8px;
+}
+
+.tabBtn {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  min-height: 48px;
+  min-width: 48px;
+  background: transparent;
+  border: none;
+  text-decoration: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  outline: none;
+  transition: color 0.15s ease, transform 0.1s ease;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.tabBtn:active {
+  transform: scale(0.96);
+}
+
+.activeTab {
+  color: var(--text-primary);
+}
+
+.iconWrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 22px;
+}
+
+.activeDot {
+  position: absolute;
+  top: -2px;
+  right: -5px;
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: var(--text-primary);
+}
+
+.tabLabel {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+/* ─── Bottom Sheet Modal ─────────────────────────────────────────── */
+
+.backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.65);
+  z-index: 200;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  animation: fadeIn 0.2s ease-out;
+}
+
+.sheet {
+  width: 100%;
+  max-width: 600px;
+  max-height: 85dvh;
+  background: var(--bg-surface);
+  border-top-left-radius: 16px;
+  border-top-right-radius: 16px;
+  border-top: 1px solid var(--border-strong);
+  display: flex;
+  flex-direction: column;
+  box-shadow: var(--shadow-lg);
+  padding-bottom: calc(16px + env(safe-area-inset-bottom, 0px));
+  animation: slideUp 0.35s cubic-bezier(0.22, 1, 0.36, 1);
+  overflow: hidden;
+}
+
+.dragHandleWrap {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 10px 0 4px 0;
+}
+
+.dragHandle {
+  width: 36px;
+  height: 4px;
+  border-radius: 2px;
+  background: var(--border-strong);
+}
+
+.sheetHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 20px 16px 20px;
+  border-bottom: 1px solid var(--border);
+}
+
+.sheetBrand {
+  font-size: 14px;
+  font-weight: 900;
+  letter-spacing: -0.02em;
+  color: var(--text-primary);
+  text-transform: uppercase;
+}
+
+.sheetSubtitle {
+  font-size: 11px;
+  font-family: var(--font-mono);
+  color: var(--text-muted);
+}
+
+.closeBtn {
+  background: var(--bg-subtle);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+  color: var(--text-primary);
+  cursor: pointer;
+}
+
+.sheetBody {
+  padding: 16px 20px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.secGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.secTitle {
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--text-muted);
+  margin-bottom: 6px;
+  padding-left: 8px;
+}
+
+.linkList {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.sheetLink {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 12px;
+  border-radius: 6px;
+  text-decoration: none;
+  font-size: 13.5px;
+  color: var(--text-secondary);
+  transition: all 0.12s ease;
+  min-height: 44px;
+}
+
+.sheetLink:hover, .sheetLink:active {
+  background: var(--bg-hover);
+  color: var(--text-primary);
+}
+
+.sheetLinkActive {
+  background: var(--bg-subtle);
+  color: var(--text-primary);
+  font-weight: 600;
+}
+
+.linkActiveIndicator {
+  font-size: 9px;
+  color: var(--text-primary);
+}
+
+@keyframes slideUp {
+  from { transform: translateY(100%); }
+  to { transform: translateY(0); }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}

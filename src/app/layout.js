@@ -1,5 +1,6 @@
 import './globals.css';
 import Sidebar from '@/components/Sidebar';
+import MobileNav from '@/components/MobileNav';
 import CommandPalette from '@/components/CommandPalette';
 import ToastContainer from '@/components/Toast';
 
@@ -12,7 +13,7 @@ export default function RootLayout({ children }) {
   return (
     <html lang="en" suppressHydrationWarning>
       <head>
-        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
         <meta name="theme-color" content="#09090b" />
         <script
           dangerouslySetInnerHTML={{
@@ -34,6 +35,7 @@ export default function RootLayout({ children }) {
             {children}
           </main>
         </div>
+        <MobileNav />
         <CommandPalette />
         <ToastContainer />
       </body>

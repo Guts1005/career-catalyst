@@ -34,6 +34,7 @@
 @media (max-width: 1024px) {
   .grid {
     grid-template-columns: 1fr;
+    gap: 20px;
   }
 }
 
@@ -43,6 +44,12 @@
   border-radius: 6px;
   padding: 24px;
   color: var(--text-primary);
+}
+
+@media (max-width: 768px) {
+  .card {
+    padding: 16px;
+  }
 }
 
 .inputSection h2 {
@@ -56,7 +63,7 @@
 
 .textarea {
   width: 100%;
-  height: 280px;
+  height: 240px;
   background-color: var(--bg-subtle);
   border: 1px solid var(--border-strong);
   border-radius: 4px;
@@ -69,6 +76,13 @@
   margin-bottom: 16px;
 }
 
+@media (max-width: 768px) {
+  .textarea {
+    font-size: 16px;
+    height: 180px;
+  }
+}
+
 .textarea:focus {
   outline: none;
   border-color: var(--text-primary);
@@ -79,11 +93,12 @@
   color: var(--text-inverse);
   border: 1px solid var(--bg-inverse);
   border-radius: var(--radius-sm);
-  padding: 10px 20px;
+  padding: 12px 20px;
   font-size: 13px;
   font-weight: 600;
   cursor: pointer;
   width: 100%;
+  min-height: 44px;
   transition: background-color 0.15s ease;
 }
 
@@ -106,14 +121,14 @@
 }
 
 .scoreCircle {
-  width: 80px;
-  height: 80px;
+  width: 72px;
+  height: 72px;
   border: 2px solid var(--text-primary);
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 24px;
+  font-size: 22px;
   font-weight: 900;
   font-family: var(--font-mono);
   color: var(--text-primary);
@@ -121,13 +136,13 @@
 }
 
 .scoreDetails h3 {
-  font-size: 16px;
+  font-size: 15px;
   font-weight: 800;
   color: var(--text-primary);
 }
 
 .scoreDetails p {
-  font-size: 12.5px;
+  font-size: 12px;
   color: var(--text-secondary);
   margin-top: 2px;
 }
@@ -135,26 +150,26 @@
 .metricGrid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 12px;
+  gap: 10px;
 }
 
 .metricItem {
   background: var(--bg-subtle);
   border: 1px solid var(--border);
   border-radius: 4px;
-  padding: 12px;
+  padding: 10px;
   text-align: center;
 }
 
 .metricValue {
-  font-size: 18px;
+  font-size: 16px;
   font-weight: 800;
   font-family: var(--font-mono);
   color: var(--text-primary);
 }
 
 .metricLabel {
-  font-size: 10.5px;
+  font-size: 10px;
   color: var(--text-muted);
   text-transform: uppercase;
   font-family: var(--font-mono);
@@ -167,7 +182,7 @@
 }
 
 .keywordTitle {
-  font-size: 12px;
+  font-size: 11.5px;
   font-weight: 700;
   text-transform: uppercase;
   font-family: var(--font-mono);
@@ -187,8 +202,10 @@
   background: var(--green-subtle);
   color: var(--green);
   border: 1px solid var(--green-border);
-  padding: 3px 8px;
+  padding: 4px 8px;
   border-radius: 3px;
+  display: inline-flex;
+  align-items: center;
 }
 
 .kwMissing {
@@ -197,9 +214,11 @@
   background: var(--red-subtle);
   color: var(--red);
   border: 1px solid var(--red-border);
-  padding: 3px 8px;
+  padding: 4px 8px;
   border-radius: 3px;
   cursor: pointer;
+  display: inline-flex;
+  align-items: center;
   transition: background-color 0.15s ease;
 }
 

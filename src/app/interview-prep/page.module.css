@@ -37,6 +37,14 @@
   margin-bottom: 32px;
 }
 
+@media (max-width: 768px) {
+  .statsRow {
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-bottom: 20px;
+  }
+}
+
 .statCard {
   background: var(--bg-surface);
   border: 1px solid var(--border);
@@ -48,8 +56,14 @@
   color: var(--text-primary);
 }
 
+@media (max-width: 768px) {
+  .statCard {
+    padding: 14px;
+  }
+}
+
 .statVal {
-  font-size: 32px;
+  font-size: clamp(24px, 5vw, 32px);
   font-weight: 900;
   font-family: var(--font-mono);
   color: var(--text-primary);
@@ -74,19 +88,25 @@
 
 .categoryPills {
   display: flex;
-  gap: 4px;
-  flex-wrap: wrap;
+  gap: 6px;
+  overflow-x: auto;
+  padding-bottom: 4px;
+  -webkit-overflow-scrolling: touch;
 }
 
 .pill {
-  padding: 6px 12px;
-  border-radius: 4px;
-  font-size: 12px;
+  padding: 8px 14px;
+  border-radius: 20px;
+  font-size: 11.5px;
   font-family: var(--font-mono);
-  background: transparent;
+  background: var(--bg-surface);
   color: var(--text-secondary);
   border: 1px solid var(--border-strong);
   cursor: pointer;
+  white-space: nowrap;
+  min-height: 38px;
+  display: inline-flex;
+  align-items: center;
   transition: all 0.15s ease;
 }
 
@@ -115,6 +135,12 @@
   cursor: pointer;
   transition: border-color 0.15s ease;
   color: var(--text-primary);
+}
+
+@media (max-width: 768px) {
+  .questionCard {
+    padding: 16px;
+  }
 }
 
 .questionCard:hover {

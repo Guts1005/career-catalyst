@@ -39,6 +39,13 @@
   gap: 16px;
 }
 
+@media (max-width: 768px) {
+  .summaryCards {
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+}
+
 .summaryCard {
   background: var(--bg-surface);
   border: 1px solid var(--border);
@@ -50,8 +57,14 @@
   color: var(--text-primary);
 }
 
+@media (max-width: 768px) {
+  .summaryCard {
+    padding: 14px;
+  }
+}
+
 .summaryValue {
-  font-size: 36px;
+  font-size: clamp(26px, 6vw, 36px);
   font-weight: 900;
   font-family: var(--font-mono);
   color: var(--text-primary);
@@ -75,6 +88,12 @@
   align-items: center;
 }
 
+@media (max-width: 768px) {
+  .radarContainer {
+    padding: 16px 8px;
+  }
+}
+
 .radarWrapper {
   max-width: 380px;
   width: 100%;
@@ -91,6 +110,14 @@
   flex-wrap: wrap;
 }
 
+@media (max-width: 768px) {
+  .controls {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 10px;
+  }
+}
+
 .select, .input {
   background: var(--bg-subtle);
   border: 1px solid var(--border-strong);
@@ -102,99 +129,38 @@
   font-family: inherit;
 }
 
-.select:focus, .input:focus {
-  border-color: var(--text-primary);
+@media (max-width: 768px) {
+  .select, .input {
+    font-size: 16px;
+    min-height: 44px;
+    width: 100%;
+  }
 }
 
-.skillsGrid {
+.skillGrid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
   gap: 16px;
+}
+
+@media (max-width: 768px) {
+  .skillGrid {
+    grid-template-columns: 1fr;
+  }
 }
 
 .skillCard {
   background: var(--bg-surface);
   border: 1px solid var(--border);
   border-radius: var(--radius-sm);
-  padding: 20px;
+  padding: 18px;
   display: flex;
   flex-direction: column;
   gap: 14px;
+  color: var(--text-primary);
   transition: border-color 0.15s ease;
 }
 
 .skillCard:hover {
   border-color: var(--border-strong);
-}
-
-.skillHeader {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  gap: 10px;
-}
-
-.skillName {
-  font-size: 15px;
-  font-weight: 700;
-  color: var(--text-primary);
-  margin: 0;
-}
-
-.skillCategory {
-  font-family: var(--font-mono);
-  font-size: 11px;
-  color: var(--text-muted);
-}
-
-.levelRow {
-  display: flex;
-  justify-content: space-between;
-  font-size: 12px;
-  font-family: var(--font-mono);
-  color: var(--text-muted);
-}
-
-.levelBar {
-  position: relative;
-  height: 4px;
-  background: var(--bg-subtle);
-  border-radius: 2px;
-  overflow: hidden;
-}
-
-.currentFill {
-  position: absolute;
-  height: 100%;
-  background: var(--text-primary);
-  border-radius: 2px;
-}
-
-.targetMarker {
-  position: absolute;
-  top: 0;
-  bottom: 0;
-  width: 2px;
-  background: var(--blue);
-}
-
-.badgeHigh {
-  background: var(--amber-subtle);
-  color: var(--amber);
-  border: 1px solid var(--amber-border);
-  font-size: 10px;
-  font-family: var(--font-mono);
-  padding: 2px 6px;
-  border-radius: 3px;
-  font-weight: 700;
-}
-
-.badgeNormal {
-  background: var(--bg-subtle);
-  color: var(--text-muted);
-  border: 1px solid var(--border);
-  font-size: 10px;
-  font-family: var(--font-mono);
-  padding: 2px 6px;
-  border-radius: 3px;
 }

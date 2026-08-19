@@ -99,6 +99,29 @@
   border-bottom: 1px solid var(--border-strong);
 }
 
+@media (max-width: 768px) {
+  .heroSection {
+    padding: 24px 16px;
+    min-height: auto;
+  }
+
+  .narrativeSection, .narrativeSectionDark {
+    padding: 54px 16px;
+  }
+
+  .actSection {
+    padding: 64px 16px !important;
+  }
+
+  .heroDisplayTitle {
+    font-size: clamp(38px, 11vw, 64px);
+  }
+
+  .chapterHeading {
+    font-size: clamp(30px, 8vw, 48px);
+  }
+}
+
 .sectionHeaderRow {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -110,6 +133,7 @@
 @media (max-width: 768px) {
   .sectionHeaderRow {
     grid-template-columns: 1fr;
+    margin-bottom: 32px;
   }
 }
 
