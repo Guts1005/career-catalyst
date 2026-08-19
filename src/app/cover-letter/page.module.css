@@ -1,5 +1,5 @@
 .container {
-  animation: fadeIn 0.3s ease;
+  padding: 32px clamp(16px, 3vw, 40px);
   max-width: 1400px;
   margin: 0 auto;
 }
@@ -7,29 +7,32 @@
 .header {
   display: flex;
   justify-content: space-between;
-  align-items: center;
-  margin-bottom: var(--space-xl);
+  align-items: flex-end;
+  margin-bottom: 32px;
+  border-bottom: 1px solid var(--gray-100);
+  padding-bottom: 24px;
+  gap: 16px;
   flex-wrap: wrap;
-  gap: var(--space-md);
 }
 
 .title {
-  font-size: 28px;
-  font-weight: 800;
-  letter-spacing: var(--tracking-tight);
-  color: var(--text-primary);
+  font-size: clamp(28px, 4vw, 48px);
+  font-weight: 900;
+  letter-spacing: -0.03em;
+  text-transform: uppercase;
+  color: var(--black);
 }
 
 .subtitle {
   font-size: 14px;
-  color: var(--text-secondary);
+  color: var(--gray-600);
   margin-top: 4px;
 }
 
 .layout {
   display: grid;
   grid-template-columns: 420px 1fr;
-  gap: var(--space-xl);
+  gap: 32px;
 }
 
 @media (max-width: 1024px) {
@@ -39,44 +42,43 @@
 }
 
 .previewSheet {
-  background: var(--bg-secondary);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-lg);
-  padding: var(--space-xl);
-  box-shadow: var(--shadow-lg);
+  background: var(--white);
+  border: 1px solid var(--gray-100);
+  border-radius: 6px;
+  padding: 24px;
   display: flex;
   flex-direction: column;
-  gap: var(--space-lg);
+  gap: 20px;
 }
 
 .previewContent {
   background: #ffffff;
-  color: #1a1a1a;
-  padding: 40px;
-  border-radius: var(--radius-md);
+  color: #111111;
+  padding: 36px;
+  border-radius: 4px;
+  border: 1px solid var(--gray-200);
   font-family: 'Times New Roman', Times, serif;
-  font-size: 14.5px;
-  line-height: 1.7;
+  font-size: 14px;
+  line-height: 1.65;
   white-space: pre-wrap;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
 }
 
 .pitchBox {
-  background: var(--bg-tertiary);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-md);
-  padding: var(--space-lg);
+  background: var(--off-white);
+  border: 1px solid var(--gray-200);
+  border-radius: 4px;
+  padding: 20px;
 }
 
 .pitchText {
-  font-size: 13.5px;
-  color: var(--text-primary);
+  font-size: 13px;
+  color: var(--black);
   line-height: 1.6;
   white-space: pre-wrap;
-  background: var(--bg-primary);
+  background: var(--white);
   padding: 14px;
-  border-radius: var(--radius-sm);
-  border: 1px solid var(--border);
+  border-radius: 4px;
+  border: 1px solid var(--gray-200);
   margin-top: 8px;
 }
 
@@ -92,7 +94,7 @@
     left: 0;
     top: 0;
     width: 100%;
-    box-shadow: none;
+    border: none;
     padding: 0;
   }
 }
