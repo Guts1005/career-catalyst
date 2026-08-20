@@ -3,7 +3,7 @@
   align-items: center;
   background: var(--bg-surface);
   border-bottom: 1px solid var(--border);
-  height: 36px;
+  height: 38px;
   overflow: hidden;
   font-family: var(--font-mono);
   font-size: 11px;
@@ -26,6 +26,12 @@
   flex-shrink: 0;
   z-index: 2;
   text-transform: uppercase;
+  cursor: pointer;
+  user-select: none;
+}
+
+.tickerBadge:hover {
+  background: var(--bg-hover);
 }
 
 .liveDot {
@@ -37,29 +43,33 @@
   animation: pulse 2s infinite ease-in-out;
 }
 
-.trackWrapper {
-  overflow: hidden;
-  white-space: nowrap;
+.badgeText {
+  font-size: 10px;
+}
+
+/* ─── Slide Presentation Mode (Calm & Readable) ─── */
+.slideWrapper {
   flex: 1;
   display: flex;
-  position: relative;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 16px;
+  cursor: pointer;
+  overflow: hidden;
 }
 
-.track {
+.slideItem {
   display: flex;
   align-items: center;
-  gap: 24px;
-  animation: scrollMarquee 35s linear infinite;
-}
-
-.track.paused {
-  animation-play-state: paused;
-}
-
-.tickerItem {
-  display: inline-flex;
-  align-items: center;
   gap: 8px;
+  animation: fadeInSlide 0.35s ease-out;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.itemIcon {
+  font-size: 12px;
 }
 
 .itemLabel {
@@ -77,9 +87,113 @@
   font-size: 10px;
 }
 
+.infoHint {
+  font-size: 10px;
+  color: var(--text-muted);
+  background: var(--bg-subtle);
+  border: 1px solid var(--border);
+  padding: 1px 5px;
+  border-radius: 3px;
+  margin-left: 8px;
+  display: inline-block;
+}
+
+.stepperControls {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex-shrink: 0;
+  margin-left: 12px;
+}
+
+.stepBtn, .pauseBtn {
+  background: var(--bg-subtle);
+  border: 1px solid var(--border);
+  color: var(--text-primary);
+  width: 22px;
+  height: 22px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 3px;
+  font-size: 11px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.stepBtn:hover, .pauseBtn:hover {
+  background: var(--bg-hover);
+  border-color: var(--text-primary);
+}
+
+.stepCount {
+  font-size: 10px;
+  color: var(--text-muted);
+  padding: 0 4px;
+  min-width: 24px;
+  text-align: center;
+}
+
+/* ─── Ultra-Slow Marquee Mode ──────────────────── */
+.trackWrapper {
+  overflow: hidden;
+  white-space: nowrap;
+  flex: 1;
+  display: flex;
+  position: relative;
+  cursor: pointer;
+}
+
+.track {
+  display: flex;
+  align-items: center;
+  gap: 28px;
+  animation: scrollMarquee 95s linear infinite; /* Ultra-slow 95s pace for comfortable reading */
+}
+
+.track.paused {
+  animation-play-state: paused;
+}
+
+.tickerItem {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
 .separator {
   color: var(--border-strong);
   margin-left: 12px;
+}
+
+/* ─── Mode Toggle ─────────────────────────────── */
+.modeToggleWrapper {
+  border-left: 1px solid var(--border);
+  padding: 0 10px;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  background: var(--bg-surface);
+  flex-shrink: 0;
+}
+
+.modeToggleBtn {
+  background: transparent;
+  border: 1px solid var(--border);
+  border-radius: 3px;
+  padding: 3px 7px;
+  font-family: var(--font-mono);
+  font-size: 9.5px;
+  font-weight: 700;
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.modeToggleBtn:hover {
+  color: var(--text-primary);
+  border-color: var(--text-primary);
+  background: var(--bg-subtle);
 }
 
 @keyframes scrollMarquee {
@@ -88,6 +202,17 @@
   }
   100% {
     transform: translateX(-50%);
+  }
+}
+
+@keyframes fadeInSlide {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
   }
 }
 
@@ -104,11 +229,19 @@
 
 @media (max-width: 768px) {
   .tickerRoot {
-    height: 32px;
+    height: 34px;
     font-size: 10px;
   }
   .tickerBadge {
-    padding: 0 10px;
-    font-size: 9.5px;
+    padding: 0 8px;
+  }
+  .badgeText {
+    display: none;
+  }
+  .infoHint {
+    display: none;
+  }
+  .modeToggleWrapper {
+    display: none;
   }
 }
