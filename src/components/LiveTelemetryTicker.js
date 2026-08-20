@@ -1,13 +1,13 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import styles from './LiveTelemetryTicker.module.css';
 
 const TELEMETRY_FEED = [
   {
     id: 'triton',
     icon: '⚡',
-    shortLabel: 'TRITON INFERENCE',
+    shortLabel: 'P99 TRITON INFERENCE',
     label: 'P99 TRITON INFERENCE',
     value: '13.8ms on 8x H100 (Llama-3)',
     change: '+38% QPS',
@@ -16,7 +16,7 @@ const TELEMETRY_FEED = [
   {
     id: 'comp',
     icon: '📈',
-    shortLabel: 'SENIOR ML COMP',
+    shortLabel: 'SENIOR ML MEDIAN COMP',
     label: 'SENIOR ML MEDIAN COMP',
     value: '$345,000 Total Comp',
     change: 'Top 10%',
@@ -25,9 +25,9 @@ const TELEMETRY_FEED = [
   {
     id: 'skill',
     icon: '🎯',
-    shortLabel: 'DEMANDED SKILL',
+    shortLabel: 'TOP DEMANDED SKILL',
     label: 'TOP DEMANDED SKILL',
-    value: 'CUDA & Triton Programming',
+    value: 'CUDA & Triton GPU Programming',
     change: '+48% YoY',
     detail: 'Stanford AI Index tracking high-scarcity technical job openings requiring low-level GPU acceleration and kernel fusion.',
   },
@@ -36,23 +36,23 @@ const TELEMETRY_FEED = [
     icon: '🟢',
     shortLabel: 'FLASHATTENTION-2',
     label: 'FLASHATTENTION-2 SAVINGS',
-    value: '7.2x Less HBM I/O',
+    value: '7.2x Less HBM Memory I/O',
     change: 'SRAM Tiled',
     detail: 'Memory bandwidth reduction achieved by calculating online softmax in on-chip SRAM instead of materializing N×N attention in HBM.',
   },
   {
     id: 'ats',
     icon: '📊',
-    shortLabel: 'ATS THRESHOLD',
+    shortLabel: 'ATS RESUME PASSING THRESHOLD',
     label: 'ATS RESUME PASSING THRESHOLD',
-    value: '82% Match Score',
+    value: '82% Keyword Match Score',
     change: 'Senior Bar',
     detail: 'Empirical match score needed to reliably clear automated applicant tracking parser filters for Senior technical roles.',
   },
   {
     id: 'gqa',
     icon: '💡',
-    shortLabel: 'GQA MEMORY',
+    shortLabel: 'GROUPED-QUERY ATTENTION (GQA)',
     label: 'GROUPED-QUERY ATTENTION (GQA)',
     value: '8x KV-Cache Compression',
     change: 'FP8 Quantized',
@@ -61,84 +61,35 @@ const TELEMETRY_FEED = [
 ];
 
 export default function LiveTelemetryTicker() {
-  const [activeTabId, setActiveTabId] = useState(TELEMETRY_FEED[0].id);
-  const [isRotating, setIsRotating] = useState(true);
   const [selectedDetail, setSelectedDetail] = useState(null);
-
-  // Soft stationary cycle every 6 seconds (Zero horizontal motion, instant clear text)
-  useEffect(() => {
-    if (!isRotating) return;
-    const interval = setInterval(() => {
-      setActiveTabId((prevId) => {
-        const idx = TELEMETRY_FEED.findIndex((item) => item.id === prevId);
-        const nextIdx = (idx + 1) % TELEMETRY_FEED.length;
-        return TELEMETRY_FEED[nextIdx].id;
-      });
-    }, 6000);
-    return () => clearInterval(interval);
-  }, [isRotating]);
-
-  const activeItem = TELEMETRY_FEED.find((item) => item.id === activeTabId) || TELEMETRY_FEED[0];
-  const activeIndex = TELEMETRY_FEED.findIndex((item) => item.id === activeTabId);
-
-  const handlePrev = () => {
-    setIsRotating(false);
-    const nextIdx = (activeIndex - 1 + TELEMETRY_FEED.length) % TELEMETRY_FEED.length;
-    setActiveTabId(TELEMETRY_FEED[nextIdx].id);
-  };
-
-  const handleNext = () => {
-    setIsRotating(false);
-    const nextIdx = (activeIndex + 1) % TELEMETRY_FEED.length;
-    setActiveTabId(TELEMETRY_FEED[nextIdx].id);
-  };
 
   return (
     <>
-      <div className={styles.telemetryBar}>
-        {/* Left Badge */}
-        <div className={styles.badge} onClick={() => setSelectedDetail(activeItem)}>
+      <div className={styles.tickerContainer}>
+        {/* Left Fixed Badge */}
+        <div className={styles.badge}>
           <span className={styles.liveDot} />
-          <span className={styles.badgeLabel}>INDUSTRY BENCHMARKS</span>
+          <span className={styles.badgeLabel}>LIVE ML BENCHMARKS</span>
         </div>
 
-        {/* Desktop: Stationary Clickable Metric Chips (Zero Motion Blur) */}
-        <div className={styles.desktopPillsRow}>
-          {TELEMETRY_FEED.map((item) => {
-            const isActive = item.id === activeTabId;
-            return (
+        {/* Automatic 60fps Smooth Glide Track */}
+        <div className={styles.glideViewport}>
+          <div className={styles.glideTrack}>
+            {/* Duplicated for seamless infinite loop */}
+            {[...TELEMETRY_FEED, ...TELEMETRY_FEED, ...TELEMETRY_FEED].map((item, idx) => (
               <button
-                key={item.id}
+                key={`${item.id}-${idx}`}
                 type="button"
-                className={`${styles.metricChip} ${isActive ? styles.chipActive : ''}`}
-                onClick={() => {
-                  setActiveTabId(item.id);
-                  setSelectedDetail(item);
-                }}
-                title="Click to view verified source and empirical details"
+                className={styles.glideChip}
+                onClick={() => setSelectedDetail(item)}
+                title="Click to view verified empirical sources"
               >
                 <span className={styles.chipIcon}>{item.icon}</span>
                 <span className={styles.chipLabel}>{item.shortLabel}:</span>
                 <strong className={styles.chipValue}>{item.value}</strong>
                 <span className={styles.chipChange}>[{item.change}]</span>
               </button>
-            );
-          })}
-        </div>
-
-        {/* Mobile / Compact: Single Stationary Headline (Zero Motion Blur) */}
-        <div className={styles.compactRow}>
-          <div className={styles.compactText} onClick={() => setSelectedDetail(activeItem)}>
-            <span>{activeItem.icon}</span>
-            <strong className={styles.compactLabel}>{activeItem.shortLabel}:</strong>
-            <span>{activeItem.value}</span>
-            <span className={styles.chipChange}>[{activeItem.change}]</span>
-          </div>
-
-          <div className={styles.compactControls}>
-            <button type="button" className={styles.stepBtn} onClick={handlePrev} title="Previous">‹</button>
-            <span className={styles.stepCount}>{activeIndex + 1}/{TELEMETRY_FEED.length}</span>
-            <button type="button" className={styles.stepBtn} onClick={handleNext} title="Next">›</button>
+            ))}
           </div>
         </div>
       </div>
