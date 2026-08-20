@@ -58,19 +58,17 @@ const MOCK_QUESTION_SETS = {
 };
 
 export async function GET(request) {
+  const { searchParams } = new URL(request.url);
+  const track = searchParams.get('track') || 'ml_system_design';
+  const questions = MOCK_QUESTION_SETS[track] || MOCK_QUESTION_SETS.ml_system_design;
+
   try {
     const supabase = getSupabase();
-    const { searchParams } = new URL(request.url);
-    const track = searchParams.get('track') || 'ml_system_design';
-
-    const questions = MOCK_QUESTION_SETS[track] || MOCK_QUESTION_SETS.ml_system_design;
-    const { data: history, error } = await supabase.from('mock_interview_sessions').select('*').order('completed_at', { ascending: false }).limit(10);
-    if (error) throw error;
-
-    return NextResponse.json({ questions, history });
+    const { data: history } = await supabase.from('mock_interview_sessions').select('*').order('completed_at', { ascending: false }).limit(10);
+    return NextResponse.json({ questions, history: history || [] });
   } catch (error) {
-    console.error('Failed to get mock interview questions:', error);
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    console.error('Failed to get mock interview history, returning questions:', error);
+    return NextResponse.json({ questions, history: [] });
   }
 }
 

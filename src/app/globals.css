@@ -173,11 +173,11 @@ html.theme-transitioning *::after {
 
 html {
   font-size: 16px;
-  scroll-behavior: smooth;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   background: var(--bg-primary);
   color: var(--text-primary);
+  text-rendering: optimizeLegibility;
 }
 
 body {
@@ -187,6 +187,7 @@ body {
   line-height: 1.55;
   min-height: 100vh;
   overflow-x: hidden;
+  overscroll-behavior-y: none;
 }
 
 /* ─── Editorial Layout Structure ────────────────────────────────── */

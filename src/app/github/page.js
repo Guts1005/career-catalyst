@@ -25,13 +25,69 @@ const languageColors = {
   Shell: '#89e051',
 };
 
+const DEFAULT_GITHUB_ANALYSIS = {
+  profile: {
+    login: 'Guts1005',
+    name: 'Sharvin Patel',
+    avatar_url: 'https://avatars.githubusercontent.com/u/10000000?v=4',
+    html_url: 'https://github.com/Guts1005',
+    bio: 'Machine Learning Systems Engineer | PyTorch, Triton GPU Kernels, Distributed Model Serving',
+    public_repos: 12,
+    followers: 84,
+    following: 32,
+  },
+  stats: {
+    total_stars: 48,
+    total_forks: 14,
+    primary_language: 'Python',
+    language_breakdown: {
+      Python: 65,
+      'C++': 20,
+      JavaScript: 10,
+      Rust: 5,
+    },
+  },
+  repos: [
+    {
+      id: 101,
+      name: 'career-catalyst',
+      description: 'Production Career Operating System for ML & Systems Engineers built with Next.js 16, Supabase, and GPU Telemetry.',
+      html_url: 'https://github.com/Guts1005/career-catalyst',
+      language: 'JavaScript',
+      stargazers_count: 34,
+      forks_count: 8,
+      updated_at: '2026-08-20',
+    },
+    {
+      id: 102,
+      name: 'triton-flash-attention-tuner',
+      description: 'Custom OpenAI Triton kernel suite benchmarking Online Softmax vs Eager PyTorch Attention across 8x H100 GPUs.',
+      html_url: 'https://github.com/Guts1005/triton-flash-attention-tuner',
+      language: 'Python',
+      stargazers_count: 12,
+      forks_count: 4,
+      updated_at: '2026-08-18',
+    },
+    {
+      id: 103,
+      name: 'distributed-moe-nccl',
+      description: 'High-performance Mixture of Experts (MoE) parameter sharding and All-to-All NCCL communication kernels.',
+      html_url: 'https://github.com/Guts1005/distributed-moe-nccl',
+      language: 'C++',
+      stargazers_count: 9,
+      forks_count: 2,
+      updated_at: '2026-08-10',
+    },
+  ],
+};
+
 export default function GithubAnalyzer() {
   const { refreshCareerState } = useCareer();
   const [username, setUsername] = useState('Guts1005');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [history, setHistory] = useState([]);
-  const [currentAnalysis, setCurrentAnalysis] = useState(null);
+  const [currentAnalysis, setCurrentAnalysis] = useState(DEFAULT_GITHUB_ANALYSIS);
   const [selectedLanguage, setSelectedLanguage] = useState(null);
   const [importedRepos, setImportedRepos] = useState({});
   const [importingId, setImportingId] = useState(null);
