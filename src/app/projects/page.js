@@ -7,6 +7,8 @@ import { showToast } from '@/components/Toast';
 import PageHeader from '@/components/PageHeader';
 import { useCareer } from '@/context/CareerContext';
 
+import BenchmarkLatencyVisualizer from '@/components/BenchmarkLatencyVisualizer';
+
 export default function ProjectsPage() {
   const { projects: contextProjects, setProjects: setContextProjects, skills, setSkills, refreshCareerState } = useCareer();
   const [statusFilter, setStatusFilter] = useState('all');
@@ -134,6 +136,9 @@ export default function ProjectsPage() {
           </button>
         }
       />
+
+      {/* Production Inference Latency Visualizer */}
+      <BenchmarkLatencyVisualizer />
 
       {/* Filters and Search */}
       <div className={styles.filters}>

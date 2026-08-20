@@ -6,35 +6,83 @@ import styles from './page.module.css';
 import { showToast } from '@/components/Toast';
 import { useCareer } from '@/context/CareerContext';
 import OnboardingModal from '@/components/OnboardingModal';
+import LiveTelemetryTicker from '@/components/LiveTelemetryTicker';
+import BenchmarkLatencyVisualizer from '@/components/BenchmarkLatencyVisualizer';
 
 export default function HomePage() {
-  const { readiness, nextBestAction, targetRole, skills, projects, jobs, userProfile, isDemoMode, toggleDemoMode } = useCareer();
+  const {
+    readiness,
+    nextBestAction,
+    targetRole,
+    skills,
+    projects,
+    jobs,
+    userProfile,
+    demoPersonas,
+    activePersonaId,
+    selectPersona,
+  } = useCareer();
+
   const [isOnboardingOpen, setIsOnboardingOpen] = useState(false);
 
-  const [activeRagTab, setActiveRagTab] = useState('sparse_dense');
-  const [ragQuery, setRagQuery] = useState('How does FlashAttention-2 tile GPU shared memory to minimize HBM IO?');
-  const [ragResult, setRagResult] = useState({
-    denseCosine: '0.942',
-    sparseScore: '0.887',
-    latencyMs: '38ms',
-    passage: 'FlashAttention-2 partitions the Q, K, V attention matrices into SRAM cache blocks, computing softmax scaling online without materializing the N x N attention matrix in high-bandwidth memory (HBM), yielding a 2.5x kernel speedup.',
-  });
+  // Quick 30-Second Diagnostic Widget State
+  const [diagStep, setDiagStep] = useState(1);
+  const [diagFramework, setDiagFramework] = useState('PyTorch / Triton');
+  const [diagDistributed, setDiagDistributed] = useState('Multi-Node / FSDP');
+  const [diagCompGoal, setDiagCompGoal] = useState('$250k - $350k');
+  const [diagScore, setDiagScore] = useState(null);
 
-  const handleSimulateRag = () => {
-    showToast('Cross-encoder re-ranking evaluated in 38ms', 'success');
+  const handleRunDiagnostic = () => {
+    let score = 75;
+    if (diagFramework === 'PyTorch / Triton') score += 12;
+    if (diagDistributed === 'Multi-Node / FSDP') score += 10;
+    setDiagScore(score);
+    showToast(`Diagnostic Complete: Calibrated ${score}% Initial Readiness!`, 'success');
   };
 
-  const handleCopyEmail = () => {
-    navigator.clipboard.writeText('sharvinneve67@gmail.com');
-    showToast('Email copied: sharvinneve67@gmail.com', 'success');
-  };
-
-  // Extract top competencies from unified skills state
   const topCompetencies = skills.slice(0, 4);
 
   return (
     <div className={styles.landingRoot}>
-      {/* ─── Hero Section (Off-White Canvas) ────────────────────────── */}
+      {/* ─── Real-Time Live Telemetry Ticker Bar ────────────────────── */}
+      <LiveTelemetryTicker />
+
+      {/* ─── Interactive Persona Switcher Banner ─────────────────────── */}
+      <div style={{ background: 'var(--bg-surface)', borderBottom: '1px solid var(--border)', padding: '10px 24px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '10px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <span style={{ fontSize: '11px', fontFamily: 'var(--font-mono)', color: 'var(--text-muted)', textTransform: 'uppercase', fontWeight: 700 }}>
+            EXPLORE CANDIDATE PERSONAS:
+          </span>
+        </div>
+        <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+          {demoPersonas?.map((p) => {
+            const isActive = activePersonaId === p.id;
+            return (
+              <button
+                key={p.id}
+                type="button"
+                className={`tag ${isActive ? 'active' : ''}`}
+                onClick={() => selectPersona(p.id)}
+                style={{
+                  cursor: 'pointer',
+                  background: isActive ? 'var(--bg-inverse)' : 'var(--bg-subtle)',
+                  color: isActive ? 'var(--text-inverse)' : 'var(--text-primary)',
+                  border: `1px solid ${isActive ? 'var(--bg-inverse)' : 'var(--border)'}`,
+                  fontSize: '11.5px',
+                  padding: '6px 12px',
+                  fontWeight: 600,
+                  borderRadius: '4px',
+                  transition: 'all 0.15s ease',
+                }}
+              >
+                {p.badge} ({p.personaName.split(' ')[0]})
+              </button>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* ─── Hero Section ───────────────────────────────────────────── */}
       <section className={styles.heroSection}>
         <div className={styles.heroMetaTop}>
           <span>CAREER INTELLIGENCE PLATFORM</span>
@@ -117,9 +165,69 @@ export default function HomePage() {
           </div>
         </div>
 
+        {/* ─── Quick 30-Second Diagnostic Interactive Widget ────────── */}
+        <div style={{ marginTop: '36px', background: 'var(--bg-subtle)', border: '1px solid var(--border)', borderRadius: '8px', padding: '20px' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '14px', flexWrap: 'wrap', gap: '8px' }}>
+            <span style={{ fontSize: '11px', fontFamily: 'var(--font-mono)', fontWeight: 800, color: 'var(--text-muted)', textTransform: 'uppercase' }}>
+              ⚡ 30-SECOND RAPID TECHNICAL DIAGNOSTIC
+            </span>
+            {diagScore && (
+              <span style={{ fontSize: '12px', fontFamily: 'var(--font-mono)', color: 'var(--green)', fontWeight: 800 }}>
+                ✓ DIAGNOSED READINESS: {diagScore}%
+              </span>
+            )}
+          </div>
+
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '12px', marginBottom: '16px' }}>
+            <div>
+              <label style={{ fontSize: '10.5px', fontFamily: 'var(--font-mono)', color: 'var(--text-muted)', textTransform: 'uppercase', display: 'block', marginBottom: '4px' }}>
+                Primary Core Framework
+              </label>
+              <select className="select" value={diagFramework} onChange={(e) => setDiagFramework(e.target.value)} style={{ width: '100%' }}>
+                <option value="PyTorch / Triton">PyTorch & Custom Triton</option>
+                <option value="TensorFlow / JAX">TensorFlow & JAX</option>
+                <option value="Scikit-Learn / Classical">Scikit-Learn & Classical ML</option>
+              </select>
+            </div>
+
+            <div>
+              <label style={{ fontSize: '10.5px', fontFamily: 'var(--font-mono)', color: 'var(--text-muted)', textTransform: 'uppercase', display: 'block', marginBottom: '4px' }}>
+                Distributed Training Scale
+              </label>
+              <select className="select" value={diagDistributed} onChange={(e) => setDiagDistributed(e.target.value)} style={{ width: '100%' }}>
+                <option value="Multi-Node / FSDP">Multi-Node (FSDP / Megatron)</option>
+                <option value="Single-Node / Multi-GPU">Single-Node (DDP / 8x GPU)</option>
+                <option value="Single GPU / Cloud API">Single GPU / Colab / APIs</option>
+              </select>
+            </div>
+
+            <div>
+              <label style={{ fontSize: '10.5px', fontFamily: 'var(--font-mono)', color: 'var(--text-muted)', textTransform: 'uppercase', display: 'block', marginBottom: '4px' }}>
+                Target Compensation Tier
+              </label>
+              <select className="select" value={diagCompGoal} onChange={(e) => setDiagCompGoal(e.target.value)} style={{ width: '100%' }}>
+                <option value="$250k - $350k">$250,000 - $350,000+ (Staff/Principal)</option>
+                <option value="$180k - $250k">$180,000 - $250,000 (Senior ML)</option>
+                <option value="$120k - $180k">$120,000 - $180,000 (Core Engineer)</option>
+              </select>
+            </div>
+          </div>
+
+          <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
+            <button
+              type="button"
+              className="btn btn-primary"
+              onClick={handleRunDiagnostic}
+              style={{ fontSize: '12px', padding: '8px 18px' }}
+            >
+              RUN RAPID DIAGNOSTIC →
+            </button>
+          </div>
+        </div>
+
         {/* ─── Next Best Action Card (Core Intelligence Loop) ───────── */}
         {nextBestAction && (
-          <div style={{ marginTop: '48px', background: 'var(--bg-surface)', border: '1px solid var(--border-strong)', borderRadius: '8px', padding: '24px', color: 'var(--text-primary)' }}>
+          <div style={{ marginTop: '36px', background: 'var(--bg-surface)', border: '1px solid var(--border-strong)', borderRadius: '8px', padding: '24px', color: 'var(--text-primary)' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
               <span style={{ fontSize: '11px', fontFamily: 'var(--font-mono)', color: 'var(--green)', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.08em' }}>
                 ● YOUR NEXT BEST ACTION
@@ -168,6 +276,9 @@ export default function HomePage() {
             </p>
           </div>
         </div>
+
+        {/* ─── Interactive Inference Benchmark Visualizer ───────────── */}
+        <BenchmarkLatencyVisualizer />
 
         <div className={styles.projectLedger}>
           {projects.slice(0, 3).map((p, idx) => (
@@ -221,7 +332,7 @@ export default function HomePage() {
               </div>
               <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
                 <span style={{ fontSize: '11px', fontFamily: 'var(--font-mono)', color: 'var(--green)', fontWeight: 700 }}>
-                  {j.match_score || 90}% MATCH
+                  {j.match_score || 92}% MATCH
                 </span>
                 <span style={{ fontSize: '10.5px', fontFamily: 'var(--font-mono)', background: 'var(--bg-subtle)', border: '1px solid var(--border)', padding: '2px 8px', borderRadius: '4px', textTransform: 'uppercase', color: 'var(--text-muted)' }}>
                   {j.status}

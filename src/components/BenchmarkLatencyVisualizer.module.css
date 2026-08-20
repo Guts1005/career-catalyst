@@ -1,0 +1,230 @@
+.visualizerCard {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-strong);
+  border-radius: 8px;
+  padding: 24px;
+  color: var(--text-primary);
+  margin: 24px 0;
+  box-shadow: var(--shadow-sm);
+  transition: border-color 0.2s ease;
+}
+
+.visualizerCard:hover {
+  border-color: var(--text-primary);
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.subBadge {
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  font-weight: 700;
+  color: var(--text-muted);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.title {
+  font-size: 18px;
+  font-weight: 800;
+  color: var(--text-primary);
+  margin: 4px 0 0 0;
+  letter-spacing: -0.01em;
+}
+
+.speedupBadge {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  font-weight: 800;
+  color: var(--green);
+  background: var(--green-subtle);
+  border: 1px solid var(--green-border);
+  padding: 4px 10px;
+  border-radius: 4px;
+}
+
+.description {
+  font-size: 13px;
+  color: var(--text-secondary);
+  line-height: 1.5;
+  margin: 10px 0 20px 0;
+}
+
+.controlsGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  background: var(--bg-subtle);
+  padding: 16px;
+  border-radius: 6px;
+  border: 1px solid var(--border);
+  margin-bottom: 24px;
+}
+
+@media (max-width: 768px) {
+  .controlsGrid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.controlItem {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.controlLabelRow {
+  display: flex;
+  justify-content: space-between;
+  font-size: 12px;
+  font-family: var(--font-mono);
+  color: var(--text-secondary);
+}
+
+.controlLabelRow strong {
+  color: var(--text-primary);
+}
+
+.rangeInput {
+  width: 100%;
+  accent-color: var(--text-primary);
+  cursor: pointer;
+}
+
+.comparisonList {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.stackRow {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.stackMeta {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.stackNameWrap {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.stackTagGreen {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--green);
+  background: var(--green-subtle);
+  border: 1px solid var(--green-border);
+  padding: 2px 6px;
+  border-radius: 3px;
+}
+
+.stackTagBlue {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--blue);
+  background: var(--blue-subtle);
+  border: 1px solid var(--blue-border);
+  padding: 2px 6px;
+  border-radius: 3px;
+}
+
+.stackTagGray {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--text-muted);
+  background: var(--bg-subtle);
+  border: 1px solid var(--border);
+  padding: 2px 6px;
+  border-radius: 3px;
+}
+
+.stackName {
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.stackMetrics {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-family: var(--font-mono);
+}
+
+.metricValGreen {
+  font-size: 14px;
+  font-weight: 800;
+  color: var(--green);
+}
+
+.metricValBlue {
+  font-size: 14px;
+  font-weight: 800;
+  color: var(--blue);
+}
+
+.metricValGray {
+  font-size: 14px;
+  font-weight: 800;
+  color: var(--text-muted);
+}
+
+.metricTps {
+  font-size: 11.5px;
+  color: var(--text-secondary);
+}
+
+.barTrack {
+  height: 8px;
+  background: var(--bg-subtle);
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.barFillGreen {
+  height: 100%;
+  background: var(--green);
+  border-radius: 4px;
+  transition: width 0.25s ease-out;
+}
+
+.barFillBlue {
+  height: 100%;
+  background: var(--blue);
+  border-radius: 4px;
+  transition: width 0.25s ease-out;
+}
+
+.barFillGray {
+  height: 100%;
+  background: var(--text-muted);
+  border-radius: 4px;
+  transition: width 0.25s ease-out;
+}
+
+.footerNote {
+  margin-top: 16px;
+  padding-top: 12px;
+  border-top: 1px solid var(--border);
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  color: var(--text-muted);
+}

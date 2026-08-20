@@ -72,7 +72,7 @@ export default function Sidebar() {
   const pathname = usePathname();
   const [isOpen, setIsOpen] = useState(false);
   const [isOnboardingOpen, setIsOnboardingOpen] = useState(false);
-  const { readiness } = useCareer();
+  const { readiness, userProfile } = useCareer();
 
   useEffect(() => {
     setIsOpen(false);
@@ -188,7 +188,7 @@ export default function Sidebar() {
             }}
           >
             <span style={{ fontSize: '9.5px', fontFamily: 'var(--font-mono)', color: 'var(--text-muted)', textTransform: 'uppercase' }}>
-              TARGET TRACK ⚙
+              {userProfile?.name || 'CANDIDATE'} • TRACK ⚙
             </span>
             <span style={{ fontSize: '11.5px', fontWeight: 700, color: 'var(--text-primary)', textTransform: 'uppercase' }}>
               {readiness?.targetRoleTitle || 'ML Engineer'}

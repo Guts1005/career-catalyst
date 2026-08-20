@@ -5,6 +5,7 @@ import {
   calculateCareerReadiness,
   generateNextBestAction,
   getRoleById,
+  DEMO_PERSONAS,
   BENCHMARK_DEMO_DATA,
 } from '@/lib/careerGraph';
 import { showToast } from '@/components/Toast';
@@ -13,35 +14,40 @@ const CareerContext = createContext(null);
 
 export function CareerProvider({ children }) {
   // State Initialization
-  const [isDemoMode, setIsDemoMode] = useState(false);
+  const [activePersonaId, setActivePersonaId] = useState('sharvin_ml');
+  const [isDemoMode, setIsDemoMode] = useState(true);
   const [isOnboarded, setIsOnboarded] = useState(true);
   const [targetRole, setTargetRoleState] = useState('senior_ml');
-  const [userProfile, setUserProfile] = useState({
-    name: 'Sharvin Patel',
-    title: 'Machine Learning Engineer',
-    targetRole: 'senior_ml',
-    level: 'Mid-Senior',
-    location: 'San Francisco, CA',
-  });
+  const [userProfile, setUserProfile] = useState(BENCHMARK_DEMO_DATA.profile);
 
-  const [skills, setSkills] = useState([]);
-  const [projects, setProjects] = useState([]);
-  const [jobs, setJobs] = useState([]);
+  const [skills, setSkills] = useState(BENCHMARK_DEMO_DATA.skills);
+  const [projects, setProjects] = useState(BENCHMARK_DEMO_DATA.projects);
+  const [jobs, setJobs] = useState(BENCHMARK_DEMO_DATA.jobs);
   const [resumeData, setResumeData] = useState(null);
   const [loading, setLoading] = useState(true);
 
   // Sync state from server / localStorage on load
   const refreshCareerState = useCallback(async () => {
     try {
-      // Check localStorage for onboarded flag & targetRole preference
       if (typeof window !== 'undefined') {
         const savedOnboarded = localStorage.getItem('catalyst_onboarded');
         const savedRole = localStorage.getItem('catalyst_target_role');
         const savedDemo = localStorage.getItem('catalyst_demo_mode');
+        const savedPersona = localStorage.getItem('catalyst_persona_id');
 
         if (savedOnboarded !== null) setIsOnboarded(savedOnboarded === 'true');
         if (savedRole) setTargetRoleState(savedRole);
         if (savedDemo !== null) setIsDemoMode(savedDemo === 'true');
+        if (savedPersona) {
+          const found = DEMO_PERSONAS.find((p) => p.id === savedPersona);
+          if (found) {
+            setActivePersonaId(savedPersona);
+            setSkills(found.skills);
+            setProjects(found.projects);
+            setJobs(found.jobs);
+            setUserProfile(found.profile);
+          }
+        }
       }
 
       // Fetch live DB entities concurrently
@@ -56,14 +62,8 @@ export function CareerProvider({ children }) {
       const fetchedProjects = Array.isArray(projectsRes) ? projectsRes : [];
       const fetchedJobs = jobsRes?.jobs || [];
 
-      // If user has zero DB records and demo mode is ON or default benchmark
-      if (fetchedSkills.length === 0 && fetchedProjects.length === 0 && fetchedJobs.length === 0) {
-        // Provide benchmark demo data so the system is fully populated and cohesive
-        setSkills(BENCHMARK_DEMO_DATA.skills);
-        setProjects(BENCHMARK_DEMO_DATA.projects);
-        setJobs(BENCHMARK_DEMO_DATA.jobs);
-        setUserProfile(BENCHMARK_DEMO_DATA.profile);
-      } else {
+      // If user has database records, use them
+      if (fetchedSkills.length > 0 || fetchedProjects.length > 0 || fetchedJobs.length > 0) {
         setSkills(fetchedSkills);
         setProjects(fetchedProjects);
         setJobs(fetchedJobs);
@@ -71,10 +71,6 @@ export function CareerProvider({ children }) {
       }
     } catch (e) {
       console.error('Failed to sync career state:', e);
-      // Fallback to cohesive benchmark data
-      setSkills(BENCHMARK_DEMO_DATA.skills);
-      setProjects(BENCHMARK_DEMO_DATA.projects);
-      setJobs(BENCHMARK_DEMO_DATA.jobs);
     } finally {
       setLoading(false);
     }
@@ -83,6 +79,22 @@ export function CareerProvider({ children }) {
   useEffect(() => {
     refreshCareerState();
   }, [refreshCareerState]);
+
+  // Switch Active Candidate Persona with rich sample datasets
+  const selectPersona = useCallback((personaId) => {
+    const found = DEMO_PERSONAS.find((p) => p.id === personaId) || DEMO_PERSONAS[0];
+    setActivePersonaId(found.id);
+    setUserProfile(found.profile);
+    setTargetRoleState(found.profile.targetRole);
+    setSkills(found.skills);
+    setProjects(found.projects);
+    setJobs(found.jobs);
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('catalyst_persona_id', found.id);
+      localStorage.setItem('catalyst_target_role', found.profile.targetRole);
+    }
+    showToast(`Persona Calibrated: ${found.personaName} (${found.badge})`, 'success');
+  }, []);
 
   // Set & Propagate Target Role
   const setTargetRole = useCallback((roleId) => {
@@ -142,7 +154,6 @@ export function CareerProvider({ children }) {
   // Log Rejection Feedback Loop (Converts Rejections into Priority Skill Gaps)
   const logRejectionFeedback = useCallback((jobId, company, reasonTopic) => {
     if (!reasonTopic) return;
-    // Add or elevate the skill gap in competency list
     setSkills((prev) => {
       const existing = prev.find((s) => s.name.toLowerCase() === reasonTopic.toLowerCase());
       if (existing) {
@@ -192,6 +203,9 @@ export function CareerProvider({ children }) {
   }, [targetRole, skills, projects, jobs, readiness]);
 
   const value = {
+    activePersonaId,
+    selectPersona,
+    demoPersonas: DEMO_PERSONAS,
     isDemoMode,
     toggleDemoMode,
     isOnboarded,
