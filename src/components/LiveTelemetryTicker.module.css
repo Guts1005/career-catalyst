@@ -3,10 +3,10 @@
   align-items: center;
   background: var(--bg-surface);
   border-bottom: 1px solid var(--border);
-  height: 38px;
+  height: 40px;
   overflow: hidden;
   font-family: var(--font-mono);
-  font-size: 11px;
+  font-size: 11.5px;
   color: var(--text-primary);
   position: relative;
   z-index: 40;
@@ -18,7 +18,7 @@
   gap: 6px;
   background: var(--bg-subtle);
   border-right: 1px solid var(--border);
-  padding: 0 14px;
+  padding: 0 16px;
   height: 100%;
   font-weight: 800;
   letter-spacing: 0.06em;
@@ -47,13 +47,13 @@
   font-size: 10px;
 }
 
-/* ─── Slide Presentation Mode (Calm & Readable) ─── */
+/* ─── Slide Presentation Mode (Stationary & 100% Readable) ─── */
 .slideWrapper {
   flex: 1;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0 16px;
+  padding: 0 18px;
   cursor: pointer;
   overflow: hidden;
 }
@@ -61,15 +61,15 @@
 .slideItem {
   display: flex;
   align-items: center;
-  gap: 8px;
-  animation: fadeInSlide 0.35s ease-out;
+  gap: 10px;
+  animation: fadeInSlide 0.4s ease-out;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 
 .itemIcon {
-  font-size: 12px;
+  font-size: 13px;
 }
 
 .itemLabel {
@@ -84,7 +84,7 @@
 
 .itemChange {
   color: var(--green);
-  font-size: 10px;
+  font-size: 10.5px;
 }
 
 .infoHint {
@@ -92,7 +92,7 @@
   color: var(--text-muted);
   background: var(--bg-subtle);
   border: 1px solid var(--border);
-  padding: 1px 5px;
+  padding: 2px 6px;
   border-radius: 3px;
   margin-left: 8px;
   display: inline-block;
@@ -101,22 +101,39 @@
 .stepperControls {
   display: flex;
   align-items: center;
-  gap: 4px;
+  gap: 6px;
   flex-shrink: 0;
-  margin-left: 12px;
+  margin-left: 14px;
 }
 
-.stepBtn, .pauseBtn {
+.stepBtn {
   background: var(--bg-subtle);
   border: 1px solid var(--border);
   color: var(--text-primary);
-  width: 22px;
-  height: 22px;
+  width: 24px;
+  height: 24px;
   display: flex;
   align-items: center;
   justify-content: center;
-  border-radius: 3px;
-  font-size: 11px;
+  border-radius: 4px;
+  font-size: 12px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.pauseBtn {
+  background: var(--bg-subtle);
+  border: 1px solid var(--border);
+  color: var(--text-primary);
+  padding: 0 8px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 4px;
+  font-size: 10px;
+  font-family: var(--font-mono);
+  font-weight: 700;
   cursor: pointer;
   transition: all 0.15s ease;
 }
@@ -127,14 +144,14 @@
 }
 
 .stepCount {
-  font-size: 10px;
+  font-size: 10.5px;
   color: var(--text-muted);
   padding: 0 4px;
-  min-width: 24px;
+  min-width: 30px;
   text-align: center;
 }
 
-/* ─── Ultra-Slow Marquee Mode ──────────────────── */
+/* ─── Ultra-Slow 180s Glide Mode (Isolated Cards) ──── */
 .trackWrapper {
   overflow: hidden;
   white-space: nowrap;
@@ -147,29 +164,34 @@
 .track {
   display: flex;
   align-items: center;
-  gap: 28px;
-  animation: scrollMarquee 95s linear infinite; /* Ultra-slow 95s pace for comfortable reading */
+  gap: 36px;
+  animation: scrollMarquee 180s linear infinite; /* Ultra-slow 180s (3 min) pace */
 }
 
 .track.paused {
   animation-play-state: paused;
 }
 
-.tickerItem {
+.tickerCardItem {
   display: inline-flex;
   align-items: center;
   gap: 8px;
+  background: var(--bg-subtle);
+  border: 1px solid var(--border);
+  padding: 4px 14px;
+  border-radius: 6px;
+  transition: all 0.15s ease;
 }
 
-.separator {
-  color: var(--border-strong);
-  margin-left: 12px;
+.tickerCardItem:hover {
+  border-color: var(--text-primary);
+  background: var(--bg-hover);
 }
 
 /* ─── Mode Toggle ─────────────────────────────── */
 .modeToggleWrapper {
   border-left: 1px solid var(--border);
-  padding: 0 10px;
+  padding: 0 12px;
   height: 100%;
   display: flex;
   align-items: center;
@@ -180,10 +202,10 @@
 .modeToggleBtn {
   background: transparent;
   border: 1px solid var(--border);
-  border-radius: 3px;
-  padding: 3px 7px;
+  border-radius: 4px;
+  padding: 4px 8px;
   font-family: var(--font-mono);
-  font-size: 9.5px;
+  font-size: 10px;
   font-weight: 700;
   color: var(--text-muted);
   cursor: pointer;
@@ -208,7 +230,7 @@
 @keyframes fadeInSlide {
   from {
     opacity: 0;
-    transform: translateY(4px);
+    transform: translateY(6px);
   }
   to {
     opacity: 1;
@@ -229,11 +251,11 @@
 
 @media (max-width: 768px) {
   .tickerRoot {
-    height: 34px;
-    font-size: 10px;
+    height: 36px;
+    font-size: 10.5px;
   }
   .tickerBadge {
-    padding: 0 8px;
+    padding: 0 10px;
   }
   .badgeText {
     display: none;
