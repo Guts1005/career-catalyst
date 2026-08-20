@@ -16,7 +16,7 @@ const BENCHMARK_PROBLEMS = [
     category: 'GPU & Systems',
     difficulty: 'hard',
     status: 'solved',
-    solution_notes: 'Computed online softmax rescaling factors m_new = max(m_prev, row_max) and l_new = l_prev * exp(m_prev - m_new) + exp(row_max - m_new) in CUDA shared memory to avoid writing intermediate N x N attention matrix to HBM.',
+    solution_notes: 'Computed online softmax rescaling factors m_new = max(m_prev, row_max) and l_new = l_prev * exp(m_prev - m_new) + exp(row_max - m_new) in CUDA shared memory to avoid writing intermediate N x N attention matrix to HBM. Source: Tri Dao (arXiv:2307.08691).',
   },
   {
     id: 2,
@@ -25,7 +25,7 @@ const BENCHMARK_PROBLEMS = [
     category: 'Distributed Systems',
     difficulty: 'hard',
     status: 'solved',
-    solution_notes: 'Implemented 2*(P-1) step ring communication split into Scatter-Reduce followed by AllGather phases, achieving optimal 2*(P-1)/P * S transfer bandwidth.',
+    solution_notes: 'Implemented 2*(P-1) step ring communication split into Scatter-Reduce followed by AllGather phases, achieving optimal 2*(P-1)/P * S transfer bandwidth without master-worker network bottlenecks. Source: Baidu Silicon Valley AI Lab / NCCL.',
   },
   {
     id: 3,
@@ -34,7 +34,7 @@ const BENCHMARK_PROBLEMS = [
     category: 'Vector Search',
     difficulty: 'medium',
     status: 'solved',
-    solution_notes: 'Product quantization (PQ) with Voronoi cell partitioning for sub-millisecond retrieval across 10M dense embedding vectors.',
+    solution_notes: 'Product quantization (PQ) with Voronoi cell partitioning for sub-millisecond retrieval across 10M dense embedding vectors. Source: Babenko & Lempitsky (IEEE TPAMI).',
   },
   {
     id: 4,
@@ -43,7 +43,7 @@ const BENCHMARK_PROBLEMS = [
     category: 'Data Structures',
     difficulty: 'medium',
     status: 'solved',
-    solution_notes: 'O(1) amortized get/put using doubly linked list node pointer map for eviction policies in model weights caching.',
+    solution_notes: 'O(1) amortized get/put using doubly linked list node pointer map for eviction policies in model weights caching. LeetCode #146.',
   },
 ];
 
@@ -57,6 +57,11 @@ export default function CodingTrackerPage() {
   const [expandedId, setExpandedId] = useState(null);
   const [search, setSearch] = useState('');
   const searchInputRef = useRef(null);
+
+  // Live LeetCode Sync State
+  const [lcUsername, setLcUsername] = useState('Guts1005');
+  const [syncingLc, setSyncingLc] = useState(false);
+  const [liveLcProfile, setLiveLcProfile] = useState(null);
 
   // Form
   const [title, setTitle] = useState('');
@@ -77,7 +82,6 @@ export default function CodingTrackerPage() {
         setProblems(data.problems);
         setStats(data.stats);
       } else {
-        // Cohesive benchmark problems
         setProblems(BENCHMARK_PROBLEMS);
         setStats({ total: 4, easy: 0, medium: 2, hard: 2, platforms: { LeetCode: 1, Kaggle: 1, Custom: 2 } });
       }
@@ -92,6 +96,35 @@ export default function CodingTrackerPage() {
   useEffect(() => {
     fetchData();
   }, [fetchData]);
+
+  // Live LeetCode Sync Handler
+  const handleSyncLeetCode = async (e) => {
+    e.preventDefault();
+    if (!lcUsername.trim()) return;
+    setSyncingLc(true);
+    try {
+      const res = await fetch('/api/coding-tracker', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'sync_leetcode',
+          username: lcUsername.trim(),
+        }),
+      });
+      const data = await res.json();
+      if (res.ok && data.success) {
+        setLiveLcProfile(data);
+        showToast(`Synced real live stats for LeetCode user @${data.username}!`, 'success');
+      } else {
+        showToast(data.error || 'Failed to sync LeetCode profile', 'error');
+      }
+    } catch (err) {
+      console.error('LeetCode sync error:', err);
+      showToast('Error querying live LeetCode API', 'error');
+    } finally {
+      setSyncingLc(false);
+    }
+  };
 
   // Keyboard shortcut '/'
   useEffect(() => {
@@ -169,7 +202,7 @@ export default function CodingTrackerPage() {
       <PageHeader
         chapter="TECHNICAL CORE / 08"
         title={<>ALGORITHMIC &<br />CODING LEDGER.</>}
-        subtitle="Track algorithmic practice, GPU systems implementations, and mathematical problem-solving benchmarks."
+        subtitle="Track algorithmic practice, real live LeetCode profiles, and verified GPU systems invariants."
         actions={
           <button className="btn btn-primary" onClick={() => setIsModalOpen(true)}>
             + LOG PROBLEM
@@ -177,27 +210,72 @@ export default function CodingTrackerPage() {
         }
       />
 
+      {/* Real Live LeetCode Sync Bar */}
+      <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: '8px', padding: '16px 20px', marginBottom: '24px' }}>
+        <form onSubmit={handleSyncLeetCode} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '12px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flex: 1, minWidth: '240px' }}>
+            <span style={{ fontSize: '11px', fontFamily: 'var(--font-mono)', fontWeight: 800, color: 'var(--text-muted)', textTransform: 'uppercase' }}>
+              ⚡ LIVE LEETCODE SYNC:
+            </span>
+            <input
+              type="text"
+              className="input"
+              value={lcUsername}
+              onChange={(e) => setLcUsername(e.target.value)}
+              placeholder="Enter real LeetCode handle (e.g. Guts1005)"
+              style={{ maxWidth: '240px', fontSize: '12.5px' }}
+            />
+          </div>
+          <button type="submit" className="btn btn-secondary" disabled={syncingLc} style={{ fontSize: '11.5px', padding: '6px 16px' }}>
+            {syncingLc ? 'FETCHING LIVE STATS...' : '🔄 SYNC LIVE PROFILE →'}
+          </button>
+        </form>
+
+        {liveLcProfile && (
+          <div style={{ marginTop: '14px', paddingTop: '12px', borderTop: '1px solid var(--border)', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: '12px' }}>
+            <div>
+              <div style={{ fontSize: '10.5px', fontFamily: 'var(--font-mono)', color: 'var(--text-muted)' }}>LEETCODE HANDLE</div>
+              <strong style={{ fontSize: '13px', color: 'var(--text-primary)' }}>@{liveLcProfile.username}</strong>
+            </div>
+            <div>
+              <div style={{ fontSize: '10.5px', fontFamily: 'var(--font-mono)', color: 'var(--text-muted)' }}>TOTAL SOLVED</div>
+              <strong style={{ fontSize: '14px', color: 'var(--text-primary)' }}>{liveLcProfile.total_solved} Problems</strong>
+            </div>
+            <div>
+              <div style={{ fontSize: '10.5px', fontFamily: 'var(--font-mono)', color: 'var(--green)' }}>EASY / MED / HARD</div>
+              <strong style={{ fontSize: '13px', color: 'var(--text-primary)' }}>{liveLcProfile.easy_solved} / {liveLcProfile.medium_solved} / {liveLcProfile.hard_solved}</strong>
+            </div>
+            <div>
+              <div style={{ fontSize: '10.5px', fontFamily: 'var(--font-mono)', color: 'var(--text-muted)' }}>GLOBAL RANKING</div>
+              <strong style={{ fontSize: '13px', color: 'var(--text-primary)' }}>#{liveLcProfile.ranking}</strong>
+            </div>
+          </div>
+        )}
+      </div>
+
       {/* KPI Stats Row */}
       <div className={styles.kpiRow}>
         <div className={styles.kpiCard}>
-          <div className={styles.kpiValue}>{problems.length}</div>
+          <div className={styles.kpiValue}>
+            {liveLcProfile ? liveLcProfile.total_solved : problems.length}
+          </div>
           <div className={styles.kpiLabel}>Total Problems Solved</div>
         </div>
         <div className={styles.kpiCard}>
           <div className={styles.kpiValue} style={{ color: 'var(--green)' }}>
-            {problems.filter((p) => p.difficulty === 'easy').length}
+            {liveLcProfile ? liveLcProfile.easy_solved : problems.filter((p) => p.difficulty === 'easy').length}
           </div>
           <div className={styles.kpiLabel}>Easy Tier</div>
         </div>
         <div className={styles.kpiCard}>
           <div className={styles.kpiValue} style={{ color: 'var(--amber)' }}>
-            {problems.filter((p) => p.difficulty === 'medium').length}
+            {liveLcProfile ? liveLcProfile.medium_solved : problems.filter((p) => p.difficulty === 'medium').length}
           </div>
           <div className={styles.kpiLabel}>Medium Tier</div>
         </div>
         <div className={styles.kpiCard}>
           <div className={styles.kpiValue} style={{ color: 'var(--red)' }}>
-            {problems.filter((p) => p.difficulty === 'hard').length}
+            {liveLcProfile ? liveLcProfile.hard_solved : problems.filter((p) => p.difficulty === 'hard').length}
           </div>
           <div className={styles.kpiLabel}>Hard & Systems Tier</div>
         </div>

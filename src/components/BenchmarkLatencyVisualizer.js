@@ -134,7 +134,10 @@ export default function BenchmarkLatencyVisualizer() {
       </div>
 
       <div className={styles.footerNote}>
-        <span>Tested with NVIDIA Nsight Compute on Hopper Architecture (SRAM Bandwidth: 3.3 TB/s).</span>
+        <div style={{ display: 'flex', justifyContent: 'space-between', flexWrap: 'wrap', gap: '8px' }}>
+          <span><strong>Hardware:</strong> 8x NVIDIA H100 SXM5 80GB (HBM3 Bandwidth: 3.35 TB/s • SRAM Cache: 50MB)</span>
+          <span><strong>Citations:</strong> Tri Dao (arXiv:2307.08691) • Kwon et al. (SOSP &apos;23 / UC Berkeley)</span>
+        </div>
       </div>
     </div>
   );

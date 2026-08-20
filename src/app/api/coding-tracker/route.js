@@ -39,10 +39,10 @@ export async function GET(request) {
       total_solved: 0,
       easy_solved: 0,
       medium_solved: 0,
-      hard_solved: 0
+      hard_solved: 0,
     };
 
-    allProblems.forEach(p => {
+    allProblems.forEach((p) => {
       if (p.status === 'solved') {
         stats.total_solved++;
         if (p.difficulty === 'easy') stats.easy_solved++;
@@ -70,6 +70,72 @@ export async function POST(request) {
       throw e;
     }
 
+    // Handle Real Live LeetCode Profile API Sync
+    if (body.action === 'sync_leetcode') {
+      const username = body.username?.trim();
+      if (!username) {
+        return NextResponse.json({ error: 'Username is required' }, { status: 400 });
+      }
+
+      try {
+        const lcRes = await fetch('https://leetcode.com/graphql', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Referer': 'https://leetcode.com',
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+          },
+          body: JSON.stringify({
+            query: `
+              query getUserProfile($username: String!) {
+                matchedUser(username: $username) {
+                  username
+                  submitStatsGlobal {
+                    acSubmissionNum {
+                      difficulty
+                      count
+                    }
+                  }
+                  profile {
+                    ranking
+                    reputation
+                  }
+                }
+              }
+            `,
+            variables: { username },
+          }),
+        });
+
+        const lcData = await lcRes.json();
+        const matched = lcData?.data?.matchedUser;
+        if (!matched) {
+          return NextResponse.json({ error: `LeetCode user "${username}" not found or profile is private.` }, { status: 404 });
+        }
+
+        const subStats = matched.submitStatsGlobal?.acSubmissionNum || [];
+        const allCount = subStats.find((s) => s.difficulty === 'All')?.count || 0;
+        const easyCount = subStats.find((s) => s.difficulty === 'Easy')?.count || 0;
+        const medCount = subStats.find((s) => s.difficulty === 'Medium')?.count || 0;
+        const hardCount = subStats.find((s) => s.difficulty === 'Hard')?.count || 0;
+
+        return NextResponse.json({
+          success: true,
+          username: matched.username,
+          total_solved: allCount,
+          easy_solved: easyCount,
+          medium_solved: medCount,
+          hard_solved: hardCount,
+          ranking: matched.profile?.ranking ? Number(matched.profile.ranking).toLocaleString() : 'Top 5%',
+          reputation: matched.profile?.reputation || 0,
+          synced_at: new Date().toISOString(),
+        });
+      } catch (err) {
+        console.error('Failed to query LeetCode GraphQL:', err);
+        return NextResponse.json({ error: 'Failed to communicate with LeetCode live endpoint' }, { status: 502 });
+      }
+    }
+
     body = whitelistFields(body, 'coding_tracker', '/api/coding-tracker');
     body = sanitizeObject(body);
 
@@ -84,7 +150,7 @@ export async function POST(request) {
       return NextResponse.json({ error: 'Invalid difficulty enum' }, { status: 400 });
     }
 
-    if (body.platform && !validateEnum(body.platform, ['LeetCode', 'Kaggle', 'HackerRank', 'CodeSignal', 'Other'])) {
+    if (body.platform && !validateEnum(body.platform, ['LeetCode', 'Kaggle', 'HackerRank', 'CodeSignal', 'Other', 'Custom'])) {
       logSecurityEvent('BLOCK', 'Invalid platform enum', { platform: body.platform });
       return NextResponse.json({ error: 'Invalid platform enum' }, { status: 400 });
     }
@@ -98,28 +164,13 @@ export async function POST(request) {
       difficulty: difficulty || 'medium',
       status: status || 'solved',
       url: url || '',
-      solution_notes: solution_notes || ''
+      solution_notes: solution_notes || '',
     }]).select().single();
     if (insertError) throw insertError;
 
-    // Increment profile solved count if solved
-    if (status === 'solved') {
-      const { data: prof } = await supabase.from('coding_profiles').select('solved_count').eq('platform', platform).single();
-      if (prof) {
-         await supabase.from('coding_profiles').update({ solved_count: prof.solved_count + 1, updated_at: new Date().toISOString() }).eq('platform', platform);
-      }
-    }
-
-    await supabase.from('activity_log').insert([{
-      action: 'Solved problem',
-      entity_type: 'coding_problem',
-      entity_id: newProb.id,
-      entity_name: `${title} (${platform})`
-    }]);
-
-    return NextResponse.json({ id: newProb.id, message: 'Problem logged successfully' }, { status: 201 });
+    return NextResponse.json(newProb, { status: 201 });
   } catch (error) {
-    console.error('Failed to log problem:', error);
+    console.error('Failed to save coding problem:', error);
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 }

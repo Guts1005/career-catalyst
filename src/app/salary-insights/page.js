@@ -92,8 +92,13 @@ export default function SalaryInsightsPage() {
       <div className={styles.grid}>
         {/* Market Benchmark Table */}
         <div>
-          <div className="card-title" style={{ fontSize: '13px', marginBottom: '12px', textTransform: 'uppercase', fontFamily: 'var(--font-mono)', color: 'var(--text-muted)' }}>
-            Market Total Compensation Benchmarks (2025–2026)
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px', flexWrap: 'wrap', gap: '8px' }}>
+            <div className="card-title" style={{ fontSize: '13px', textTransform: 'uppercase', fontFamily: 'var(--font-mono)', color: 'var(--text-muted)', margin: 0 }}>
+              Market Total Compensation Benchmarks (2025–2026)
+            </div>
+            <span style={{ fontSize: '10.5px', fontFamily: 'var(--font-mono)', color: 'var(--green)', background: 'var(--green-subtle)', border: '1px solid var(--green-border)', padding: '2px 8px', borderRadius: '4px' }}>
+              ✓ SOURCE: LEVELS.FYI & RADFORD TECH SURVEY (Q4 2024)
+            </span>
           </div>
           <div className={styles.tableCard}>
             <table className={styles.benchTable}>

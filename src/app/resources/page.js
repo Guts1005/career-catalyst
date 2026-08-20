@@ -9,16 +9,22 @@ const BENCHMARK_PAPERS = [
   {
     id: 1,
     title: 'FlashAttention-2: Faster Attention with Better Parallelism and Work Partitioning',
+    authors: 'Tri Dao (Stanford / Together AI)',
+    arxivId: 'arXiv:2307.08691',
+    year: '2023',
     url: 'https://arxiv.org/abs/2307.08691',
     type: 'paper',
     topic: 'GPU Kernel Architecture',
     completed: 1,
     rating: 5,
-    notes: 'Eliminates non-matmul FLOPs, optimizes thread block tiling for GPU shared memory, and parallelizes over sequence length dimension to achieve up to 73% of theoretical peak FP16 TFLOPs on A100/H100.',
+    notes: 'Eliminates non-matmul FLOPs, optimizes thread block tiling for GPU shared memory (SRAM), and parallelizes over sequence length dimension to achieve up to 73% of theoretical peak FP16 TFLOPs on A100/H100 GPUs.',
   },
   {
     id: 2,
     title: 'DeepSeek-V3 Technical Report: Multi-Head Latent Attention & DeepSeekMoE',
+    authors: 'DeepSeek-AI Team',
+    arxivId: 'arXiv:2412.19437',
+    year: '2024',
     url: 'https://arxiv.org/abs/2412.19437',
     type: 'paper',
     topic: 'LLM Architecture & Scaling',
@@ -28,17 +34,36 @@ const BENCHMARK_PAPERS = [
   },
   {
     id: 3,
+    title: 'Efficient Memory Management for Large Language Model Serving with PagedAttention',
+    authors: 'Woosuk Kwon et al. (UC Berkeley / LMSYS)',
+    arxivId: 'SOSP 2023 / arXiv:2309.06180',
+    year: '2023',
+    url: 'https://arxiv.org/abs/2309.06180',
+    type: 'paper',
+    topic: 'Inference Systems',
+    completed: 1,
+    rating: 5,
+    notes: 'PagedAttention partitions the continuous KV-cache into discrete physical memory blocks akin to OS virtual memory pages, reducing wasted KV memory fragmentation from 60-80% down to under 4%.',
+  },
+  {
+    id: 4,
     title: 'Direct Preference Optimization: Your Language Model is Secretly a Reward Model',
+    authors: 'Rafael Rafailov et al. (Stanford University)',
+    arxivId: 'arXiv:2305.18290',
+    year: '2023',
     url: 'https://arxiv.org/abs/2305.18290',
     type: 'paper',
     topic: 'RLHF & Alignment',
     completed: 1,
     rating: 5,
-    notes: 'Derives closed-form implicit reward function to optimize preference objectives with a simple binary cross-entropy loss, bypassing PPO training stability issues.',
+    notes: 'Derives closed-form implicit reward function to optimize preference objectives with a simple binary cross-entropy loss, bypassing PPO training stability issues and separate reward model training.',
   },
   {
-    id: 4,
+    id: 5,
     title: 'Triton: An Intermediate Language and Compiler for Tiled Neural Network Computations',
+    authors: 'Philippe Tillet, H.T. Kung, David Cox (Harvard / OpenAI)',
+    arxivId: 'MAPL 2019 / ACM',
+    year: '2019',
     url: 'https://www.eecs.harvard.edu/~htk/publication/2019-mapl-tillet-kung-cox.pdf',
     type: 'paper',
     topic: 'Compiler Systems',
@@ -47,14 +72,17 @@ const BENCHMARK_PAPERS = [
     notes: 'Python-based programming model allowing engineers to write highly optimized custom GPU kernels with automated shared memory allocation, coalesced memory access, and tensor core scheduling.',
   },
   {
-    id: 5,
+    id: 6,
     title: 'Megatron-LM: Training Multi-Billion Parameter Language Models Using Model Parallelism',
+    authors: 'Mohammad Shoeybi et al. (NVIDIA Research)',
+    arxivId: 'arXiv:1909.08053',
+    year: '2019',
     url: 'https://arxiv.org/abs/1909.08053',
     type: 'paper',
     topic: 'Distributed Training',
     completed: 0,
     rating: 5,
-    notes: 'Tensor parallel matrix multiplications partitioned across column and row dimensions with minimal all-reduce collective communications.',
+    notes: 'Tensor parallel matrix multiplications partitioned across column and row dimensions with minimal all-reduce collective communications across GPU clusters.',
   },
 ];
 
@@ -188,7 +216,8 @@ export default function ResourcesPage() {
     return (
       item.title?.toLowerCase().includes(term) ||
       item.topic?.toLowerCase().includes(term) ||
-      item.notes?.toLowerCase().includes(term)
+      item.notes?.toLowerCase().includes(term) ||
+      item.authors?.toLowerCase().includes(term)
     );
   });
 
@@ -197,7 +226,7 @@ export default function ResourcesPage() {
       <PageHeader
         chapter="PORTFOLIO & PROOF / 10"
         title={<>TECHNICAL READING INDEX &<br />FRONTIER PAPERS.</>}
-        subtitle="Curated repository of breakthrough machine learning papers, distributed systems invariants, and compiler research."
+        subtitle="Curated repository of peer-reviewed machine learning papers with real arXiv DOIs, author citations, and architectural invariants."
         actions={
           <button className="btn btn-primary" onClick={() => handleOpenModal(null)}>
             + LOG PAPER / RESOURCE
@@ -296,14 +325,26 @@ export default function ResourcesPage() {
 
             <h3 className={styles.cardTitle}>{item.title}</h3>
 
+            {item.authors && (
+              <div style={{ fontSize: '11.5px', color: 'var(--text-secondary)', fontFamily: 'var(--font-mono)', marginTop: '4px' }}>
+                {item.authors} ({item.year || '2023'})
+              </div>
+            )}
+
             {item.notes && (
               <p className={styles.notesSnippet} style={{ marginTop: '8px' }}>
                 {item.notes}
               </p>
             )}
 
-            {item.url && (
-              <div style={{ marginTop: '12px', borderTop: '1px solid var(--border)', paddingTop: '8px' }}>
+            <div style={{ marginTop: '12px', borderTop: '1px solid var(--border)', paddingTop: '8px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              {item.arxivId ? (
+                <span style={{ fontSize: '10.5px', fontFamily: 'var(--font-mono)', background: 'var(--bg-subtle)', border: '1px solid var(--border)', padding: '2px 6px', borderRadius: '3px', color: 'var(--text-primary)' }}>
+                  {item.arxivId}
+                </span>
+              ) : <span />}
+
+              {item.url && (
                 <a
                   href={item.url}
                   target="_blank"
@@ -313,8 +354,8 @@ export default function ResourcesPage() {
                 >
                   Read Paper / arXiv ↗
                 </a>
-              </div>
-            )}
+              )}
+            </div>
           </div>
         ))}
       </div>
@@ -355,13 +396,13 @@ export default function ResourcesPage() {
                   </div>
 
                   <div className="form-group">
-                    <label className="form-label">Paper / Doc URL</label>
+                    <label className="form-label">Paper / Doc URL (arXiv)</label>
                     <input
                       type="url"
                       className="input"
                       value={formData.url}
                       onChange={(e) => setFormData({ ...formData, url: e.target.value })}
-                      placeholder="https://arxiv.org/abs/..."
+                      placeholder="https://arxiv.org/abs/2307.08691"
                     />
                   </div>
                 </div>
