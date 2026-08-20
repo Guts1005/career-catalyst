@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import styles from './page.module.css';
 import { showToast } from '@/components/Toast';
 import PageHeader from '@/components/PageHeader';
+import { useCareer } from '@/context/CareerContext';
 import { IconGitHub, IconCheck, IconArrowUpRight } from '@/components/Icons';
 
 const languageColors = {
@@ -25,6 +26,7 @@ const languageColors = {
 };
 
 export default function GithubAnalyzer() {
+  const { refreshCareerState } = useCareer();
   const [username, setUsername] = useState('Guts1005');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -53,6 +55,18 @@ export default function GithubAnalyzer() {
     }
   };
 
+  const loadAnalysis = async (id) => {
+    try {
+      const res = await fetch(`/api/github/${id}`);
+      if (res.ok) {
+        const data = await res.json();
+        setCurrentAnalysis(data);
+      }
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
   const handleImportRepo = async (repo) => {
     setImportingId(repo.id);
     try {
@@ -71,6 +85,7 @@ export default function GithubAnalyzer() {
       if (res.ok) {
         setImportedRepos((prev) => ({ ...prev, [repo.id]: true }));
         showToast(`Repository "${repo.name}" synced to portfolio!`, 'success');
+        refreshCareerState();
       }
     } catch (err) {
       console.error('Failed to import repo:', err);
@@ -99,7 +114,7 @@ export default function GithubAnalyzer() {
 
       setCurrentAnalysis(data);
       fetchHistory();
-      showToast(`GitHub profile @${username} synchronized!`, 'success');
+      showToast(`GitHub profile @${username} analyzed successfully!`, 'success');
     } catch (err) {
       setError(err.message);
       showToast(err.message, 'error');
@@ -108,208 +123,202 @@ export default function GithubAnalyzer() {
     }
   };
 
-  const loadAnalysis = async (id) => {
-    try {
-      const res = await fetch(`/api/github/${id}`);
-      if (res.ok) {
-        const data = await res.json();
-        setCurrentAnalysis(data);
-      }
-    } catch (err) {
-      console.error(err);
-    }
-  };
-
-  const renderLanguageBar = (stats) => {
-    const totalBytes = Object.values(stats || {}).reduce((a, b) => a + b, 0);
-    if (totalBytes === 0) return null;
-
-    const sortedLangs = Object.entries(stats).sort((a, b) => b[1] - a[1]);
-
-    return (
-      <div className={styles.languageContainer}>
-        <div className={styles.languageBar}>
-          {sortedLangs.map(([lang, bytes]) => (
-            <div
-              key={lang}
-              className={styles.languageSegment}
-              style={{
-                width: `${(bytes / totalBytes) * 100}%`,
-                backgroundColor: languageColors[lang] || '#cccccc',
-                opacity: selectedLanguage && selectedLanguage !== lang ? 0.3 : 1.0,
-                cursor: 'pointer',
-              }}
-              onClick={() => setSelectedLanguage(selectedLanguage === lang ? null : lang)}
-              title={`${lang}: ${((bytes / totalBytes) * 100).toFixed(1)}% (Click to filter)`}
-            />
-          ))}
-        </div>
-        <div className={styles.languageLegend}>
-          {sortedLangs.map(([lang, bytes]) => (
-            <button
-              key={lang}
-              type="button"
-              className={styles.legendItem}
-              onClick={() => setSelectedLanguage(selectedLanguage === lang ? null : lang)}
-              style={{
-                background: selectedLanguage === lang ? 'var(--off-white)' : 'transparent',
-                border: selectedLanguage === lang ? '1px solid var(--black)' : '1px solid transparent',
-                padding: '3px 6px',
-                borderRadius: '3px',
-                cursor: 'pointer',
-              }}
-            >
-              <span
-                className={styles.legendColor}
-                style={{ backgroundColor: languageColors[lang] || '#cccccc' }}
-              />
-              <span className={styles.legendLabel}>{lang}</span>
-              <span className={styles.legendValue} style={{ fontFamily: 'var(--font-mono)' }}>
-                {((bytes / totalBytes) * 100).toFixed(1)}%
-              </span>
-            </button>
-          ))}
-          {selectedLanguage && (
-            <button
-              type="button"
-              onClick={() => setSelectedLanguage(null)}
-              style={{ background: 'none', border: 'none', fontSize: '11px', fontFamily: 'var(--font-mono)', color: 'var(--gray-500)', cursor: 'pointer' }}
-            >
-              [CLEAR FILTER]
-            </button>
-          )}
-        </div>
-      </div>
-    );
-  };
-
-  const reposToDisplay = currentAnalysis?.top_repos?.filter((r) => {
-    if (!selectedLanguage) return true;
-    return r.language === selectedLanguage;
-  }) || [];
+  const filteredRepos = currentAnalysis?.repos
+    ? selectedLanguage
+      ? currentAnalysis.repos.filter((r) => r.language === selectedLanguage)
+      : currentAnalysis.repos
+    : [];
 
   return (
     <div className={styles.container}>
       <PageHeader
-        chapter="TECHNICAL CORE / 11"
-        title={<>GITHUB<br />CODE SYNC.</>}
-        subtitle="Analyze public repositories, evaluate programming language distributions, and import top projects into your verified portfolio."
+        chapter="PORTFOLIO & PROOF / 09"
+        title={<>GITHUB SYNC &<br />CODEBASE EVIDENCE.</>}
+        subtitle="Analyze public repositories, evaluate language distributions, and import verified codebase artifacts into your career graph."
       />
 
-      <form onSubmit={handleAnalyze} className={styles.searchForm}>
-        <input
-          type="text"
-          value={username}
-          onChange={(e) => setUsername(e.target.value)}
-          placeholder="Enter GitHub username (e.g. Guts1005)"
-          className={styles.input}
-          disabled={loading}
-          style={{ fontSize: '13px' }}
-        />
-        <button type="submit" className={styles.analyzeButton} disabled={loading || !username.trim()} style={{ fontSize: '12.5px', padding: '8px 18px' }}>
-          {loading ? 'Synchronizing Repositories...' : 'SYNC GITHUB PROFILE →'}
-        </button>
+      {/* Input Form */}
+      <form onSubmit={handleAnalyze} className={styles.inputCard}>
+        <div style={{ display: 'flex', gap: '10px', alignItems: 'center', flexWrap: 'wrap', width: '100%' }}>
+          <div style={{ position: 'relative', flex: 1, minWidth: '240px' }}>
+            <span style={{ position: 'absolute', left: '12px', top: '12px', color: 'var(--text-muted)', fontFamily: 'var(--font-mono)', fontSize: '13px' }}>
+              @
+            </span>
+            <input
+              type="text"
+              className="input"
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
+              placeholder="Enter GitHub username (e.g. Guts1005)"
+              style={{ paddingLeft: '32px' }}
+            />
+          </div>
+          <button type="submit" className="btn btn-primary" disabled={loading} style={{ minHeight: '44px', padding: '0 24px' }}>
+            {loading ? 'ANALYZING REPOSITORIES...' : 'SYNC CODEBASE PROOF →'}
+          </button>
+        </div>
       </form>
 
-      {error && <div className={styles.errorAlert}>{error}</div>}
+      {error && (
+        <div style={{ padding: '14px', background: 'var(--red-subtle)', border: '1px solid var(--red-border)', borderRadius: '6px', color: 'var(--red)', fontSize: '13px', marginTop: '16px' }}>
+          {error}
+        </div>
+      )}
 
+      {/* Profile Overview Card */}
       {currentAnalysis && (
-        <div className={styles.resultsGrid}>
-          {/* Profile Overview Card */}
-          <div className={styles.card}>
-            <div className={styles.profileHeader}>
-              {currentAnalysis.avatar_url && (
+        <div className={styles.analysisGrid}>
+          {/* User Profile Card */}
+          <div className={styles.profileCard}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+              {currentAnalysis.profile.avatar_url && (
                 <img
-                  src={currentAnalysis.avatar_url}
-                  alt={currentAnalysis.username}
+                  src={currentAnalysis.profile.avatar_url}
+                  alt={currentAnalysis.profile.login}
                   className={styles.avatar}
                 />
               )}
-              <div className={styles.profileInfo}>
-                <h2>{currentAnalysis.name || currentAnalysis.username}</h2>
-                <p className={styles.bio}>{currentAnalysis.bio || 'Machine Learning Engineer & Open Source Contributor'}</p>
-                <div className={styles.statsRow}>
-                  <div className={styles.statItem}>
-                    <span className={styles.statLabel}>Public Repos</span>
-                    <span className={styles.statValue}>{currentAnalysis.public_repos}</span>
-                  </div>
-                  <div className={styles.statItem}>
-                    <span className={styles.statLabel}>Total Stars</span>
-                    <span className={styles.statValue}>{currentAnalysis.total_stars}</span>
-                  </div>
-                  <div className={styles.statItem}>
-                    <span className={styles.statLabel}>Followers</span>
-                    <span className={styles.statValue}>{currentAnalysis.followers}</span>
-                  </div>
+              <div>
+                <h3 className={styles.profileName}>{currentAnalysis.profile.name || currentAnalysis.profile.login}</h3>
+                <a
+                  href={currentAnalysis.profile.html_url}
+                  target="_blank"
+                  rel="noreferrer"
+                  className={styles.profileLogin}
+                >
+                  @{currentAnalysis.profile.login} ↗
+                </a>
+              </div>
+            </div>
+
+            {currentAnalysis.profile.bio && <p className={styles.bio}>{currentAnalysis.profile.bio}</p>}
+
+            <div className={styles.statsRow}>
+              <div className={styles.statBox}>
+                <div className={styles.statVal}>{currentAnalysis.profile.public_repos}</div>
+                <div className={styles.statLbl}>Repositories</div>
+              </div>
+              <div className={styles.statBox}>
+                <div className={styles.statVal}>{currentAnalysis.profile.followers}</div>
+                <div className={styles.statLbl}>Followers</div>
+              </div>
+              <div className={styles.statBox}>
+                <div className={styles.statVal}>{currentAnalysis.profile.total_stars || 0}</div>
+                <div className={styles.statLbl}>Total Stars</div>
+              </div>
+            </div>
+
+            {/* Language Distribution */}
+            {currentAnalysis.languages && currentAnalysis.languages.length > 0 && (
+              <div style={{ marginTop: '20px' }}>
+                <div className={styles.subHeading}>Language Distribution</div>
+                <div className={styles.langBar}>
+                  {currentAnalysis.languages.map((l) => (
+                    <div
+                      key={l.language}
+                      style={{
+                        width: `${l.percentage}%`,
+                        background: languageColors[l.language] || '#999',
+                        height: '100%',
+                      }}
+                      title={`${l.language}: ${l.percentage}%`}
+                    />
+                  ))}
+                </div>
+
+                <div className={styles.langPills}>
+                  <button
+                    type="button"
+                    className={`${styles.langPill} ${!selectedLanguage ? styles.active : ''}`}
+                    onClick={() => setSelectedLanguage(null)}
+                  >
+                    All ({currentAnalysis.repos?.length || 0})
+                  </button>
+                  {currentAnalysis.languages.map((l) => (
+                    <button
+                      key={l.language}
+                      type="button"
+                      className={`${styles.langPill} ${selectedLanguage === l.language ? styles.active : ''}`}
+                      onClick={() => setSelectedLanguage(selectedLanguage === l.language ? null : l.language)}
+                    >
+                      <span
+                        style={{
+                          display: 'inline-block',
+                          width: '8px',
+                          height: '8px',
+                          borderRadius: '50%',
+                          background: languageColors[l.language] || '#999',
+                          marginRight: '6px',
+                        }}
+                      />
+                      {l.language} ({l.percentage}%)
+                    </button>
+                  ))}
                 </div>
               </div>
-            </div>
+            )}
           </div>
 
-          {/* Language Breakdown */}
-          {currentAnalysis.languages && (
-            <div className={styles.card}>
-              <h3 className={styles.sectionTitle}>
-                Programming Language Distribution {selectedLanguage && `(Filtered: ${selectedLanguage})`}
+          {/* Repositories List */}
+          <div className={styles.reposSection}>
+            <div className={styles.reposHeader}>
+              <h3 style={{ fontSize: '15px', fontWeight: 800, color: 'var(--text-primary)', textTransform: 'uppercase' }}>
+                Public Repositories ({filteredRepos.length})
               </h3>
-              {renderLanguageBar(currentAnalysis.languages)}
             </div>
-          )}
 
-          {/* Top Repositories */}
-          {reposToDisplay.length > 0 && (
-            <div className={styles.card}>
-              <h3 className={styles.sectionTitle}>
-                Repositories ({reposToDisplay.length})
-              </h3>
-              <div className={styles.repoList}>
-                {reposToDisplay.map((repo) => (
-                  <div key={repo.id} className={styles.repoItem}>
-                    <div className={styles.repoDetails}>
-                      <div className={styles.repoNameRow}>
-                        <a
-                          href={repo.html_url}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className={styles.repoLink}
-                        >
-                          {repo.name}
-                        </a>
-                        {repo.language && (
-                          <span
-                            className={styles.languageTag}
-                            style={{
-                              backgroundColor: `${languageColors[repo.language] || '#cccccc'}20`,
-                              color: languageColors[repo.language] || '#666',
-                              borderColor: languageColors[repo.language] || '#cccccc',
-                            }}
-                          >
-                            {repo.language}
-                          </span>
-                        )}
-                      </div>
-                      {repo.description && (
-                        <p className={styles.repoDescription}>{repo.description}</p>
-                      )}
-                      <div className={styles.repoStats}>
-                        <span>⭐ {repo.stargazers_count || 0}</span>
-                        <span>🍴 {repo.forks_count || 0}</span>
-                      </div>
-                    </div>
+            <div className={styles.repoGrid}>
+              {filteredRepos.map((repo) => (
+                <div key={repo.id} className={styles.repoCard}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                    <a
+                      href={repo.html_url}
+                      target="_blank"
+                      rel="noreferrer"
+                      className={styles.repoName}
+                    >
+                      {repo.name} ↗
+                    </a>
+                    {repo.stargazers_count > 0 && (
+                      <span className={styles.starBadge}>
+                        ★ {repo.stargazers_count}
+                      </span>
+                    )}
+                  </div>
+
+                  <p className={styles.repoDesc}>{repo.description || 'No description provided.'}</p>
+
+                  <div className={styles.repoFooter}>
+                    {repo.language && (
+                      <span className={styles.repoLang}>
+                        <span
+                          style={{
+                            display: 'inline-block',
+                            width: '8px',
+                            height: '8px',
+                            borderRadius: '50%',
+                            background: languageColors[repo.language] || '#999',
+                            marginRight: '6px',
+                          }}
+                        />
+                        {repo.language}
+                      </span>
+                    )}
 
                     <button
+                      type="button"
+                      className={`btn btn-sm ${importedRepos[repo.id] ? 'btn-secondary' : 'btn-primary'}`}
                       onClick={() => handleImportRepo(repo)}
                       disabled={importingId === repo.id || importedRepos[repo.id]}
-                      className="btn btn-secondary btn-sm"
-                      style={{ fontSize: '11px', whiteSpace: 'nowrap' }}
+                      style={{ fontSize: '11px', padding: '4px 10px' }}
                     >
-                      {importedRepos[repo.id] ? '✓ Synced' : importingId === repo.id ? 'Syncing...' : '+ Import to Portfolio'}
+                      {importedRepos[repo.id] ? '✓ SYNCED' : importingId === repo.id ? 'SYNCING...' : '+ SYNC TO PORTFOLIO'}
                     </button>
                   </div>
-                ))}
-              </div>
+                </div>
+              ))}
             </div>
-          )}
+          </div>
         </div>
       )}
     </div>

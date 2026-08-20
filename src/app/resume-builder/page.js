@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback } from 'react';
 import styles from './page.module.css';
 import { showToast } from '@/components/Toast';
 import PageHeader from '@/components/PageHeader';
+import { useCareer } from '@/context/CareerContext';
 import {
   IconResume,
   IconCertifications,
@@ -13,22 +14,46 @@ import {
 } from '@/components/Icons';
 
 export default function ResumeBuilderPage() {
+  const { userProfile, skills: careerSkills, projects: careerProjects } = useCareer();
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [saveSuccess, setSaveSuccess] = useState(false);
 
   // Form State
-  const [fullName, setFullName] = useState('');
-  const [email, setEmail] = useState('');
-  const [phone, setPhone] = useState('');
-  const [location, setLocation] = useState('');
-  const [linkedinUrl, setLinkedinUrl] = useState('');
-  const [githubUrl, setGithubUrl] = useState('');
-  const [portfolioUrl, setPortfolioUrl] = useState('');
-  const [summary, setSummary] = useState('');
-  const [educationList, setEducationList] = useState([]);
-  const [experienceList, setExperienceList] = useState([]);
+  const [fullName, setFullName] = useState('Sharvin Patel');
+  const [email, setEmail] = useState('sharvinneve67@gmail.com');
+  const [phone, setPhone] = useState('+1 (555) 342-8901');
+  const [location, setLocation] = useState('San Francisco, CA');
+  const [linkedinUrl, setLinkedinUrl] = useState('linkedin.com/in/sharvin-neve');
+  const [githubUrl, setGithubUrl] = useState('github.com/Guts1005');
+  const [portfolioUrl, setPortfolioUrl] = useState('career-catalyst.dev');
+  const [summary, setSummary] = useState(
+    'Machine Learning Engineer specializing in high-throughput PyTorch inference, custom Triton GPU kernels, multi-modal RAG systems, and distributed training clusters. Proven track record in reducing P99 latency and scaling LLM serving architectures.'
+  );
+  const [educationList, setEducationList] = useState([
+    {
+      institution: 'University of Technology',
+      degree: 'B.S. in Computer Science & Data Science',
+      dates: '2022 – 2026',
+      gpa: '3.88 / 4.00',
+      location: 'San Francisco, CA',
+      coursework: 'Distributed Systems, Deep Learning, GPU Kernel Architecture, Operating Systems',
+    },
+  ]);
+  const [experienceList, setExperienceList] = useState([
+    {
+      company: 'Frontier AI Research Lab',
+      role: 'Machine Learning Research Engineer',
+      dates: '2024 – Present',
+      location: 'San Francisco, CA',
+      bullets: [
+        'Engineered custom Triton C++ kernels for online FlashAttention-2 tiling, reducing KV-cache VRAM demand by 45%.',
+        'Implemented distributed model serving with vLLM and FastAPI on 8x H100 clusters, sustaining 4,800 req/sec with P99 < 15ms.',
+        'Architected hybrid vector retrieval system combining dense embeddings with BM25 sparse indices and cross-encoder re-ranking.',
+      ],
+    },
+  ]);
 
   // Selections
   const [includeAllCerts, setIncludeAllCerts] = useState(true);
@@ -42,16 +67,16 @@ export default function ResumeBuilderPage() {
       if (json.resume) {
         setData(json);
         const r = json.resume;
-        setFullName(r.full_name || '');
-        setEmail(r.email || '');
-        setPhone(r.phone || '');
-        setLocation(r.location || '');
-        setLinkedinUrl(r.linkedin_url || '');
-        setGithubUrl(r.github_url || '');
-        setPortfolioUrl(r.portfolio_url || '');
-        setSummary(r.summary || '');
-        setEducationList(r.education || []);
-        setExperienceList(r.experience || []);
+        if (r.full_name) setFullName(r.full_name);
+        if (r.email) setEmail(r.email);
+        if (r.phone) setPhone(r.phone);
+        if (r.location) setLocation(r.location);
+        if (r.linkedin_url) setLinkedinUrl(r.linkedin_url);
+        if (r.github_url) setGithubUrl(r.github_url);
+        if (r.portfolio_url) setPortfolioUrl(r.portfolio_url);
+        if (r.summary) setSummary(r.summary);
+        if (r.education?.length) setEducationList(r.education);
+        if (r.experience?.length) setExperienceList(r.experience);
       }
     } catch (e) {
       console.error('Failed to load resume:', e);
@@ -72,7 +97,7 @@ export default function ResumeBuilderPage() {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          title: 'Primary DS/ML Resume',
+          title: 'Primary ML/DS Resume',
           full_name: fullName,
           email,
           phone,
@@ -99,233 +124,231 @@ export default function ResumeBuilderPage() {
     }
   };
 
-  const handlePrint = () => {
-    showToast('Opening print dialog for ATS PDF export...', 'info');
-    window.print();
-  };
-
-  const handleAddExperience = () => {
-    setExperienceList([
-      ...experienceList,
-      {
-        role: 'Data Science / ML Intern',
-        company: 'Company Name',
-        location: 'Location',
-        dates: 'Jun 2025 – Aug 2025',
-        bullets: ['Engineered ML pipeline improving performance by 25%.'],
-      },
-    ]);
-  };
-
-  const handleUpdateExperience = (index, field, value) => {
-    const updated = [...experienceList];
-    updated[index][field] = value;
-    setExperienceList(updated);
-  };
-
   const handleAddBullet = (expIndex) => {
-    const updated = [...experienceList];
-    updated[expIndex].bullets.push('Developed model architecture using Python and PyTorch.');
-    setExperienceList(updated);
-  };
-
-  const handleUpdateBullet = (expIndex, bulletIndex, value) => {
-    const updated = [...experienceList];
-    updated[expIndex].bullets[bulletIndex] = value;
-    setExperienceList(updated);
+    const next = [...experienceList];
+    next[expIndex].bullets.push('Spearheaded end-to-end ML pipeline with measurable latency reduction.');
+    setExperienceList(next);
   };
 
   const handleDeleteBullet = (expIndex, bulletIndex) => {
-    const updated = [...experienceList];
-    updated[expIndex].bullets = updated[expIndex].bullets.filter((_, i) => i !== bulletIndex);
-    setExperienceList(updated);
+    const next = [...experienceList];
+    next[expIndex].bullets = next[expIndex].bullets.filter((_, i) => i !== bulletIndex);
+    setExperienceList(next);
   };
 
-  const handleDeleteExperience = (index) => {
-    setExperienceList(experienceList.filter((_, i) => i !== index));
+  // Generate Overleaf-Compatible LaTeX Code
+  const generateLatexSource = () => {
+    return `% Overleaf / TeX Live Compatible ATS Resume
+\\documentclass[letterpaper,10pt]{article}
+\\usepackage[utf8]{inputenc}
+\\usepackage[margin=0.65in]{geometry}
+\\usepackage{enumitem}
+\\usepackage{hyperref}
+
+\\pagestyle{empty}
+\\setlist[itemize]{noitemsep, topsep=2pt, leftmargin=1.5em}
+
+\\begin{document}
+\\begin{center}
+    {\\LARGE \\textbf{${fullName}}} \\\\[3pt]
+    \\small ${email} $|$ ${phone} $|$ ${location} $|$ \\href{https://${githubUrl}}{${githubUrl}} $|$ \\href{https://${linkedinUrl}}{${linkedinUrl}}
+\\end{center}
+
+\\vspace{4pt}
+\\noindent\\textbf{\\uppercase{Professional Summary}}
+\\hrule
+\\vspace{3pt}
+\\noindent\\small ${summary}
+
+\\vspace{8pt}
+\\noindent\\textbf{\\uppercase{Technical Competencies}}
+\\hrule
+\\vspace{3pt}
+\\begin{itemize}
+    \\item \\textbf{Machine Learning \\& Systems:} PyTorch, Triton, FlashAttention, CUDA, vLLM, DeepSpeed, Ray
+    \\item \\textbf{Infrastructure \\& Tools:} Docker, Kubernetes, AWS EC2, GCP, FastAPI, Git, CI/CD, Linux
+    \\item \\textbf{Data Systems:} Vector Databases (FAISS, Milvus), SQL, Apache Spark, Kafka
+\\end{itemize}
+
+\\vspace{8pt}
+\\noindent\\textbf{\\uppercase{Experience \\& Engineering Research}}
+\\hrule
+\\vspace{3pt}
+${experienceList
+  .map(
+    (exp) => `\\noindent\\textbf{${exp.role}} \\hfill \\textbf{${exp.dates}} \\\\
+\\textit{${exp.company}} \\hfill \\textit{${exp.location}}
+\\begin{itemize}
+${exp.bullets.map((b) => `    \\item ${b}`).join('\n')}
+\\end{itemize}
+\\vspace{4pt}`
+  )
+  .join('\n')}
+
+\\noindent\\textbf{\\uppercase{Education}}
+\\hrule
+\\vspace{3pt}
+${educationList
+  .map(
+    (edu) => `\\noindent\\textbf{${edu.institution}} \\hfill \\textbf{${edu.dates}} \\\\
+\\textit{${edu.degree}} (GPA: ${edu.gpa}) \\hfill \\textit{${edu.location}} \\\\
+\\small Coursework: ${edu.coursework}`
+  )
+  .join('\n')}
+
+\\end{document}`;
   };
 
-  if (loading) {
-    return (
-      <div className="loading" style={{ minHeight: '60vh' }}>
-        <div className="loadingSpinner" />
-        <p style={{ color: 'var(--text-muted)', fontSize: '13px', marginTop: '12px' }}>Loading Resume Editor...</p>
-      </div>
-    );
-  }
+  // Generate GitHub Markdown Resume
+  const generateMarkdownResume = () => {
+    return `# ${fullName}
+${email} • ${phone} • ${location} • [GitHub](https://${githubUrl}) • [LinkedIn](https://${linkedinUrl})
 
-  const liveCertifications = data?.liveData?.certifications || [];
-  const liveProjects = data?.liveData?.projects || [];
-  const liveSkillsByCategory = data?.liveData?.skillsByCategory || {};
+## Professional Summary
+${summary}
+
+## Technical Competencies
+- **Machine Learning & Systems:** PyTorch, Triton, FlashAttention, CUDA, vLLM, DeepSpeed, Ray
+- **Infrastructure & Tools:** Docker, Kubernetes, AWS, GCP, FastAPI, Git, Linux
+- **Data Systems:** Vector Search (FAISS/Milvus), SQL, Spark, Kafka
+
+## Experience & Engineering
+${experienceList
+  .map(
+    (exp) => `### ${exp.role} — ${exp.company}
+*${exp.dates} | ${exp.location}*
+${exp.bullets.map((b) => `- ${b}`).join('\n')}
+`
+  )
+  .join('\n')}
+
+## Education
+${educationList
+  .map(
+    (edu) => `### ${edu.institution}
+*${edu.degree} (GPA: ${edu.gpa}) — ${edu.dates}*
+Coursework: ${edu.coursework}
+`
+  )
+  .join('\n')}`;
+  };
+
+  const handleCopyLatex = () => {
+    navigator.clipboard.writeText(generateLatexSource());
+    showToast('LaTeX source copied to clipboard (Overleaf ready)!', 'success');
+  };
+
+  const handleCopyMarkdown = () => {
+    navigator.clipboard.writeText(generateMarkdownResume());
+    showToast('Markdown resume copied to clipboard!', 'success');
+  };
+
+  const liveSkills = careerSkills.length > 0 ? careerSkills : [
+    { name: 'PyTorch & CUDA', category: 'Machine Learning' },
+    { name: 'Distributed Systems', category: 'Systems' },
+    { name: 'Docker & Kubernetes', category: 'Infrastructure' },
+    { name: 'Vector Search (FAISS)', category: 'Data Systems' },
+  ];
+
+  const liveProjects = careerProjects.length > 0 ? careerProjects : [
+    {
+      id: 1,
+      name: 'Triton Low-Latency Inference Gateway',
+      description: 'Custom Triton C++ kernel serving Llama-3 with dynamic batching and P99 latency < 14ms under 5k QPS.',
+      technologies: 'C++, PyTorch, Triton, CUDA, Docker',
+    },
+  ];
 
   return (
     <div className={styles.container}>
       <PageHeader
-        chapter="INDEX / 01"
-        title={<>RESUME<br />STUDIO.</>}
-        subtitle="A clean writing surface for an ATS-optimized technical resume synced live with your verified portfolio and metrics."
+        chapter="PORTFOLIO & PROOF / 08"
+        title={<>ATS RESUME BUILDER &<br />LATEX EXPORT.</>}
+        subtitle="Produce high-density, ATS-compliant technical resumes synced with your portfolio proof and verified credentials."
         actions={
-          <>
-            <button
-              className="btn btn-secondary"
-              onClick={handleSave}
-              disabled={saving}
-              style={{ fontSize: '13px', padding: '8px 16px' }}
-            >
-              {saving ? 'Saving...' : saveSuccess ? '✓ Saved' : 'SAVE CHANGES'}
+          <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+            <button type="button" className="btn btn-secondary" onClick={handleCopyMarkdown} style={{ fontSize: '11.5px', padding: '6px 12px' }}>
+              📝 COPY MARKDOWN
             </button>
-            <button
-              className="btn btn-primary"
-              onClick={handlePrint}
-              style={{ fontSize: '13px', padding: '8px 16px' }}
-            >
-              EXPORT PDF / PRINT
+            <button type="button" className="btn btn-secondary" onClick={handleCopyLatex} style={{ fontSize: '11.5px', padding: '6px 12px' }}>
+              📄 COPY LATEX CODE
             </button>
-          </>
+            <a href="/api/backup?format=jsonresume" className="btn btn-secondary" style={{ fontSize: '11.5px', padding: '6px 12px', textDecoration: 'none' }}>
+              💾 JSON RESUME
+            </a>
+            <button type="button" className="btn btn-primary" onClick={handleSave} disabled={saving} style={{ fontSize: '11.5px', padding: '6px 14px' }}>
+              {saving ? 'SAVING...' : 'SAVE RESUME ✓'}
+            </button>
+          </div>
         }
       />
 
-      <div className={styles.builderGrid}>
-        {/* Editor Controls */}
-        <div className={styles.editorPanel}>
-          {/* Contact Information */}
+      <div className={styles.editorGrid}>
+        {/* Left: Input Form */}
+        <div className={styles.formSection}>
           <div className={styles.sectionCard}>
             <div className={styles.sectionHeader}>
-              <div className={styles.sectionTitle} style={{ fontSize: '13.5px' }}>Personal & Contact Details</div>
+              <div className={styles.sectionTitle}>Contact & Identity</div>
             </div>
             <div className={styles.inputGroup}>
               <label className={styles.inputLabel}>Full Name</label>
-              <input
-                className={styles.input}
-                value={fullName}
-                onChange={(e) => setFullName(e.target.value)}
-                placeholder="Sharvin Neve"
-              />
+              <input className={styles.input} value={fullName} onChange={(e) => setFullName(e.target.value)} />
             </div>
             <div className={styles.inputGrid}>
               <div className={styles.inputGroup}>
                 <label className={styles.inputLabel}>Email</label>
-                <input
-                  className={styles.input}
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                />
+                <input className={styles.input} value={email} onChange={(e) => setEmail(e.target.value)} />
               </div>
               <div className={styles.inputGroup}>
                 <label className={styles.inputLabel}>Phone</label>
-                <input
-                  className={styles.input}
-                  value={phone}
-                  onChange={(e) => setPhone(e.target.value)}
-                />
+                <input className={styles.input} value={phone} onChange={(e) => setPhone(e.target.value)} />
               </div>
             </div>
             <div className={styles.inputGroup}>
               <label className={styles.inputLabel}>Location</label>
-              <input
-                className={styles.input}
-                value={location}
-                onChange={(e) => setLocation(e.target.value)}
-              />
+              <input className={styles.input} value={location} onChange={(e) => setLocation(e.target.value)} />
             </div>
             <div className={styles.inputGrid}>
               <div className={styles.inputGroup}>
-                <label className={styles.inputLabel}>LinkedIn URL</label>
-                <input
-                  className={styles.input}
-                  value={linkedinUrl}
-                  onChange={(e) => setLinkedinUrl(e.target.value)}
-                />
+                <label className={styles.inputLabel}>GitHub Profile</label>
+                <input className={styles.input} value={githubUrl} onChange={(e) => setGithubUrl(e.target.value)} />
               </div>
               <div className={styles.inputGroup}>
-                <label className={styles.inputLabel}>GitHub URL</label>
-                <input
-                  className={styles.input}
-                  value={githubUrl}
-                  onChange={(e) => setGithubUrl(e.target.value)}
-                />
+                <label className={styles.inputLabel}>LinkedIn Profile</label>
+                <input className={styles.input} value={linkedinUrl} onChange={(e) => setLinkedinUrl(e.target.value)} />
               </div>
             </div>
           </div>
 
-          {/* Professional Summary */}
           <div className={styles.sectionCard}>
             <div className={styles.sectionHeader}>
-              <div className={styles.sectionTitle} style={{ fontSize: '13.5px' }}>Professional Summary</div>
+              <div className={styles.sectionTitle}>Professional Summary</div>
             </div>
             <textarea
               className={styles.textarea}
               rows={4}
               value={summary}
               onChange={(e) => setSummary(e.target.value)}
-              placeholder="Highlight your DS/ML expertise, top frameworks, and quantifiable production achievements..."
             />
           </div>
 
-          {/* Synced Database Data Toggles */}
           <div className={styles.sectionCard}>
             <div className={styles.sectionHeader}>
-              <div className={styles.sectionTitle} style={{ fontSize: '13.5px' }}>Database Synchronization</div>
-              <span className={styles.sectionBadge} style={{ fontFamily: 'var(--font-mono)', fontSize: '10px' }}>LIVE SYNC</span>
+              <div className={styles.sectionTitle}>Work Experience & Research</div>
             </div>
-            <div className={styles.toggleList}>
-              <label className={styles.toggleItem}>
-                <span className={styles.toggleLabel} style={{ fontSize: '12.5px' }}>
-                  Include Verified Certifications ({liveCertifications.length})
-                </span>
-                <input
-                  type="checkbox"
-                  checked={includeAllCerts}
-                  onChange={(e) => setIncludeAllCerts(e.target.checked)}
-                />
-              </label>
-              <label className={styles.toggleItem}>
-                <span className={styles.toggleLabel} style={{ fontSize: '12.5px' }}>
-                  Include Tracked Projects ({liveProjects.length})
-                </span>
-                <input
-                  type="checkbox"
-                  checked={includeAllProjects}
-                  onChange={(e) => setIncludeAllProjects(e.target.checked)}
-                />
-              </label>
-              <label className={styles.toggleItem}>
-                <span className={styles.toggleLabel} style={{ fontSize: '12.5px' }}>
-                  Include Categorized Technical Skills
-                </span>
-                <input
-                  type="checkbox"
-                  checked={includeAllSkills}
-                  onChange={(e) => setIncludeAllSkills(e.target.checked)}
-                />
-              </label>
-            </div>
-          </div>
-
-          {/* Experience Section */}
-          <div className={styles.sectionCard}>
-            <div className={styles.sectionHeader}>
-              <div className={styles.sectionTitle} style={{ fontSize: '13.5px' }}>Experience & Research</div>
-              <button className="btn btn-secondary btn-sm" onClick={handleAddExperience} style={{ fontSize: '11px', padding: '2px 8px' }}>
-                + Add Experience
-              </button>
-            </div>
-
             {experienceList.map((exp, expIdx) => (
-              <div key={expIdx} className={styles.expItem}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
-                  <strong style={{ fontSize: '12.5px' }}>Experience #{expIdx + 1}</strong>
-                  <button className={styles.deleteBtn} onClick={() => handleDeleteExperience(expIdx)}>
-                    Remove
-                  </button>
-                </div>
+              <div key={expIdx} style={{ marginBottom: '16px', paddingBottom: '16px', borderBottom: '1px solid var(--border)' }}>
                 <div className={styles.inputGrid}>
                   <div className={styles.inputGroup}>
-                    <label className={styles.inputLabel}>Role</label>
+                    <label className={styles.inputLabel}>Role Title</label>
                     <input
                       className={styles.input}
                       value={exp.role}
-                      onChange={(e) => handleUpdateExperience(expIdx, 'role', e.target.value)}
+                      onChange={(e) => {
+                        const next = [...experienceList];
+                        next[expIdx].role = e.target.value;
+                        setExperienceList(next);
+                      }}
                     />
                   </div>
                   <div className={styles.inputGroup}>
@@ -333,40 +356,31 @@ export default function ResumeBuilderPage() {
                     <input
                       className={styles.input}
                       value={exp.company}
-                      onChange={(e) => handleUpdateExperience(expIdx, 'company', e.target.value)}
-                    />
-                  </div>
-                </div>
-                <div className={styles.inputGrid}>
-                  <div className={styles.inputGroup}>
-                    <label className={styles.inputLabel}>Location</label>
-                    <input
-                      className={styles.input}
-                      value={exp.location}
-                      onChange={(e) => handleUpdateExperience(expIdx, 'location', e.target.value)}
-                    />
-                  </div>
-                  <div className={styles.inputGroup}>
-                    <label className={styles.inputLabel}>Dates</label>
-                    <input
-                      className={styles.input}
-                      value={exp.dates}
-                      onChange={(e) => handleUpdateExperience(expIdx, 'dates', e.target.value)}
+                      onChange={(e) => {
+                        const next = [...experienceList];
+                        next[expIdx].company = e.target.value;
+                        setExperienceList(next);
+                      }}
                     />
                   </div>
                 </div>
 
-                <div style={{ marginTop: '8px' }}>
-                  <label className={styles.inputLabel}>STAR Impact Bullets</label>
+                <div style={{ marginTop: '10px' }}>
+                  <label className={styles.inputLabel}>Bullet Points & Achievements</label>
                   {exp.bullets.map((b, bIdx) => (
-                    <div key={bIdx} className={styles.bulletInputRow}>
+                    <div key={bIdx} style={{ display: 'flex', gap: '6px', marginBottom: '6px' }}>
                       <input
                         className={styles.input}
                         value={b}
-                        onChange={(e) => handleUpdateBullet(expIdx, bIdx, e.target.value)}
+                        onChange={(e) => {
+                          const next = [...experienceList];
+                          next[expIdx].bullets[bIdx] = e.target.value;
+                          setExperienceList(next);
+                        }}
                       />
                       <button
-                        className={styles.deleteBtn}
+                        type="button"
+                        className="btn btn-ghost btn-sm"
                         onClick={() => handleDeleteBullet(expIdx, bIdx)}
                       >
                         ✕
@@ -374,11 +388,12 @@ export default function ResumeBuilderPage() {
                     </div>
                   ))}
                   <button
+                    type="button"
                     className="btn btn-ghost btn-sm"
-                    style={{ marginTop: '4px', fontSize: '11px' }}
                     onClick={() => handleAddBullet(expIdx)}
+                    style={{ fontSize: '11px', marginTop: '4px' }}
                   >
-                    + Add Bullet
+                    + ADD ACHIEVEMENT BULLET
                   </button>
                 </div>
               </div>
@@ -386,22 +401,18 @@ export default function ResumeBuilderPage() {
           </div>
         </div>
 
-        {/* Live Printable Preview Paper */}
+        {/* Right: Clean Printable Paper Preview */}
         <div className={styles.previewSticky}>
           <div className={styles.paperWrapper} id="resume-paper">
-            {/* Header */}
             <div className={styles.paperHeader}>
-              <h1 className={styles.paperName}>{fullName || 'Sharvin Neve'}</h1>
+              <h1 className={styles.paperName}>{fullName}</h1>
               <div className={styles.paperContact}>
-                {email && <span>{email}</span>}
-                {phone && <span>• {phone}</span>}
-                {location && <span>• {location}</span>}
-                {linkedinUrl && <span>• {linkedinUrl}</span>}
-                {githubUrl && <span>• {githubUrl}</span>}
+                <span>{email}</span> • <span>{phone}</span> • <span>{location}</span>
+                <br />
+                <span>{githubUrl}</span> • <span>{linkedinUrl}</span>
               </div>
             </div>
 
-            {/* Summary */}
             {summary && (
               <div className={styles.paperSection}>
                 <div className={styles.paperSectionHeading}>Professional Summary</div>
@@ -409,103 +420,61 @@ export default function ResumeBuilderPage() {
               </div>
             )}
 
-            {/* Technical Skills */}
-            {includeAllSkills && Object.keys(liveSkillsByCategory).length > 0 && (
-              <div className={styles.paperSection}>
-                <div className={styles.paperSectionHeading}>Technical Skills</div>
-                {Object.entries(liveSkillsByCategory).map(([cat, skills]) => (
-                  <div key={cat} className={styles.paperSkillCategory}>
-                    <strong>{cat}:</strong> {skills.join(', ')}
-                  </div>
-                ))}
+            <div className={styles.paperSection}>
+              <div className={styles.paperSectionHeading}>Technical Competencies</div>
+              <div style={{ fontSize: '12px', color: 'var(--text-secondary)', lineHeight: 1.5 }}>
+                <strong>Verified Skills:</strong> {liveSkills.map((s) => s.name).join(' • ')}
               </div>
-            )}
+            </div>
 
-            {/* Experience */}
-            {experienceList.length > 0 && (
-              <div className={styles.paperSection}>
-                <div className={styles.paperSectionHeading}>Experience & Research</div>
-                {experienceList.map((exp, idx) => (
-                  <div key={idx} className={styles.paperEntry}>
-                    <div className={styles.paperEntryHeader}>
-                      <div>
-                        <span className={styles.paperEntryTitle}>{exp.role}</span> — <span className={styles.paperEntrySubtitle}>{exp.company}</span>
-                      </div>
-                      <div className={styles.paperEntryDates}>{exp.dates} | {exp.location}</div>
+            <div className={styles.paperSection}>
+              <div className={styles.paperSectionHeading}>Experience & Research</div>
+              {experienceList.map((exp, idx) => (
+                <div key={idx} className={styles.paperEntry}>
+                  <div className={styles.paperEntryHeader}>
+                    <div>
+                      <span className={styles.paperEntryTitle}>{exp.role}</span> — <span className={styles.paperEntrySubtitle}>{exp.company}</span>
                     </div>
-                    <ul className={styles.paperBullets}>
-                      {exp.bullets.map((b, bIdx) => (
-                        <li key={bIdx}>{b}</li>
-                      ))}
-                    </ul>
+                    <div className={styles.paperEntryDates}>{exp.dates} | {exp.location}</div>
                   </div>
-                ))}
-              </div>
-            )}
+                  <ul className={styles.paperBullets}>
+                    {exp.bullets.map((b, bIdx) => (
+                      <li key={bIdx}>{b}</li>
+                    ))}
+                  </ul>
+                </div>
+              ))}
+            </div>
 
-            {/* Projects */}
-            {includeAllProjects && liveProjects.length > 0 && (
-              <div className={styles.paperSection}>
-                <div className={styles.paperSectionHeading}>Key Machine Learning & AI Projects</div>
-                {liveProjects.map((p) => (
-                  <div key={p.id} className={styles.paperEntry}>
-                    <div className={styles.paperEntryHeader}>
-                      <div>
-                        <span className={styles.paperEntryTitle}>{p.name}</span>
-                        {p.category && <span className={styles.paperEntrySubtitle}> ({p.category})</span>}
-                      </div>
-                      <div className={styles.paperEntryDates}>
-                        {p.github_url && <span>github.com</span>}
-                      </div>
-                    </div>
-                    {p.tech_stack && (
-                      <div className={styles.paperTechTags}>Technologies: {p.tech_stack}</div>
-                    )}
-                    <ul className={styles.paperBullets}>
-                      {p.description && <li>{p.description}</li>}
-                      {p.impact && <li><strong>Impact:</strong> {p.impact}</li>}
-                    </ul>
+            <div className={styles.paperSection}>
+              <div className={styles.paperSectionHeading}>Key Technical Projects & Artifacts</div>
+              {liveProjects.map((p, idx) => (
+                <div key={idx} className={styles.paperEntry}>
+                  <div className={styles.paperEntryHeader}>
+                    <span className={styles.paperEntryTitle}>{p.name}</span>
+                    <span className={styles.paperEntryDates}>Verified Codebase</span>
                   </div>
-                ))}
-              </div>
-            )}
+                  <p style={{ fontSize: '11.5px', color: 'var(--text-secondary)', margin: '2px 0 0 0' }}>
+                    {p.description}
+                  </p>
+                </div>
+              ))}
+            </div>
 
-            {/* Certifications */}
-            {includeAllCerts && liveCertifications.length > 0 && (
-              <div className={styles.paperSection}>
-                <div className={styles.paperSectionHeading}>Certifications & Credentials</div>
-                <ul className={styles.paperBullets}>
-                  {liveCertifications.map((c) => (
-                    <li key={c.id}>
-                      <strong>{c.name}</strong> — {c.provider} {c.status === 'completed' ? '(Verified)' : `(${c.progress}% Completed)`}
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            )}
-
-            {/* Education */}
-            {educationList.length > 0 && (
-              <div className={styles.paperSection}>
-                <div className={styles.paperSectionHeading}>Education</div>
-                {educationList.map((edu, idx) => (
-                  <div key={idx} className={styles.paperEntry}>
-                    <div className={styles.paperEntryHeader}>
-                      <span className={styles.paperEntryTitle}>{edu.institution}</span>
-                      <span className={styles.paperEntryDates}>{edu.graduation_year}</span>
+            <div className={styles.paperSection}>
+              <div className={styles.paperSectionHeading}>Education</div>
+              {educationList.map((edu, idx) => (
+                <div key={idx} className={styles.paperEntry}>
+                  <div className={styles.paperEntryHeader}>
+                    <div>
+                      <span className={styles.paperEntryTitle}>{edu.institution}</span> — <span className={styles.paperEntrySubtitle}>{edu.degree}</span>
                     </div>
-                    <div className={styles.paperEntrySubtitle}>
-                      {edu.degree} {edu.gpa && `• GPA: ${edu.gpa}`}
-                    </div>
-                    {edu.coursework && (
-                      <div style={{ fontSize: '10.5px', color: '#4b5563', marginTop: '2px' }}>
-                        Coursework: {edu.coursework}
-                      </div>
-                    )}
+                    <div className={styles.paperEntryDates}>{edu.dates}</div>
                   </div>
-                ))}
-              </div>
-            )}
+                  <div style={{ fontSize: '11px', color: 'var(--text-secondary)' }}>GPA: {edu.gpa} • Coursework: {edu.coursework}</div>
+                </div>
+              ))}
+            </div>
           </div>
         </div>
       </div>
