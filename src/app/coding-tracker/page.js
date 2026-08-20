@@ -49,9 +49,9 @@ const BENCHMARK_PROBLEMS = [
 
 export default function CodingTrackerPage() {
   const [profiles, setProfiles] = useState([]);
-  const [problems, setProblems] = useState([]);
-  const [stats, setStats] = useState(null);
-  const [loading, setLoading] = useState(true);
+  const [problems, setProblems] = useState(BENCHMARK_PROBLEMS);
+  const [stats, setStats] = useState({ total_logged: 4, total_solved: 4, easy_solved: 0, medium_solved: 2, hard_solved: 2 });
+  const [loading, setLoading] = useState(false);
   const [selectedPlatform, setSelectedPlatform] = useState('All');
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [expandedId, setExpandedId] = useState(null);
@@ -74,8 +74,7 @@ export default function CodingTrackerPage() {
 
   const fetchData = useCallback(async () => {
     try {
-      const q = selectedPlatform === 'All' ? '' : `?platform=${selectedPlatform}`;
-      const res = await fetch(`/api/coding-tracker${q}`);
+      const res = await fetch('/api/coding-tracker');
       const data = await res.json();
       if (data.problems && data.problems.length > 0) {
         setProfiles(data.profiles || []);
@@ -91,7 +90,7 @@ export default function CodingTrackerPage() {
     } finally {
       setLoading(false);
     }
-  }, [selectedPlatform]);
+  }, []);
 
   useEffect(() => {
     fetchData();

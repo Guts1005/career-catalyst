@@ -6,8 +6,12 @@ import { showToast } from '@/components/Toast';
 import PageHeader from '@/components/PageHeader';
 
 export default function CertificationsPage() {
-  const [certifications, setCertifications] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [certifications, setCertifications] = useState([
+    { id: 1, name: 'AWS Certified Machine Learning – Specialty', provider: 'Amazon Web Services', status: 'completed', progress: 100, category: 'Cloud ML Systems', priority: 'high', notes: 'Validated expertise in building, training, tuning, and deploying production ML models on Amazon SageMaker.' },
+    { id: 2, name: 'Google Cloud Professional ML Engineer', provider: 'Google Cloud', status: 'completed', progress: 100, category: 'Infrastructure', priority: 'high', notes: 'Architecting end-to-end data pipelines and Vertex AI model serving.' },
+    { id: 3, name: 'Deep Learning Specialization', provider: 'DeepLearning.AI', status: 'completed', progress: 100, category: 'Deep Learning Theory', priority: 'medium', notes: 'Mastery in neural networks, CNNs, Sequence Models, and backpropagation by Andrew Ng.' },
+  ]);
+  const [loading, setLoading] = useState(false);
   const [filter, setFilter] = useState('all');
   const [search, setSearch] = useState('');
   const [isModalOpen, setIsModalOpen] = useState(false);

@@ -87,8 +87,8 @@ const BENCHMARK_PAPERS = [
 ];
 
 export default function ResourcesPage() {
-  const [resources, setResources] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [resources, setResources] = useState(BENCHMARK_PAPERS);
+  const [loading, setLoading] = useState(false);
   const [search, setSearch] = useState('');
   const [filterType, setFilterType] = useState('all');
   const [filterCompleted, setFilterCompleted] = useState('all');

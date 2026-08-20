@@ -27,7 +27,18 @@ export async function GET(request) {
     const { data: skills, error } = await query;
     if (error) throw error;
     
-    return NextResponse.json(skills || []);
+    const defaultSkills = [
+      { id: 1, name: 'Triton & CUDA GPU Programming', category: 'Core Systems', current_level: 88, target_level: 95, importance: 'high' },
+      { id: 2, name: 'C++ (C++20 / SIMD / Multi-threading)', category: 'Core Systems', current_level: 85, target_level: 92, importance: 'high' },
+      { id: 3, name: 'PyTorch & Distributed Training (FSDP / DDP)', category: 'Core Systems', current_level: 92, target_level: 98, importance: 'high' },
+      { id: 4, name: 'Transformer Attention Optimizations (FlashAttn / GQA)', category: 'Architecture', current_level: 90, target_level: 96, importance: 'high' },
+      { id: 5, name: 'Quantization & Low-Precision Inference (FP8 / AWQ)', category: 'Architecture', current_level: 82, target_level: 90, importance: 'high' },
+      { id: 6, name: 'Linux Systems Performance & eBPF Profiling', category: 'Infrastructure', current_level: 80, target_level: 88, importance: 'medium' },
+      { id: 7, name: 'Vector Databases & HNSW Indexing', category: 'Infrastructure', current_level: 86, target_level: 92, importance: 'high' },
+    ];
+
+    const finalSkills = (skills && skills.length > 0) ? skills : defaultSkills;
+    return NextResponse.json(finalSkills);
   } catch (error) {
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
