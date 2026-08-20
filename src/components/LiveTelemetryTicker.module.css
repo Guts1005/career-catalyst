@@ -70,11 +70,11 @@
 .glideTrack {
   display: flex;
   align-items: center;
-  gap: 28px;
+  gap: 36px;
   width: max-content;
   will-change: transform;
   transform: translate3d(0, 0, 0);
-  animation: smoothGlide 110s linear infinite;
+  animation: smoothGlide 220s linear infinite;
 }
 
 .glideTrack:hover {
@@ -84,10 +84,10 @@
 .glideChip {
   display: inline-flex;
   align-items: center;
-  gap: 7px;
+  gap: 8px;
   background: var(--bg-subtle);
   border: 1px solid var(--border);
-  padding: 4px 12px;
+  padding: 5px 14px;
   border-radius: 4px;
   font-family: var(--font-mono);
   font-size: 11px;
@@ -161,7 +161,7 @@
     display: none;
   }
   .glideTrack {
-    gap: 16px;
-    animation-duration: 90s;
+    gap: 20px;
+    animation-duration: 180s;
   }
 }
