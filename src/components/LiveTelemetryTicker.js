@@ -80,38 +80,69 @@ const TELEMETRY_FEED = [
 
 export default function LiveTelemetryTicker() {
   const [activeIdx, setActiveIdx] = useState(0);
-  const [isPaused, setIsPaused] = useState(false);
+  const [isUserPaused, setIsUserPaused] = useState(false);
+  const [isHovered, setIsHovered] = useState(false);
   const [selectedDetail, setSelectedDetail] = useState(null);
+  const [progress, setProgress] = useState(0);
 
   const nextBenchmark = useCallback(() => {
     setActiveIdx((prev) => (prev + 1) % TELEMETRY_FEED.length);
+    setProgress(0);
   }, []);
 
   const prevBenchmark = useCallback(() => {
     setActiveIdx((prev) => (prev - 1 + TELEMETRY_FEED.length) % TELEMETRY_FEED.length);
+    setProgress(0);
   }, []);
 
-  // 7-second stationary rotation
+  const togglePlayPause = (e) => {
+    e.stopPropagation();
+    setIsUserPaused((prev) => !prev);
+    setProgress(0);
+  };
+
+  // High-precision smooth progress & rotation timer (7000ms duration)
   useEffect(() => {
-    if (isPaused || selectedDetail !== null) return;
-    const interval = setInterval(nextBenchmark, 7000);
-    return () => clearInterval(interval);
-  }, [isPaused, selectedDetail, nextBenchmark]);
+    if (isUserPaused || isHovered || selectedDetail !== null) return;
+
+    const tickInterval = 50; // Update every 50ms for smooth progress
+    const totalDuration = 7000;
+    const step = (tickInterval / totalDuration) * 100;
+
+    const timer = setInterval(() => {
+      setProgress((prev) => {
+        if (prev >= 100) {
+          nextBenchmark();
+          return 0;
+        }
+        return prev + step;
+      });
+    }, tickInterval);
+
+    return () => clearInterval(timer);
+  }, [isUserPaused, isHovered, selectedDetail, nextBenchmark]);
 
   const activeItem = TELEMETRY_FEED[activeIdx];
+  const isRotationPaused = isUserPaused || isHovered || selectedDetail !== null;
 
   return (
     <>
       <div
         className={styles.tickerContainer}
-        onMouseEnter={() => setIsPaused(true)}
-        onMouseLeave={() => setIsPaused(false)}
+        onMouseEnter={() => setIsHovered(true)}
+        onMouseLeave={() => setIsHovered(false)}
         role="region"
         aria-label="Live ML Industry Benchmarks"
       >
+        {/* Subtle timer progress line at the bottom of the ticker */}
+        <div
+          className={`${styles.progressBar} ${isRotationPaused ? styles.progressPaused : ''}`}
+          style={{ width: `${progress}%` }}
+        />
+
         {/* Left Badge */}
         <div className={styles.badge}>
-          <span className={styles.liveDot} />
+          <span className={`${styles.liveDot} ${isRotationPaused ? styles.dotPaused : ''}`} />
           <span className={styles.badgeLabel}>LIVE ML BENCHMARKS</span>
         </div>
 
@@ -132,7 +163,7 @@ export default function LiveTelemetryTicker() {
             type="button"
             className={styles.ctrlBtn}
             onClick={prevBenchmark}
-            title="Previous benchmark"
+            title="Previous benchmark (‹)"
             aria-label="Previous benchmark"
           >
             ‹
@@ -144,18 +175,19 @@ export default function LiveTelemetryTicker() {
             type="button"
             className={styles.ctrlBtn}
             onClick={nextBenchmark}
-            title="Next benchmark"
+            title="Next benchmark (›)"
             aria-label="Next benchmark"
           >
             ›
           </button>
           <button
             type="button"
-            className={`${styles.ctrlBtn} ${isPaused ? styles.ctrlActive : ''}`}
-            onClick={() => setIsPaused(!isPaused)}
-            title={isPaused ? 'Resume auto-rotation' : 'Pause rotation'}
+            className={`${styles.ctrlBtn} ${isUserPaused ? styles.ctrlActive : ''}`}
+            onClick={togglePlayPause}
+            title={isUserPaused ? 'Resume auto-rotation' : 'Pause rotation'}
+            aria-label={isUserPaused ? 'Play auto-rotation' : 'Pause auto-rotation'}
           >
-            {isPaused ? '▶ Play' : '⏸ Pause'}
+            {isUserPaused ? '▶ Play' : '⏸ Pause'}
           </button>
           <button
             type="button"

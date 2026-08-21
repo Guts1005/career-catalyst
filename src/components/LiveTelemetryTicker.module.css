@@ -14,6 +14,23 @@
   width: 100%;
 }
 
+/* ─── High-Precision Visual Countdown Progress Line ─── */
+.progressBar {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  height: 2px;
+  background: var(--green);
+  transition: width 0.05s linear;
+  z-index: 50;
+  pointer-events: none;
+}
+
+.progressPaused {
+  background: var(--text-muted);
+  opacity: 0.4;
+}
+
 .badge {
   display: flex;
   align-items: center;
@@ -38,6 +55,13 @@
   background: var(--green);
   box-shadow: 0 0 8px rgba(22, 163, 74, 0.7);
   animation: pulseDot 2s infinite ease-in-out;
+}
+
+.dotPaused {
+  animation: none;
+  background: var(--text-muted);
+  box-shadow: none;
+  opacity: 0.5;
 }
 
 .badgeLabel {
