@@ -49,29 +49,29 @@
 }
 
 .heroDisplayTitle {
-  font-size: clamp(52px, 8.5vw, 130px);
+  font-size: clamp(52px, 8vw, 120px);
   font-weight: 900;
-  line-height: 0.92;
-  letter-spacing: -0.04em;
+  line-height: 1.04;
+  letter-spacing: -0.025em;
   text-transform: uppercase;
   color: var(--text-primary);
 }
 
 .heroSubtitleBlock {
-  max-width: 380px;
+  max-width: 460px;
 }
 
 .heroDescription {
-  font-size: 15px;
-  line-height: 1.6;
+  font-size: 16px;
+  line-height: 1.7;
   color: var(--text-secondary);
-  margin-bottom: 24px;
+  margin-bottom: 28px;
 }
 
 .heroCtaGroup {
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 12px;
 }
 
 .heroMetaBottom {
@@ -87,13 +87,13 @@
 
 /* ─── Alternating Editorial Section Structure ───────────────────── */
 .narrativeSection {
-  padding: 90px clamp(24px, 5vw, 80px);
+  padding: 100px clamp(28px, 5.5vw, 96px);
   border-bottom: 1px solid var(--border);
   background: var(--bg-primary);
 }
 
 .narrativeSectionDark {
-  padding: 90px clamp(24px, 5vw, 80px);
+  padding: 100px clamp(28px, 5.5vw, 96px);
   background: var(--bg-surface);
   color: var(--text-primary);
   border-bottom: 1px solid var(--border-strong);
@@ -115,18 +115,20 @@
 
   .heroDisplayTitle {
     font-size: clamp(38px, 11vw, 64px);
+    line-height: 1.05;
   }
 
   .chapterHeading {
     font-size: clamp(30px, 8vw, 48px);
+    line-height: 1.1;
   }
 }
 
 .sectionHeaderRow {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 30px;
-  margin-bottom: 60px;
+  gap: 36px;
+  margin-bottom: 64px;
   align-items: flex-start;
 }
 
@@ -143,7 +145,7 @@
   text-transform: uppercase;
   letter-spacing: 0.1em;
   color: var(--text-muted);
-  margin-bottom: 12px;
+  margin-bottom: 14px;
 }
 
 .chapterNumberDark {
@@ -152,30 +154,30 @@
   text-transform: uppercase;
   letter-spacing: 0.1em;
   color: var(--text-muted);
-  margin-bottom: 12px;
+  margin-bottom: 14px;
 }
 
 .chapterHeading {
-  font-size: clamp(36px, 5vw, 76px);
+  font-size: clamp(36px, 4.8vw, 72px);
   font-weight: 900;
-  line-height: 0.96;
-  letter-spacing: -0.035em;
+  line-height: 1.14;
+  letter-spacing: -0.02em;
   text-transform: uppercase;
   color: var(--text-primary);
 }
 
 .chapterDescription {
-  font-size: 15px;
-  line-height: 1.6;
+  font-size: 15.5px;
+  line-height: 1.7;
   color: var(--text-secondary);
-  max-width: 440px;
+  max-width: 480px;
 }
 
 .chapterDescriptionDark {
-  font-size: 15px;
-  line-height: 1.6;
+  font-size: 15.5px;
+  line-height: 1.7;
   color: var(--text-secondary);
-  max-width: 440px;
+  max-width: 480px;
 }
 
 /* ─── Chapter 01: KNOW ──────────────────────────────────────────── */

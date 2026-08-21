@@ -32,10 +32,10 @@ export default function PageHeader({ chapter, title, subtitle, actions }) {
         )}
         <h1
           style={{
-            fontSize: 'clamp(28px, 4vw, 48px)',
+            fontSize: 'clamp(30px, 4.2vw, 52px)',
             fontWeight: 900,
-            lineHeight: 1.05,
-            letterSpacing: '-0.03em',
+            lineHeight: 1.18,
+            letterSpacing: '-0.02em',
             textTransform: 'uppercase',
             color: 'var(--text-primary)',
             margin: 0,
@@ -46,11 +46,11 @@ export default function PageHeader({ chapter, title, subtitle, actions }) {
         {subtitle && (
           <p
             style={{
-              fontSize: '14px',
+              fontSize: '14.5px',
               color: 'var(--text-secondary)',
-              marginTop: '6px',
-              maxWidth: '680px',
-              lineHeight: 1.5,
+              marginTop: '10px',
+              maxWidth: '780px',
+              lineHeight: 1.65,
             }}
           >
             {subtitle}
