@@ -228,3 +228,55 @@
   font-size: 10.5px;
   color: var(--text-muted);
 }
+
+@media (max-width: 600px) {
+  .visualizerCard {
+    padding: 16px;
+    margin: 16px 0;
+    max-width: 100%;
+    box-sizing: border-box;
+    overflow: hidden;
+  }
+
+  .header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+
+  .title {
+    font-size: 15px;
+  }
+
+  .speedupBadge {
+    align-self: flex-start;
+  }
+
+  .controlsGrid {
+    padding: 12px;
+    gap: 12px;
+    margin-bottom: 16px;
+  }
+
+  .stackMeta {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 4px;
+  }
+
+  .stackNameWrap {
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+
+  .stackName {
+    font-size: 12px;
+    word-break: break-word;
+  }
+
+  .stackMetrics {
+    width: 100%;
+    justify-content: space-between;
+    gap: 8px;
+  }
+}

@@ -92,7 +92,12 @@
   display: flex;
   align-items: flex-end;
   justify-content: center;
-  animation: fadeIn 0.2s ease-out;
+  animation: fadeIn 0.24s cubic-bezier(0.16, 1, 0.3, 1);
+  transition: opacity 0.24s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.backdropClosing {
+  animation: fadeOut 0.24s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
 .sheet {
@@ -107,8 +112,13 @@
   flex-direction: column;
   box-shadow: var(--shadow-lg);
   padding-bottom: calc(16px + env(safe-area-inset-bottom, 0px));
-  animation: slideUp 0.35s cubic-bezier(0.22, 1, 0.36, 1);
+  animation: slideUp 0.28s cubic-bezier(0.16, 1, 0.3, 1);
+  transition: transform 0.24s cubic-bezier(0.16, 1, 0.3, 1);
   overflow: hidden;
+}
+
+.sheetClosing {
+  animation: slideDown 0.24s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
 .dragHandleWrap {
@@ -226,7 +236,17 @@
   to { transform: translateY(0); }
 }
 
+@keyframes slideDown {
+  from { transform: translateY(0); }
+  to { transform: translateY(100%); }
+}
+
 @keyframes fadeIn {
   from { opacity: 0; }
   to { opacity: 1; }
+}
+
+@keyframes fadeOut {
+  from { opacity: 1; }
+  to { opacity: 0; }
 }

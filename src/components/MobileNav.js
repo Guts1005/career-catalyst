@@ -79,10 +79,35 @@ import { useCareer } from '@/context/CareerContext';
 export default function MobileNav() {
   const pathname = usePathname();
   const [isMoreOpen, setIsMoreOpen] = useState(false);
+  const [isClosing, setIsClosing] = useState(false);
   const { readiness } = useCareer();
 
+  const handleOpenMore = () => {
+    setIsClosing(false);
+    setIsMoreOpen(true);
+  };
+
+  const handleCloseMore = () => {
+    if (isClosing) return;
+    setIsClosing(true);
+    setTimeout(() => {
+      setIsMoreOpen(false);
+      setIsClosing(false);
+    }, 240);
+  };
+
+  const toggleMore = () => {
+    if (isMoreOpen && !isClosing) {
+      handleCloseMore();
+    } else if (!isMoreOpen) {
+      handleOpenMore();
+    }
+  };
+
   useEffect(() => {
-    setIsMoreOpen(false);
+    if (isMoreOpen) {
+      handleCloseMore();
+    }
   }, [pathname]);
 
   // Lock body scroll when bottom sheet is open
@@ -125,7 +150,7 @@ export default function MobileNav() {
           <button
             type="button"
             className={`${styles.tabBtn} ${isMoreOpen ? styles.activeTab : ''}`}
-            onClick={() => setIsMoreOpen(!isMoreOpen)}
+            onClick={toggleMore}
             aria-expanded={isMoreOpen}
             aria-label="Open More Destinations"
           >
@@ -144,8 +169,14 @@ export default function MobileNav() {
 
       {/* ─── More Bottom Sheet Overlay & Drawer ─────────────────────── */}
       {isMoreOpen && (
-        <div className={styles.backdrop} onClick={() => setIsMoreOpen(false)}>
-          <div className={styles.sheet} onClick={(e) => e.stopPropagation()}>
+        <div
+          className={`${styles.backdrop} ${isClosing ? styles.backdropClosing : ''}`}
+          onClick={handleCloseMore}
+        >
+          <div
+            className={`${styles.sheet} ${isClosing ? styles.sheetClosing : ''}`}
+            onClick={(e) => e.stopPropagation()}
+          >
             {/* Sheet Handle */}
             <div className={styles.dragHandleWrap}>
               <div className={styles.dragHandle} />
@@ -164,7 +195,7 @@ export default function MobileNav() {
                 <button
                   type="button"
                   className={styles.closeBtn}
-                  onClick={() => setIsMoreOpen(false)}
+                  onClick={handleCloseMore}
                   aria-label="Close Sheet"
                 >
                   ✕

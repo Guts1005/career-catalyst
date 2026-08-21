@@ -1,8 +1,11 @@
 .container {
   padding: 32px clamp(16px, 3vw, 40px);
   max-width: 1400px;
+  width: 100%;
   margin: 0 auto;
   color: var(--text-primary);
+  box-sizing: border-box;
+  overflow-x: hidden;
 }
 
 .header {
@@ -14,15 +17,19 @@
   padding-bottom: 24px;
   gap: 16px;
   flex-wrap: wrap;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .title {
   font-size: clamp(28px, 4vw, 48px);
   font-weight: 900;
-  letter-spacing: -0.03em;
+  letter-spacing: -0.02em;
+  line-height: 1.15;
   text-transform: uppercase;
   color: var(--text-primary);
   margin: 0 0 4px 0;
+  word-break: break-word;
 }
 
 .subtitle {
@@ -58,6 +65,7 @@
   overflow-x: auto;
   padding-bottom: 6px;
   -webkit-overflow-scrolling: touch;
+  max-width: 100%;
 }
 
 .filterBtn {
@@ -75,6 +83,7 @@
   display: inline-flex;
   align-items: center;
   transition: all 0.15s ease;
+  flex-shrink: 0;
 }
 
 .filterBtn:hover {
@@ -103,8 +112,11 @@
 
 .grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
   gap: 16px;
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
 }
 
 @media (max-width: 768px) {
@@ -123,11 +135,19 @@
   justify-content: space-between;
   color: var(--text-primary);
   transition: border-color 0.15s ease;
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+  overflow: hidden;
 }
 
 @media (max-width: 768px) {
+  .container {
+    padding: 20px 16px;
+  }
+
   .card {
-    padding: 18px;
+    padding: 16px;
   }
 }
 
@@ -141,6 +161,7 @@
   align-items: flex-start;
   gap: 12px;
   margin-bottom: 12px;
+  flex-wrap: wrap;
 }
 
 .cardTitle {
@@ -148,6 +169,9 @@
   font-weight: 700;
   color: var(--text-primary);
   margin: 0;
+  word-break: break-word;
+  overflow-wrap: break-word;
+  max-width: 100%;
 }
 
 .cardDesc {
@@ -155,6 +179,8 @@
   color: var(--text-secondary);
   line-height: 1.55;
   margin-bottom: 16px;
+  word-break: break-word;
+  overflow-wrap: break-word;
 }
 
 .cardMeta {
@@ -162,6 +188,7 @@
   flex-wrap: wrap;
   gap: 6px;
   margin-bottom: 16px;
+  max-width: 100%;
 }
 
 .metaBadge {
@@ -172,6 +199,7 @@
   padding: 2px 6px;
   border-radius: 3px;
   border: 1px solid var(--border);
+  white-space: nowrap;
 }
 
 .cardBottom {
@@ -180,6 +208,8 @@
   align-items: center;
   padding-top: 14px;
   border-top: 1px solid var(--border);
+  flex-wrap: wrap;
+  gap: 8px;
 }
 
 .statusBadge {
@@ -189,4 +219,5 @@
   display: flex;
   align-items: center;
   gap: 5px;
+  white-space: nowrap;
 }
