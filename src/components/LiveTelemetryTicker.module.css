@@ -222,12 +222,59 @@
 
 @media (max-width: 600px) {
   .tickerContainer {
-    height: 40px;
+    height: 38px;
+    width: 100%;
+    max-width: 100%;
+    overflow: hidden;
   }
-  .controls {
+
+  .badge {
+    padding: 0 10px;
+  }
+
+  .stationaryStage {
     padding: 0 8px;
-    gap: 4px;
+    min-width: 0;
   }
+
+  .activeDisplay {
+    gap: 6px;
+    font-size: 11px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 100%;
+  }
+
+  .chipLabel {
+    display: none;
+  }
+
+  .chipChange {
+    display: none;
+  }
+
+  .chipValue {
+    font-size: 11px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .controls {
+    padding: 0 6px;
+    gap: 3px;
+  }
+
+  .ctrlBtn {
+    padding: 3px 6px;
+    font-size: 10px;
+  }
+
+  .counter {
+    font-size: 9.5px;
+    min-width: 18px;
+  }
+
   .sourceBtn {
     display: none;
   }
