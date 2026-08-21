@@ -311,10 +311,10 @@ export function generateNextBestAction({ targetRole, skills = [], projects = [],
 export const DEMO_PERSONAS = [
   {
     id: 'sharvin_ml',
-    personaName: 'Sharvin Patel',
+    personaName: 'Sharvin Neve',
     badge: '🚀 ML Systems Specialist',
     profile: {
-      name: 'Sharvin Patel',
+      name: 'Sharvin Neve',
       title: 'Machine Learning Engineer',
       targetRole: 'senior_ml',
       level: 'Mid-Senior',

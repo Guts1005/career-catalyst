@@ -21,7 +21,7 @@ export default function ResumeBuilderPage() {
   const [saveSuccess, setSaveSuccess] = useState(false);
 
   // Form State
-  const [fullName, setFullName] = useState('Sharvin Patel');
+  const [fullName, setFullName] = useState('Sharvin Neve');
   const [email, setEmail] = useState('sharvinneve67@gmail.com');
   const [phone, setPhone] = useState('+1 (555) 342-8901');
   const [location, setLocation] = useState('San Francisco, CA');

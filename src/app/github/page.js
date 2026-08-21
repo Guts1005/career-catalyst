@@ -28,7 +28,7 @@ const languageColors = {
 const DEFAULT_GITHUB_ANALYSIS = {
   profile: {
     login: 'Guts1005',
-    name: 'Sharvin Patel',
+    name: 'Sharvin Neve',
     avatar_url: 'https://avatars.githubusercontent.com/u/10000000?v=4',
     html_url: 'https://github.com/Guts1005',
     bio: 'Machine Learning Systems Engineer | PyTorch, Triton GPU Kernels, Distributed Model Serving',

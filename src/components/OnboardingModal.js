@@ -25,7 +25,7 @@ export default function OnboardingModal({ isOpen, onClose }) {
   const [step, setStep] = useState(1);
 
   // Form State
-  const [name, setName] = useState('Sharvin Patel');
+  const [name, setName] = useState('Sharvin Neve');
   const [targetRole, setTargetRole] = useState('senior_ml');
   const [experienceLevel, setExperienceLevel] = useState('Early Career');
   const [selectedSkills, setSelectedSkills] = useState(['Python', 'Machine Learning']);

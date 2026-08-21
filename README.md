@@ -220,4 +220,4 @@ npm run start
 
 ## 📄 License
 
-MIT © 2026 Sharvin Patel. Built with precision for the technical engineering community.
+MIT © 2026 Sharvin Neve. Built with precision for the technical engineering community.
