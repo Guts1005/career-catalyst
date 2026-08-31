@@ -6,6 +6,7 @@ import styles from './page.module.css';
 import PageHeader from '@/components/PageHeader';
 import { useCareer } from '@/context/CareerContext';
 import { IconAnalytics } from '@/components/Icons';
+import GapBlueprintCard from '@/components/GapBlueprintCard';
 
 const TRAJECTORY_STAGES = [
   { id: 'foundation', label: 'FOUNDATION', desc: 'Core CS, Linear Algebra & Probability', status: 'completed', link: '/resources' },
@@ -48,16 +49,19 @@ export default function AnalyticsPage() {
     ];
   }, [jobs]);
 
+  // Top critical gap
+  const topGap = readiness?.gaps && readiness.gaps.length > 0 ? readiness.gaps[0] : null;
+
   return (
     <div className={styles.container}>
       <PageHeader
-        chapter="INDEX / 02"
+        chapter="01 — COMMAND CENTER"
         title={<>CAREER<br />ANALYTICS.</>}
         subtitle={`Real-time telemetry, pipeline conversion velocity, and competency progression calibrated for ${readiness?.targetRoleTitle || 'ML Engineer'}.`}
       />
 
       {/* ─── Hero Readiness & Interactive Trajectory ───────────────── */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '20px', marginBottom: '8px' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '20px', marginBottom: '16px' }}>
         {/* Animated Score Block */}
         <div className={styles.card} style={{ position: 'relative' }}>
           <div className={styles.cardHeader}>
@@ -127,8 +131,23 @@ export default function AnalyticsPage() {
         )}
       </div>
 
+      {/* ─── Actionable Skill Gap ➔ Architecture Blueprint Resolution ─ */}
+      {topGap && (
+        <div style={{ marginBottom: '16px' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
+            <span style={{ fontSize: '11px', fontFamily: 'var(--font-mono)', fontWeight: 800, color: 'var(--text-muted)', textTransform: 'uppercase' }}>
+              🎯 ACTIONABLE GAP RESOLUTION (CONNECTION A)
+            </span>
+            <Link href="/skills" style={{ fontSize: '11.5px', fontFamily: 'var(--font-mono)', color: 'var(--text-secondary)', textDecoration: 'none' }}>
+              VIEW ALL {readiness?.gaps?.length || 0} GAPS →
+            </Link>
+          </div>
+          <GapBlueprintCard gap={topGap} />
+        </div>
+      )}
+
       {/* ─── Interactive Career Trajectory ─────────────────────────── */}
-      <div className={styles.card} style={{ margin: '8px 0' }}>
+      <div className={styles.card} style={{ margin: '8px 0 16px 0' }}>
         <div className={styles.cardHeader}>
           <h2 style={{ color: 'var(--text-primary)' }}>Career Progression Trajectory</h2>
           <span style={{ fontSize: '11px', fontFamily: 'var(--font-mono)', color: 'var(--text-muted)' }}>CURRENT STAGE: PORTFOLIO & PROOF</span>
@@ -172,7 +191,7 @@ export default function AnalyticsPage() {
       </div>
 
       {/* ─── Category Mastery & Pipeline Funnel ──────────────────────── */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '20px', marginTop: '8px' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '20px' }}>
         {/* Category Competency Balances */}
         <div className={styles.card}>
           <div className={styles.cardHeader}>

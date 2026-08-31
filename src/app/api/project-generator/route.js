@@ -65,6 +65,63 @@ const PROJECT_BLUEPRINTS = {
   ],
   mlops_engineering: [
     {
+      name: 'Triton FlashAttention-2 Online Softmax GPU Kernel Suite',
+      category: 'ML Systems & GPU Kernels',
+      difficulty: 'Expert',
+      summary: 'Custom OpenAI Triton and CUDA C++ kernel implementation of FlashAttention-2 with online softmax scaling, fused QK^T matrix multiplication, and Hopper Tensor Core acceleration.',
+      dataset: 'Synthetic LLaMA-3 multi-head attention activation tensors (8k context)',
+      tech_stack: 'Python, PyTorch, OpenAI Triton, CUDA C++, NVIDIA Nsight Compute, Docker',
+      milestones: [
+        'Implement online softmax mathematical formulation in custom Triton JIT kernel',
+        'Optimize SRAM block tiling and asynchronous TMA memory transfers for Hopper H100',
+        'Benchmark against cuDNN baseline and verify 73% peak TFLOPs hardware utilization'
+      ],
+      impact: 'Achieved a 3.4x latency speedup and 8x reduction in peak high-bandwidth memory (HBM) usage over standard PyTorch SDPA.',
+      star_bullets: [
+        'Engineered custom FlashAttention-2 GPU kernels in OpenAI Triton, achieving 73% peak compute utilization on 8x NVIDIA H100 SXM5 GPUs.',
+        'Eliminated quadratic O(N^2) memory footprint by tiling attention matrices across on-chip SRAM via online softmax running max/sum accumulators.',
+        'Benchmarked kernel performance using NVIDIA Nsight Compute, achieving 13.8ms P99 latency at 8k context length.'
+      ]
+    },
+    {
+      name: 'Multi-Node Tensor Parallel Inference Engine from Scratch',
+      category: 'Distributed Systems',
+      difficulty: 'Expert',
+      summary: 'Distributed inference server implementing Megatron-LM tensor parallel linear layers, NCCL All-Reduce communication collectives, and continuous batching.',
+      dataset: 'DeepSeek-V3 and LLaMA-3-70B model checkpoints',
+      tech_stack: 'Python, PyTorch, Ray Train, Megatron-LM, NCCL, FastAPI, Docker',
+      milestones: [
+        'Implement column-parallel and row-parallel linear layers with NCCL All-Reduce',
+        'Build continuous batching engine with PagedAttention KV-cache management',
+        'Deploy multi-node Ray cluster with health-check heartbeats and live prometheus metrics'
+      ],
+      impact: 'Scaled 70B parameter model serving across 4 nodes with 82% Model FLOPs Utilization (MFU) and sub-20ms first-token latency.',
+      star_bullets: [
+        'Designed a distributed inference engine with custom tensor parallelism in PyTorch and NCCL, scaling 70B parameter LLMs across 4 GPU nodes.',
+        'Implemented continuous batching and dynamic KV-cache pagination, boosting server query throughput by 2.9x under concurrent load.',
+        'Containerized cluster deployment using Docker and Ray, maintaining sub-20ms time-to-first-token (TTFT) across 128 concurrent streams.'
+      ]
+    },
+    {
+      name: '10TB Streaming Data Lakehouse with Apache Iceberg, Kafka & ClickHouse',
+      category: 'Data Engineering',
+      difficulty: 'Advanced',
+      summary: 'Real-time and batch hybrid data lakehouse architecture processing 10TB+ daily event streams with Apache Iceberg ACID tables, dbt modeling, and ClickHouse OLAP analytics.',
+      dataset: '10TB Clickstream & Financial Order Book Synthetic Dataset',
+      tech_stack: 'Python, SQL, Apache Kafka, Apache Iceberg, ClickHouse, dbt, Apache Spark, Docker',
+      milestones: [
+        'Set up Kafka distributed event ingestion with schema registry validation',
+        'Configure Apache Iceberg ACID tables on object storage with automated compaction',
+        'Implement dbt dimensional transformation models and ClickHouse sub-second OLAP queries'
+      ],
+      impact: 'Processed 10TB daily event streams with sub-500ms analytical query response times and zero data duplication.',
+      star_bullets: [
+        'Architected a 10TB streaming data lakehouse utilizing Apache Iceberg, Kafka, and ClickHouse, achieving sub-500ms P95 query latency on 100M+ rows.',
+        'Engineered automated incremental dbt transformation pipelines and partition compaction jobs, reducing cloud storage bloat by 38%.',
+        'Implemented exactly-once stream processing semantics with Kafka schema registry and dead-letter queue recovery workflows.'
+      ]
+    },
+    {
       name: 'Full-Lifecycle MLOps Platform with Feast Feature Store & Airflow',
       category: 'MLOps & Production',
       difficulty: 'Advanced',

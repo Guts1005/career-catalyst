@@ -1,0 +1,156 @@
+.card {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-md, 8px);
+  padding: 20px;
+  position: relative;
+  overflow: hidden;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.card:hover {
+  border-color: var(--text-primary);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25);
+}
+
+.card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 4px;
+  height: 100%;
+  background: var(--amber, #f59e0b);
+}
+
+.badgeRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.gapBadge {
+  font-size: 10.5px;
+  font-family: var(--font-mono);
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--amber, #f59e0b);
+  background: rgba(245, 158, 11, 0.1);
+  border: 1px solid rgba(245, 158, 11, 0.3);
+  padding: 3px 8px;
+  border-radius: 4px;
+}
+
+.defPill {
+  font-size: 11px;
+  font-family: var(--font-mono);
+  color: var(--text-muted);
+}
+
+.whatIsWeak {
+  font-size: 17px;
+  font-weight: 800;
+  color: var(--text-primary);
+  margin-bottom: 6px;
+}
+
+.whyItMatters {
+  font-size: 13px;
+  color: var(--text-secondary);
+  line-height: 1.5;
+  margin-bottom: 16px;
+}
+
+.blueprintBox {
+  background: var(--bg-subtle);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 14px 16px;
+  margin-bottom: 16px;
+}
+
+.blueprintLabel {
+  font-size: 10px;
+  font-family: var(--font-mono);
+  font-weight: 800;
+  text-transform: uppercase;
+  color: var(--green, #22c55e);
+  margin-bottom: 4px;
+  display: block;
+}
+
+.blueprintTitle {
+  font-size: 14px;
+  font-weight: 800;
+  color: var(--text-primary);
+  margin-bottom: 4px;
+}
+
+.blueprintReason {
+  font-size: 12.5px;
+  color: var(--text-secondary);
+  line-height: 1.45;
+}
+
+.impactRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+  padding-top: 14px;
+  border-top: 1px solid var(--border);
+}
+
+.impactTags {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.impactTag {
+  font-size: 10.5px;
+  font-family: var(--font-mono);
+  color: var(--text-primary);
+  background: var(--bg-subtle);
+  border: 1px solid var(--border);
+  padding: 2px 7px;
+  border-radius: 3px;
+  font-weight: 600;
+}
+
+.ctaLink {
+  padding: 8px 16px;
+  font-size: 12px;
+  font-family: var(--font-mono);
+  font-weight: 700;
+  text-decoration: none;
+  border-radius: 4px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  transition: transform 0.15s ease;
+}
+
+.ctaLink:hover {
+  transform: translateX(2px);
+}
+
+@media (max-width: 640px) {
+  .card {
+    padding: 16px;
+  }
+  .impactRow {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .ctaLink {
+    text-align: center;
+    justify-content: center;
+    width: 100%;
+  }
+}

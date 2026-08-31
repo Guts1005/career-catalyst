@@ -7,6 +7,7 @@ import { showToast } from '@/components/Toast';
 import PageHeader from '@/components/PageHeader';
 import { useCareer } from '@/context/CareerContext';
 import { CAREER_TRACKS, getRoleById } from '@/lib/careerGraph';
+import { findBlueprintRecommendation } from '@/lib/gapBlueprintRegistry';
 
 export default function SkillsPage() {
   const { targetRole, setTargetRole, skills, setSkills, readiness } = useCareer();
@@ -282,19 +283,51 @@ export default function SkillsPage() {
               </div>
 
               {/* Connected Action Link: Build Project to close gap */}
-              <div style={{ borderTop: '1px solid var(--border)', paddingTop: '10px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <Link
-                  href={`/projects?skill=${encodeURIComponent(s.name)}`}
-                  style={{ fontSize: '11.5px', fontFamily: 'var(--font-mono)', color: 'var(--text-primary)', textDecoration: 'none', fontWeight: 600 }}
-                >
-                  BUILD PROJECT TO PROVE →
-                </Link>
-                <Link
-                  href={`/interview-prep?topic=${encodeURIComponent(s.name)}`}
-                  style={{ fontSize: '11px', fontFamily: 'var(--font-mono)', color: 'var(--text-muted)', textDecoration: 'none' }}
-                >
-                  PREP QUESTIONS ↗
-                </Link>
+              <div style={{ borderTop: '1px solid var(--border)', paddingTop: '10px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                {(() => {
+                  const rec = findBlueprintRecommendation(s.name);
+                  if (gap > 0 && rec) {
+                    return (
+                      <Link
+                        href={rec.destination}
+                        style={{
+                          fontSize: '11px',
+                          fontFamily: 'var(--font-mono)',
+                          color: 'var(--green)',
+                          background: 'var(--green-subtle, rgba(34, 197, 94, 0.1))',
+                          border: '1px solid var(--green-border, rgba(34, 197, 94, 0.3))',
+                          padding: '4px 8px',
+                          borderRadius: '4px',
+                          textDecoration: 'none',
+                          fontWeight: 700,
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'space-between',
+                        }}
+                        aria-label={`View recommended blueprint ${rec.blueprintName} to resolve ${s.name} gap`}
+                      >
+                        <span>🚀 BLUEPRINT: {rec.blueprintName.slice(0, 24)}...</span>
+                        <span>→</span>
+                      </Link>
+                    );
+                  }
+                  return null;
+                })()}
+
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <Link
+                    href={`/projects?skill=${encodeURIComponent(s.name)}`}
+                    style={{ fontSize: '11.5px', fontFamily: 'var(--font-mono)', color: 'var(--text-primary)', textDecoration: 'none', fontWeight: 600 }}
+                  >
+                    BUILD PROJECT TO PROVE →
+                  </Link>
+                  <Link
+                    href={`/interview-prep?topic=${encodeURIComponent(s.name)}`}
+                    style={{ fontSize: '11px', fontFamily: 'var(--font-mono)', color: 'var(--text-muted)', textDecoration: 'none' }}
+                  >
+                    PREP QUESTIONS ↗
+                  </Link>
+                </div>
               </div>
             </div>
           );
