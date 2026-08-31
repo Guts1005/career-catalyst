@@ -87,13 +87,13 @@
 
 /* ─── Alternating Editorial Section Structure ───────────────────── */
 .narrativeSection {
-  padding: 100px clamp(28px, 5.5vw, 96px);
+  padding: 80px clamp(24px, 5vw, 80px);
   border-bottom: 1px solid var(--border);
   background: var(--bg-primary);
 }
 
 .narrativeSectionDark {
-  padding: 100px clamp(28px, 5.5vw, 96px);
+  padding: 80px clamp(24px, 5vw, 80px);
   background: var(--bg-surface);
   color: var(--text-primary);
   border-bottom: 1px solid var(--border-strong);
@@ -106,7 +106,7 @@
   }
 
   .narrativeSection, .narrativeSectionDark {
-    padding: 54px 16px;
+    padding: 48px 16px;
   }
 
   .actSection {
@@ -128,27 +128,18 @@
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 36px;
-  margin-bottom: 64px;
+  margin-bottom: 48px;
   align-items: flex-start;
 }
 
 @media (max-width: 768px) {
   .sectionHeaderRow {
     grid-template-columns: 1fr;
-    margin-bottom: 32px;
+    margin-bottom: 28px;
   }
 }
 
 .chapterNumber {
-  font-family: var(--font-mono);
-  font-size: 12px;
-  text-transform: uppercase;
-  letter-spacing: 0.1em;
-  color: var(--text-muted);
-  margin-bottom: 14px;
-}
-
-.chapterNumberDark {
   font-family: var(--font-mono);
   font-size: 12px;
   text-transform: uppercase;
@@ -173,19 +164,13 @@
   max-width: 480px;
 }
 
-.chapterDescriptionDark {
-  font-size: 15.5px;
-  line-height: 1.7;
-  color: var(--text-secondary);
-  max-width: 480px;
-}
-
-/* ─── Chapter 01: KNOW ──────────────────────────────────────────── */
+/* ─── Chapter 01: KNOW & 4 Pillars ──────────────────────────────── */
 .knowGrid {
   display: grid;
   grid-template-columns: 1.2fr 0.8fr;
   gap: 40px;
   align-items: center;
+  margin-bottom: 36px;
 }
 
 @media (max-width: 860px) {
@@ -200,21 +185,21 @@
 }
 
 .statHugeNumber {
-  font-size: clamp(72px, 12vw, 160px);
+  font-size: clamp(64px, 10vw, 120px);
   font-weight: 900;
-  line-height: 0.9;
-  letter-spacing: -0.05em;
   font-family: var(--font-mono);
+  line-height: 1;
+  letter-spacing: -0.05em;
   color: var(--text-primary);
 }
 
 .statHugeLabel {
-  font-size: 13px;
+  font-size: 14px;
   font-weight: 700;
   text-transform: uppercase;
-  letter-spacing: 0.08em;
-  color: var(--text-muted);
-  margin-top: 8px;
+  letter-spacing: 0.05em;
+  color: var(--text-secondary);
+  margin-top: 12px;
 }
 
 .strengthList {
@@ -228,183 +213,177 @@
   justify-content: space-between;
   align-items: center;
   padding: 12px 16px;
+  background: var(--bg-surface);
   border: 1px solid var(--border);
-  background: var(--bg-surface);
-  font-size: 13.5px;
-  transform: translateZ(0);
-  transition: border-color 0.15s cubic-bezier(0.16, 1, 0.3, 1), background-color 0.15s cubic-bezier(0.16, 1, 0.3, 1);
-}
-
-/* ─── Chapter 02: PRACTICE ──────────────────────────────────────── */
-.interactiveLab {
-  border: 1px solid var(--border-strong);
-  background: var(--bg-surface);
-  padding: 24px;
-}
-
-.labTabs {
-  display: flex;
-  gap: 8px;
-  border-bottom: 1px solid var(--border);
-  padding-bottom: 12px;
-  margin-bottom: 20px;
-}
-
-.labTabBtn {
-  background: transparent;
-  border: none;
-  font-family: var(--font-mono);
-  font-size: 12px;
-  color: var(--text-muted);
-  cursor: pointer;
-  padding: 6px 12px;
-  text-transform: uppercase;
   border-radius: 4px;
-  transition: all 0.15s ease;
-}
-
-.labTabBtn:hover {
-  color: var(--text-primary);
-  background: var(--bg-hover);
-}
-
-.labTabActive {
-  color: var(--text-primary);
-  background: var(--bg-subtle);
-  font-weight: 700;
-}
-
-.ragResultBox {
-  margin-top: 20px;
-  padding: 16px;
-  background: var(--bg-subtle);
-  border: 1px solid var(--border);
   font-size: 13px;
-  line-height: 1.6;
 }
 
-/* ─── Chapter 03: BUILD ─────────────────────────────────────────── */
+/* ─── Clickable 4-Pillar Dashboard Grid ─────────────────────────── */
+.pillarsGrid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+  margin: 36px 0;
+}
+
+@media (max-width: 1024px) {
+  .pillarsGrid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 640px) {
+  .pillarsGrid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.pillarCard {
+  background: var(--bg-surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 18px 20px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  text-decoration: none;
+  color: var(--text-primary);
+  transition: all 0.16s ease;
+  position: relative;
+}
+
+.pillarCard:hover {
+  border-color: var(--border-strong);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md, 0 4px 12px rgba(0, 0, 0, 0.1));
+}
+
+.pillarCard:focus-visible {
+  outline: 2px solid var(--blue);
+  outline-offset: 2px;
+}
+
+.pillarCardTop {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.pillarBadge {
+  font-family: var(--font-mono);
+  font-size: 9.5px;
+  font-weight: 700;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.pillarArrow {
+  font-family: var(--font-mono);
+  font-size: 14px;
+  color: var(--text-muted);
+  transition: transform 0.15s ease, color 0.15s ease;
+}
+
+.pillarCard:hover .pillarArrow {
+  transform: translateX(3px);
+  color: var(--text-primary);
+}
+
+.pillarTitle {
+  font-size: 14px;
+  font-weight: 800;
+  color: var(--text-primary);
+  margin: 0 0 6px 0;
+  letter-spacing: -0.01em;
+}
+
+.pillarDesc {
+  font-size: 12px;
+  color: var(--text-secondary);
+  line-height: 1.45;
+  margin: 0 0 16px 0;
+}
+
+.pillarScoreRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-bottom: 6px;
+}
+
+.pillarScoreValue {
+  font-family: var(--font-mono);
+  font-size: 20px;
+  font-weight: 900;
+  color: var(--text-primary);
+}
+
+.pillarWeight {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--text-muted);
+}
+
+.pillarProgressBar {
+  width: 100%;
+  height: 4px;
+  background: var(--bg-subtle);
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.pillarProgressFill {
+  height: 100%;
+  background: var(--text-primary);
+  border-radius: 2px;
+  transition: width 0.3s ease;
+}
+
+/* ─── Chapter 02: PROVE (Project Ledger) ────────────────────────── */
 .projectLedger {
   display: flex;
   flex-direction: column;
+  margin-top: 36px;
 }
 
 .projectLedgerItem {
   display: grid;
-  grid-template-columns: 40px 1.4fr 2fr auto;
-  align-items: center;
-  gap: 20px;
+  grid-template-columns: 80px 1fr auto;
+  gap: 24px;
   padding: 24px 0;
-  border-bottom: 1px solid var(--border);
-  transition: background 0.12s ease;
+  align-items: center;
 }
 
-@media (max-width: 900px) {
+@media (max-width: 768px) {
   .projectLedgerItem {
     grid-template-columns: 1fr;
-    gap: 8px;
+    gap: 12px;
   }
 }
 
-.projectIndex {
+.projectLedgerIndex {
   font-family: var(--font-mono);
-  font-size: 13px;
+  font-size: 18px;
+  font-weight: 700;
   color: var(--text-muted);
 }
 
-.projectTitleText {
+.projectLedgerTitle {
   font-size: 16px;
-  font-weight: 700;
+  font-weight: 800;
+  margin-bottom: 6px;
   color: var(--text-primary);
 }
 
-.projectSummaryText {
-  font-size: 13.5px;
+.projectLedgerDesc {
+  font-size: 13px;
   color: var(--text-secondary);
+  line-height: 1.5;
 }
 
-/* ─── Chapter 04: DISCOVER ──────────────────────────────────────── */
-.jobLedgerDark {
-  display: flex;
-  flex-direction: column;
-}
-
-.jobLedgerRowDark {
-  display: grid;
-  grid-template-columns: 1.4fr 1.2fr 120px 140px;
-  align-items: center;
-  gap: 20px;
-  padding: 20px 0;
-  border-bottom: 1px solid var(--border);
-}
-
-@media (max-width: 900px) {
-  .jobLedgerRowDark {
-    grid-template-columns: 1fr;
-    gap: 6px;
-  }
-}
-
-/* ─── Chapter 05: PREPARE ───────────────────────────────────────── */
-.prepGrid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-  gap: 24px;
-}
-
-.prepCard {
-  border: 1px solid var(--border);
-  background: var(--bg-surface);
-  padding: 24px;
-}
-
-.prepCardCategory {
-  font-family: var(--font-mono);
-  font-size: 11px;
-  color: var(--text-muted);
-  text-transform: uppercase;
-  margin-bottom: 8px;
-}
-
-.prepCardQuestion {
-  font-size: 15px;
-  font-weight: 700;
-  line-height: 1.4;
-  margin-bottom: 14px;
-  color: var(--text-primary);
-}
-
-.prepCardAnswer {
-  font-size: 12.5px;
-  color: var(--text-secondary);
-  line-height: 1.6;
-}
-
-/* ─── Chapter 06: ACT ───────────────────────────────────────────── */
-.actSection {
-  padding: 120px clamp(24px, 5vw, 80px);
-  background: var(--bg-surface);
-  color: var(--text-primary);
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  justify-content: center;
-  border-top: 1px solid var(--border-strong);
-}
-
-.actDisplayTitle {
-  font-size: clamp(48px, 9vw, 130px);
-  font-weight: 900;
-  line-height: 0.92;
-  letter-spacing: -0.04em;
-  text-transform: uppercase;
-  margin-bottom: 30px;
-  color: var(--text-primary);
-}
-
-.actButtonGroup {
-  display: flex;
-  gap: 16px;
-  flex-wrap: wrap;
-  margin-top: 10px;
+.projectLedgerLink {
+  text-align: right;
 }

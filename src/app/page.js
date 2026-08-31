@@ -8,6 +8,7 @@ import { useCareer } from '@/context/CareerContext';
 import OnboardingModal from '@/components/OnboardingModal';
 import LiveTelemetryTicker from '@/components/LiveTelemetryTicker';
 import BenchmarkLatencyVisualizer from '@/components/BenchmarkLatencyVisualizer';
+import OrientationBanner from '@/components/OrientationBanner';
 
 export default function HomePage() {
   const {
@@ -42,6 +43,52 @@ export default function HomePage() {
 
   const topCompetencies = skills.slice(0, 4);
 
+  const handleReopenGuide = () => {
+    if (typeof window !== 'undefined') {
+      window.dispatchEvent(new CustomEvent('catalyst:reopen-orientation'));
+    }
+  };
+
+  // 4 Core Career Readiness Pillars
+  const pillars = [
+    {
+      id: 'skills',
+      phaseTag: '02 • PROOF',
+      title: 'Core Competency Matrix',
+      desc: 'Evaluate verified skills, evidence levels, and depth across GPU kernels & distributed systems.',
+      score: readiness?.breakdown?.skills?.score || 66,
+      weight: '30% WEIGHT',
+      href: '/skills',
+    },
+    {
+      id: 'portfolio',
+      phaseTag: '02 • PROOF',
+      title: 'Engineering Proof & Code',
+      desc: 'Inspect Hopper H100 benchmarks, completed milestones, and architecture case studies.',
+      score: readiness?.breakdown?.portfolio?.score || 61,
+      weight: '30% WEIGHT',
+      href: '/projects',
+    },
+    {
+      id: 'resume',
+      phaseTag: '03 • CONVERT',
+      title: 'ATS Keyword Matcher',
+      desc: 'Scan job descriptions and inject verified project proof directly into your resume canvas.',
+      score: readiness?.breakdown?.resume?.score || 75,
+      weight: '20% WEIGHT',
+      href: '/ats-checker',
+    },
+    {
+      id: 'applications',
+      phaseTag: '03 • CONVERT',
+      title: 'Hiring Pipeline Velocity',
+      desc: 'Track active application rounds across frontier AI labs with automated next-step triggers.',
+      score: readiness?.breakdown?.applications?.score || 51,
+      weight: '20% WEIGHT',
+      href: '/job-tracker',
+    },
+  ];
+
   return (
     <div className={styles.landingRoot}>
       {/* ─── Real-Time Live Telemetry Ticker Bar ────────────────────── */}
@@ -54,7 +101,7 @@ export default function HomePage() {
             EXPLORE CANDIDATE PERSONAS:
           </span>
         </div>
-        <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+        <div style={{ display: 'flex', gap: '8px', alignItems: 'center', flexWrap: 'wrap' }}>
           {demoPersonas?.map((p) => {
             const isActive = activePersonaId === p.id;
             return (
@@ -63,6 +110,7 @@ export default function HomePage() {
                 type="button"
                 className={`tag ${isActive ? 'active' : ''}`}
                 onClick={() => selectPersona(p.id)}
+                aria-pressed={isActive}
                 style={{
                   cursor: 'pointer',
                   background: isActive ? 'var(--bg-inverse)' : 'var(--bg-subtle)',
@@ -79,7 +127,34 @@ export default function HomePage() {
               </button>
             );
           })}
+
+          <button
+            type="button"
+            onClick={handleReopenGuide}
+            aria-label="Reopen Catalyst OS orientation guide"
+            style={{
+              cursor: 'pointer',
+              background: 'transparent',
+              border: '1px dashed var(--border-strong)',
+              color: 'var(--text-secondary)',
+              fontSize: '11px',
+              fontFamily: 'var(--font-mono)',
+              padding: '5px 10px',
+              borderRadius: '4px',
+              transition: 'all 0.15s ease',
+            }}
+          >
+            🧭 GUIDE
+          </button>
         </div>
+      </div>
+
+      {/* ─── Lightweight Non-Intrusive Orientation Banner ─────────── */}
+      <div style={{ padding: '0 clamp(16px, 4vw, 64px)' }}>
+        <OrientationBanner
+          nextBestAction={nextBestAction}
+          onOpenCalibration={() => setIsOnboardingOpen(true)}
+        />
       </div>
 
       {/* ─── Hero Section ───────────────────────────────────────────── */}
@@ -123,7 +198,7 @@ export default function HomePage() {
         <div className={styles.heroMetaBottom}>
           <span>{userProfile?.name?.toUpperCase() || 'SHARVIN NEVE'}</span>
           <span>TARGET: {readiness?.targetRoleTitle?.toUpperCase() || 'ML ENGINEER'}</span>
-          <span>SCROLL FOR NARRATIVE ↓</span>
+          <span>SCROLL FOR 4-PHASE JOURNEY ↓</span>
         </div>
       </section>
 
@@ -131,7 +206,7 @@ export default function HomePage() {
       <section className={styles.narrativeSection}>
         <div className={styles.sectionHeaderRow}>
           <div>
-            <div className={styles.chapterNumber}>01 — KNOW</div>
+            <div className={styles.chapterNumber}>01 — COMMAND CENTER</div>
             <h2 className={styles.chapterHeading}>
               KNOW<br />
               WHERE<br />
@@ -140,7 +215,7 @@ export default function HomePage() {
           </div>
           <div>
             <p className={styles.chapterDescription}>
-              Career advancement begins with unvarnished telemetry. Evaluate your technical readiness against actual hiring rubrics calibrated specifically for your target role.
+              Career advancement begins with unvarnished telemetry. Evaluate your multi-factor technical readiness across the four foundational career pillars.
             </p>
           </div>
         </div>
@@ -163,6 +238,40 @@ export default function HomePage() {
               </div>
             ))}
           </div>
+        </div>
+
+        {/* ─── 4 Clickable Core Dashboard Pillars ───────────────────── */}
+        <div className={styles.pillarsGrid} role="region" aria-label="Four Core Career Readiness Pillars">
+          {pillars.map((pillar) => (
+            <Link
+              key={pillar.id}
+              href={pillar.href}
+              className={styles.pillarCard}
+              aria-label={`${pillar.title}: ${pillar.score}%, ${pillar.weight}. Click to navigate to ${pillar.href}`}
+            >
+              <div>
+                <div className={styles.pillarCardTop}>
+                  <span className={styles.pillarBadge}>{pillar.phaseTag}</span>
+                  <span className={styles.pillarArrow} aria-hidden="true">→</span>
+                </div>
+                <h3 className={styles.pillarTitle}>{pillar.title}</h3>
+                <p className={styles.pillarDesc}>{pillar.desc}</p>
+              </div>
+
+              <div>
+                <div className={styles.pillarScoreRow}>
+                  <span className={styles.pillarScoreValue}>{pillar.score}%</span>
+                  <span className={styles.pillarWeight}>{pillar.weight}</span>
+                </div>
+                <div className={styles.pillarProgressBar}>
+                  <div
+                    className={styles.pillarProgressFill}
+                    style={{ width: `${Math.min(pillar.score, 100)}%` }}
+                  />
+                </div>
+              </div>
+            </Link>
+          ))}
         </div>
 
         {/* ─── Quick 30-Second Diagnostic Interactive Widget ────────── */}
@@ -263,7 +372,7 @@ export default function HomePage() {
       <section className={styles.narrativeSectionDark}>
         <div className={styles.sectionHeaderRow}>
           <div>
-            <div className={styles.chapterNumber} style={{ color: 'var(--text-muted)' }}>02 — PROVE</div>
+            <div className={styles.chapterNumber} style={{ color: 'var(--text-muted)' }}>02 — BUILD PROOF</div>
             <h2 className={styles.chapterHeading} style={{ color: 'var(--text-primary)' }}>
               PROOF<br />
               BEATS<br />
@@ -309,7 +418,7 @@ export default function HomePage() {
       <section className={styles.narrativeSection}>
         <div className={styles.sectionHeaderRow}>
           <div>
-            <div className={styles.chapterNumber}>03 — CONVERT</div>
+            <div className={styles.chapterNumber}>03 — LAND THE ROLE</div>
             <h2 className={styles.chapterHeading}>
               EXECUTE<br />
               THE<br />

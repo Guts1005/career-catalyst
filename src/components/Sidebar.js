@@ -6,67 +6,7 @@ import { usePathname } from 'next/navigation';
 import ThemeToggle from '@/components/ThemeToggle';
 import OnboardingModal from '@/components/OnboardingModal';
 import { useCareer } from '@/context/CareerContext';
-import {
-  IconDashboard,
-  IconAnalytics,
-  IconResume,
-  IconCoverLetter,
-  IconJobs,
-  IconInterview,
-  IconAssessment,
-  IconCertifications,
-  IconProjects,
-  IconBlueprints,
-  IconCoding,
-  IconSandbox,
-  IconSkills,
-  IconResources,
-  IconSalary,
-  IconATS,
-  IconGitHub,
-  IconPortfolio,
-} from './Icons';
-
-const NAV_SECTIONS = [
-  {
-    title: 'INDEX',
-    items: [
-      { href: '/', label: 'Overview', icon: IconDashboard },
-      { href: '/analytics', label: 'Career Analytics', icon: IconAnalytics },
-    ],
-  },
-  {
-    title: 'OPPORTUNITIES',
-    items: [
-      { href: '/job-tracker', label: 'Pipeline & Kanban', icon: IconJobs },
-      { href: '/salary-insights', label: 'Salary Intelligence', icon: IconSalary },
-      { href: '/cover-letter', label: 'Cover Pitch Studio', icon: IconCoverLetter },
-      { href: '/ats-checker', label: 'ATS Scanner', icon: IconATS },
-    ],
-  },
-  {
-    title: 'TECHNICAL CORE',
-    items: [
-      { href: '/mock-interview', label: 'Mock Assessment', icon: IconAssessment },
-      { href: '/interview-prep', label: 'Question Bank', icon: IconInterview },
-      { href: '/algorithm-sandbox', label: 'Math Sandbox', icon: IconSandbox },
-      { href: '/coding-tracker', label: 'Coding Ledger', icon: IconCoding },
-      { href: '/skills', label: 'Skill Gap Map', icon: IconSkills },
-    ],
-  },
-  {
-    title: 'PORTFOLIO & PROOF',
-    items: [
-      { href: '/projects', label: 'Case Studies', icon: IconProjects },
-      { href: '/project-generator', label: 'System Blueprints', icon: IconBlueprints },
-      { href: '/certifications', label: 'Certifications', icon: IconCertifications },
-      { href: '/resources', label: 'Reading Index', icon: IconResources },
-      { href: '/resume-builder', label: 'ATS Resume', icon: IconResume },
-      { href: '/github', label: 'GitHub Sync', icon: IconGitHub },
-      { href: '/portfolio/sharvin', label: 'Public Portfolio', icon: IconPortfolio },
-    ],
-  },
-];
+import { NAVIGATION_PHASES, SECONDARY_NAV_ITEMS } from '@/config/navigation';
 
 export default function Sidebar() {
   const pathname = usePathname();
@@ -80,6 +20,7 @@ export default function Sidebar() {
 
   return (
     <>
+      {/* Mobile Hamburger Toggle */}
       <button
         onClick={() => setIsOpen(!isOpen)}
         style={{
@@ -117,6 +58,7 @@ export default function Sidebar() {
 
       <aside
         className={`app-sidebar ${isOpen ? 'open' : ''}`}
+        aria-label="Primary Career Navigation"
         style={{
           width: 'var(--sidebar-width)',
           flexShrink: 0,
@@ -128,7 +70,7 @@ export default function Sidebar() {
           display: 'flex',
           flexDirection: 'column',
           justifyContent: 'space-between',
-          padding: '24px 16px',
+          padding: '20px 14px',
           overflowY: 'auto',
           zIndex: 50,
         }}
@@ -142,7 +84,8 @@ export default function Sidebar() {
               alignItems: 'baseline',
               gap: '8px',
               textDecoration: 'none',
-              marginBottom: '24px',
+              marginBottom: '18px',
+              paddingLeft: '4px',
             }}
           >
             <span
@@ -172,13 +115,14 @@ export default function Sidebar() {
           <button
             type="button"
             onClick={() => setIsOnboardingOpen(true)}
+            aria-label="Calibrate candidate track and target role"
             style={{
               width: '100%',
               background: 'var(--bg-subtle)',
               border: '1px solid var(--border)',
               borderRadius: '4px',
-              padding: '8px 10px',
-              marginBottom: '20px',
+              padding: '7px 9px',
+              marginBottom: '16px',
               cursor: 'pointer',
               textAlign: 'left',
               display: 'flex',
@@ -187,56 +131,69 @@ export default function Sidebar() {
               transition: 'border-color 0.15s ease',
             }}
           >
-            <span style={{ fontSize: '9.5px', fontFamily: 'var(--font-mono)', color: 'var(--text-muted)', textTransform: 'uppercase' }}>
+            <span style={{ fontSize: '9px', fontFamily: 'var(--font-mono)', color: 'var(--text-muted)', textTransform: 'uppercase' }}>
               {userProfile?.name || 'CANDIDATE'} • TRACK ⚙
             </span>
-            <span style={{ fontSize: '11.5px', fontWeight: 700, color: 'var(--text-primary)', textTransform: 'uppercase' }}>
+            <span style={{ fontSize: '11px', fontWeight: 700, color: 'var(--text-primary)', textTransform: 'uppercase' }}>
               {readiness?.targetRoleTitle || 'ML Engineer'}
             </span>
           </button>
 
-          {/* Navigation Sections */}
-          <nav>
-            {NAV_SECTIONS.map((section) => (
-              <div key={section.title} style={{ marginBottom: '20px' }}>
+          {/* ─── Semantic 4-Phase Career Journey Navigation ─────────── */}
+          <nav aria-label="Career Journey Stages">
+            {NAVIGATION_PHASES.map((phase) => (
+              <div key={phase.id} style={{ marginBottom: '16px' }}>
                 <div
                   style={{
-                    fontSize: '10px',
-                    fontWeight: 700,
-                    letterSpacing: '0.08em',
-                    color: 'var(--text-muted)',
-                    marginBottom: '8px',
-                    fontFamily: 'var(--font-mono)',
-                    paddingLeft: '8px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    padding: '0 6px',
+                    marginBottom: '6px',
                   }}
                 >
-                  {section.title}
+                  <span
+                    style={{
+                      fontSize: '9.5px',
+                      fontWeight: 800,
+                      letterSpacing: '0.08em',
+                      color: 'var(--text-muted)',
+                      fontFamily: 'var(--font-mono)',
+                      textTransform: 'uppercase',
+                    }}
+                  >
+                    {phase.phaseNumber} — {phase.title}
+                  </span>
                 </div>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
-                  {section.items.map((item) => {
+
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '1px' }}>
+                  {phase.items.map((item) => {
                     const isActive = pathname === item.href;
                     const Icon = item.icon;
                     return (
                       <Link
                         key={item.href}
                         href={item.href}
+                        aria-current={isActive ? 'page' : undefined}
                         style={{
                           display: 'flex',
                           alignItems: 'center',
                           justifyContent: 'space-between',
-                          padding: '7px 8px',
+                          padding: '6px 8px',
                           borderRadius: '4px',
                           textDecoration: 'none',
                           color: isActive ? 'var(--text-primary)' : 'var(--text-secondary)',
                           background: isActive ? 'var(--bg-subtle)' : 'transparent',
                           fontWeight: isActive ? 600 : 400,
-                          fontSize: '13px',
+                          fontSize: '12.5px',
                           transition: 'all 0.12s ease',
                         }}
                       >
-                        <span style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                          <Icon size={15} style={{ opacity: isActive ? 1 : 0.6 }} />
-                          {item.label}
+                        <span style={{ display: 'flex', alignItems: 'center', gap: '9px' }}>
+                          <Icon size={14} style={{ opacity: isActive ? 1 : 0.65, flexShrink: 0 }} />
+                          <span style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                            {item.label}
+                          </span>
                         </span>
                         {isActive && (
                           <span
@@ -245,6 +202,7 @@ export default function Sidebar() {
                               height: '4px',
                               borderRadius: '50%',
                               background: 'var(--text-primary)',
+                              flexShrink: 0,
                             }}
                           />
                         )}
@@ -254,13 +212,72 @@ export default function Sidebar() {
                 </div>
               </div>
             ))}
+
+            {/* ─── Secondary Showcase & Technical Labs ──────────────── */}
+            <div style={{ marginBottom: '14px', paddingTop: '8px', borderTop: '1px dashed var(--border)' }}>
+              <div
+                style={{
+                  fontSize: '9px',
+                  fontWeight: 800,
+                  letterSpacing: '0.08em',
+                  color: 'var(--text-muted)',
+                  fontFamily: 'var(--font-mono)',
+                  textTransform: 'uppercase',
+                  padding: '0 6px',
+                  marginBottom: '6px',
+                }}
+              >
+                SHOWCASE & LABS
+              </div>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '1px' }}>
+                {SECONDARY_NAV_ITEMS.map((item) => {
+                  const isActive = pathname === item.href;
+                  const Icon = item.icon;
+                  return (
+                    <Link
+                      key={item.href}
+                      href={item.href}
+                      aria-current={isActive ? 'page' : undefined}
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'space-between',
+                        padding: '5px 8px',
+                        borderRadius: '4px',
+                        textDecoration: 'none',
+                        color: isActive ? 'var(--text-primary)' : 'var(--text-muted)',
+                        background: isActive ? 'var(--bg-subtle)' : 'transparent',
+                        fontWeight: isActive ? 600 : 400,
+                        fontSize: '12px',
+                        transition: 'all 0.12s ease',
+                      }}
+                    >
+                      <span style={{ display: 'flex', alignItems: 'center', gap: '9px' }}>
+                        <Icon size={13} style={{ opacity: isActive ? 1 : 0.55, flexShrink: 0 }} />
+                        <span>{item.label}</span>
+                      </span>
+                      {isActive && (
+                        <span
+                          style={{
+                            width: '4px',
+                            height: '4px',
+                            borderRadius: '50%',
+                            background: 'var(--text-primary)',
+                          }}
+                        />
+                      )}
+                    </Link>
+                  );
+                })}
+              </div>
+            </div>
           </nav>
         </div>
 
         {/* Unified Readiness Status Ledger + Theme Switcher */}
         <div
           style={{
-            padding: '14px 6px 0 6px',
+            padding: '12px 4px 0 4px',
             borderTop: '1px solid var(--border)',
             display: 'flex',
             alignItems: 'center',
@@ -271,15 +288,23 @@ export default function Sidebar() {
             onClick={() => setIsOnboardingOpen(true)}
             style={{ cursor: 'pointer' }}
             title="Click to calibrate career goals"
+            role="button"
+            tabIndex={0}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                setIsOnboardingOpen(true);
+              }
+            }}
           >
-            <div style={{ fontSize: '10px', fontFamily: 'var(--font-mono)', color: 'var(--text-muted)', textTransform: 'uppercase' }}>
+            <div style={{ fontSize: '9.5px', fontFamily: 'var(--font-mono)', color: 'var(--text-muted)', textTransform: 'uppercase' }}>
               Readiness Score
             </div>
-            <div style={{ fontSize: '16px', fontWeight: 900, fontFamily: 'var(--font-mono)', color: 'var(--text-primary)' }}>
+            <div style={{ fontSize: '15px', fontWeight: 900, fontFamily: 'var(--font-mono)', color: 'var(--text-primary)' }}>
               {readiness?.overallScore || 84}%
             </div>
           </div>
-          
+
           <ThemeToggle />
         </div>
       </aside>
