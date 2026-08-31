@@ -363,24 +363,33 @@ export default function JobTrackerPage() {
             </div>
 
             <div className="modal-body" style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-              {/* Connected Interview Preparation Banner */}
-              {['interview', 'final'].includes(selectedJob.status) && (
+              {/* Connected Interview Preparation & Simulation Banner (Connections C & D) */}
+              {['interview', 'final', 'oa'].includes(selectedJob.status) && (
                 <div style={{ background: 'var(--bg-subtle)', border: '1px solid var(--border)', borderLeft: '3px solid var(--purple)', padding: '12px 14px', borderRadius: '4px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '12px', flexWrap: 'wrap' }}>
                   <div>
                     <div style={{ fontSize: '11px', fontFamily: 'var(--font-mono)', color: 'var(--purple)', fontWeight: 800 }}>
                       ⚡ ACTIVE TECHNICAL INTERVIEW STAGE
                     </div>
                     <div style={{ fontSize: '12px', color: 'var(--text-secondary)', marginTop: '2px' }}>
-                      Prepare system design, architecture trade-offs, and live coding for {selectedJob.company}.
+                      Prepare system design, architecture trade-offs, or run an AI simulation for {selectedJob.company}.
                     </div>
                   </div>
-                  <Link
-                    href={`/interview-prep?company=${encodeURIComponent(selectedJob.company)}`}
-                    className="btn btn-primary btn-sm"
-                    style={{ fontSize: '11.5px', padding: '6px 12px' }}
-                  >
-                    START INTERVIEW PREP →
-                  </Link>
+                  <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
+                    <Link
+                      href={`/interview-prep?company=${encodeURIComponent(selectedJob.company)}&role=${encodeURIComponent(selectedJob.role)}`}
+                      className="btn btn-secondary btn-sm"
+                      style={{ fontSize: '11px', padding: '5px 10px' }}
+                    >
+                      🎯 QUESTION BANK →
+                    </Link>
+                    <Link
+                      href={`/mock-interview?company=${encodeURIComponent(selectedJob.company)}&role=${encodeURIComponent(selectedJob.role)}`}
+                      className="btn btn-primary btn-sm"
+                      style={{ fontSize: '11px', padding: '5px 10px' }}
+                    >
+                      🎙️ SIMULATE ROUND →
+                    </Link>
+                  </div>
                 </div>
               )}
 

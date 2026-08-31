@@ -135,7 +135,7 @@ export const ALLOWED_FIELDS: Record<string, string[]> = {
     'name', 'description', 'html_url', 'language', 'stargazers_count',
   ],
   cover_letter: ['company', 'role', 'job_description', 'required_skills'],
-  mock_interview: ['track', 'duration_minutes', 'answers'],
+  mock_interview: ['track', 'duration_minutes', 'answers', 'company', 'role'],
   salary_insights: [
     'company', 'role', 'baseOffered', 'equityOffered', 'bonusOffered',
     'targetComp', 'leverageReason',
