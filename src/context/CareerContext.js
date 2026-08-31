@@ -332,6 +332,11 @@ export function CareerProvider({ children }) {
     });
   }, [targetRole, skills, projects, jobs, readiness]);
 
+  // Calculated Active Interview Applications (Connection C)
+  const activeInterviews = useMemo(() => {
+    return (jobs || []).filter((j) => ['interview', 'final', 'oa', 'technical'].includes(j.status));
+  }, [jobs]);
+
   const value = {
     activePersonaId,
     selectPersona,
@@ -351,6 +356,7 @@ export function CareerProvider({ children }) {
     setProjects,
     jobs,
     setJobs,
+    activeInterviews,
     certifications,
     setCertifications,
     syncCertification,

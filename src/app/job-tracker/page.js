@@ -308,6 +308,35 @@ export default function JobTrackerPage() {
                           ))}
                         </div>
                       )}
+
+                      {/* Connected Interview Intelligence CTA (Connection C) */}
+                      {['interview', 'final', 'oa'].includes(j.status) && (
+                        <div style={{ marginTop: '10px', paddingTop: '8px', borderTop: '1px solid var(--border)' }}>
+                          <Link
+                            href={`/interview-prep?company=${encodeURIComponent(j.company)}&role=${encodeURIComponent(j.role)}&stage=${encodeURIComponent(j.status)}`}
+                            className="btn btn-secondary btn-sm"
+                            style={{
+                              width: '100%',
+                              fontSize: '11px',
+                              fontFamily: 'var(--font-mono)',
+                              padding: '5px 8px',
+                              display: 'flex',
+                              justifyContent: 'space-between',
+                              alignItems: 'center',
+                              background: 'var(--bg-surface)',
+                              borderColor: 'var(--purple)',
+                              color: 'var(--purple)',
+                              fontWeight: 700,
+                              textDecoration: 'none',
+                            }}
+                            onClick={(e) => e.stopPropagation()}
+                            aria-label={`Prepare technical questions for ${j.company} ${j.role} interview`}
+                          >
+                            <span>🎯 PREPARE FOR {j.company.toUpperCase()}</span>
+                            <span>→</span>
+                          </Link>
+                        </div>
+                      )}
                     </div>
                   ))
                 )}
