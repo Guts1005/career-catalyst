@@ -5,6 +5,7 @@ import styles from './page.module.css';
 import { showToast } from '@/components/Toast';
 import PageHeader from '@/components/PageHeader';
 import { IconCoding, IconCheck, IconArrowUpRight } from '@/components/Icons';
+import { useCareer } from '@/context/CareerContext';
 
 const PLATFORMS = ['All', 'LeetCode', 'Kaggle', 'HackerRank', 'Custom'];
 
@@ -48,6 +49,7 @@ const BENCHMARK_PROBLEMS = [
 ];
 
 export default function CodingTrackerPage() {
+  const { syncSolvedProblem } = useCareer();
   const [profiles, setProfiles] = useState([]);
   const [problems, setProblems] = useState(BENCHMARK_PROBLEMS);
   const [stats, setStats] = useState({ total_logged: 4, total_solved: 4, easy_solved: 0, medium_solved: 2, hard_solved: 2 });
@@ -159,6 +161,10 @@ export default function CodingTrackerPage() {
       });
 
       if (res.ok) {
+        const savedProblem = await res.json().catch(() => ({ id: Date.now(), title, category, status }));
+        if (status === 'solved') {
+          syncSolvedProblem(savedProblem);
+        }
         setIsModalOpen(false);
         showToast(`Problem "${title}" logged to coding ledger!`, 'success');
         setTitle('');

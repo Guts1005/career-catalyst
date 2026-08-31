@@ -81,7 +81,7 @@ Requirements:
 ];
 
 export default function AtsCheckerPage() {
-  const { projects } = useCareer();
+  const { projects, injectATSProof } = useCareer();
   const [content, setContent] = useState(PRESETS[0].resume);
   const [jd, setJd] = useState(PRESETS[0].jd);
   const [loading, setLoading] = useState(false);
@@ -108,10 +108,9 @@ export default function AtsCheckerPage() {
       const missing = [];
 
       technicalKeywords.forEach((kw) => {
-        const inJd = jdText.toLowerCase().includes(kw.toLowerCase());
-        if (inJd) {
-          const inResume = resumeText.toLowerCase().includes(kw.toLowerCase());
-          if (inResume) {
+        const regex = new RegExp(`\\b${kw.replace(/[.*+?^${}()|[\\]\\]/g, '\\$&')}\\b`, 'i');
+        if (regex.test(jdText)) {
+          if (regex.test(resumeText)) {
             found.push(kw);
           } else {
             // Check if user has demonstrated evidence in a project
@@ -162,9 +161,14 @@ export default function AtsCheckerPage() {
     }
   }, [result]);
 
-  const handleInjectKeyword = (kw) => {
-    setContent((prev) => `${prev}\n- Additional Proven Competency: ${kw}`);
-    showToast(`Injected "${kw}" into resume canvas!`, 'success');
+  const handleInjectKeyword = (kw, projectEvidence) => {
+    const injectionNote = projectEvidence ? ` (Verified in ${projectEvidence})` : '';
+    setContent((prev) => `${prev}\n- Proven Competency: ${kw}${injectionNote}`);
+    if (injectATSProof) {
+      injectATSProof(kw, projectEvidence || 'ATS Matcher');
+    } else {
+      showToast(`Injected "${kw}" into resume canvas!`, 'success');
+    }
   };
 
   return (
@@ -311,7 +315,7 @@ export default function AtsCheckerPage() {
                         <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                           <span
                             className={styles.kwMissing}
-                            onClick={() => handleInjectKeyword(item.keyword)}
+                            onClick={() => handleInjectKeyword(item.keyword, item.projectEvidence)}
                             title="Click to inject into resume"
                           >
                             + {item.keyword}
@@ -338,7 +342,7 @@ export default function AtsCheckerPage() {
                         <button
                           type="button"
                           className="btn btn-ghost btn-sm"
-                          onClick={() => handleInjectKeyword(item.keyword)}
+                          onClick={() => handleInjectKeyword(item.keyword, item.projectEvidence)}
                           style={{ fontSize: '11px', padding: '2px 8px' }}
                         >
                           + INJECT

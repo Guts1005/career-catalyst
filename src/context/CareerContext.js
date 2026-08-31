@@ -23,6 +23,9 @@ export function CareerProvider({ children }) {
   const [skills, setSkills] = useState(BENCHMARK_DEMO_DATA.skills);
   const [projects, setProjects] = useState(BENCHMARK_DEMO_DATA.projects);
   const [jobs, setJobs] = useState(BENCHMARK_DEMO_DATA.jobs);
+  const [certifications, setCertifications] = useState([]);
+  const [solvedProblems, setSolvedProblems] = useState([]);
+  const [resources, setResources] = useState([]);
   const [resumeData, setResumeData] = useState(null);
   const [loading, setLoading] = useState(true);
 
@@ -51,16 +54,23 @@ export function CareerProvider({ children }) {
       }
 
       // Fetch live DB entities concurrently
-      const [skillsRes, projectsRes, jobsRes, resumeRes] = await Promise.all([
+      const [skillsRes, projectsRes, jobsRes, resumeRes, certsRes, resourcesRes] = await Promise.all([
         fetch('/api/skills').then((r) => (r.ok ? r.json() : [])),
         fetch('/api/projects').then((r) => (r.ok ? r.json() : [])),
         fetch('/api/jobs').then((r) => (r.ok ? r.json() : { jobs: [] })),
         fetch('/api/resume').then((r) => (r.ok ? r.json() : null)),
+        fetch('/api/certifications').then((r) => (r.ok ? r.json() : [])),
+        fetch('/api/resources').then((r) => (r.ok ? r.json() : [])),
       ]);
 
       const fetchedSkills = Array.isArray(skillsRes) ? skillsRes : [];
       const fetchedProjects = Array.isArray(projectsRes) ? projectsRes : [];
       const fetchedJobs = jobsRes?.jobs || [];
+      const fetchedCerts = Array.isArray(certsRes) ? certsRes : [];
+      const fetchedResources = Array.isArray(resourcesRes) ? resourcesRes : [];
+
+      if (fetchedCerts.length > 0) setCertifications(fetchedCerts);
+      if (fetchedResources.length > 0) setResources(fetchedResources);
 
       // If user has database records, use them
       if (fetchedSkills.length > 0 || fetchedProjects.length > 0 || fetchedJobs.length > 0) {
@@ -94,6 +104,64 @@ export function CareerProvider({ children }) {
       localStorage.setItem('catalyst_target_role', found.profile.targetRole);
     }
     showToast(`Persona Calibrated: ${found.personaName} (${found.badge})`, 'success');
+  }, []);
+
+  // Synchronize a newly earned/updated Certification
+  const syncCertification = useCallback((cert) => {
+    setCertifications((prev) => {
+      const idx = prev.findIndex((c) => c.id === cert.id);
+      if (idx >= 0) {
+        const next = [...prev];
+        next[idx] = cert;
+        return next;
+      }
+      return [cert, ...prev];
+    });
+    showToast(`Certification Synced: ${cert.name}`, 'success');
+  }, []);
+
+  // Synchronize a Solved Algorithmic Problem
+  const syncSolvedProblem = useCallback((problem) => {
+    setSolvedProblems((prev) => {
+      const idx = prev.findIndex((p) => p.id === problem.id);
+      if (idx >= 0) {
+        const next = [...prev];
+        next[idx] = problem;
+        return next;
+      }
+      return [problem, ...prev];
+    });
+    showToast(`Algorithm Solved: ${problem.title || 'Problem'} (+Readiness)`, 'success');
+  }, []);
+
+  // Synchronize a Read Resource or Paper
+  const syncResource = useCallback((resource) => {
+    setResources((prev) => {
+      const idx = prev.findIndex((r) => r.id === resource.id);
+      if (idx >= 0) {
+        const next = [...prev];
+        next[idx] = resource;
+        return next;
+      }
+      return [resource, ...prev];
+    });
+  }, []);
+
+  // Bidirectional ATS Proof Injector: Upgrades skill evidence and links to resume
+  const injectATSProof = useCallback((skillName, projectName) => {
+    setSkills((prev) =>
+      prev.map((s) => {
+        if (s.name.toLowerCase() === skillName.toLowerCase()) {
+          return {
+            ...s,
+            current_level: Math.max(s.current_level || 0, 88),
+            evidence_level: 'VERIFIED',
+          };
+        }
+        return s;
+      })
+    );
+    showToast(`Injected verified evidence for "${skillName}" from ${projectName}!`, 'success');
   }, []);
 
   // Set & Propagate Target Role
@@ -188,8 +256,10 @@ export function CareerProvider({ children }) {
       projects,
       jobs,
       resumeData,
+      certifications,
+      assessments: solvedProblems,
     });
-  }, [targetRole, skills, projects, jobs, resumeData]);
+  }, [targetRole, skills, projects, jobs, resumeData, certifications, solvedProblems]);
 
   // Calculated Next Best Action
   const nextBestAction = useMemo(() => {
@@ -221,6 +291,16 @@ export function CareerProvider({ children }) {
     setProjects,
     jobs,
     setJobs,
+    certifications,
+    setCertifications,
+    syncCertification,
+    solvedProblems,
+    setSolvedProblems,
+    syncSolvedProblem,
+    resources,
+    setResources,
+    syncResource,
+    injectATSProof,
     resumeData,
     setResumeData,
     readiness,

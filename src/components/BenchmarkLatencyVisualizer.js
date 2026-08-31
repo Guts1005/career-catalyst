@@ -48,6 +48,10 @@ export default function BenchmarkLatencyVisualizer() {
             max="64"
             step="1"
             value={batchSize}
+            aria-label="Concurrent Batch Streams"
+            aria-valuemin="1"
+            aria-valuemax="64"
+            aria-valuenow={batchSize}
             onChange={(e) => setBatchSize(Number(e.target.value))}
             className={styles.rangeInput}
           />
@@ -64,6 +68,10 @@ export default function BenchmarkLatencyVisualizer() {
             max="8192"
             step="512"
             value={promptLength}
+            aria-label="Input Context Window Length in Tokens"
+            aria-valuemin="512"
+            aria-valuemax="8192"
+            aria-valuenow={promptLength}
             onChange={(e) => setPromptLength(Number(e.target.value))}
             className={styles.rangeInput}
           />

@@ -4,8 +4,10 @@ import { useState, useEffect, useRef } from 'react';
 import styles from './page.module.css';
 import { showToast } from '@/components/Toast';
 import PageHeader from '@/components/PageHeader';
+import { useCareer } from '@/context/CareerContext';
 
 export default function CertificationsPage() {
+  const { syncCertification } = useCareer();
   const [certifications, setCertifications] = useState([
     { id: 1, name: 'AWS Certified Machine Learning – Specialty', provider: 'Amazon Web Services', status: 'completed', progress: 100, category: 'Cloud ML Systems', priority: 'high', notes: 'Validated expertise in building, training, tuning, and deploying production ML models on Amazon SageMaker.' },
     { id: 2, name: 'Google Cloud Professional ML Engineer', provider: 'Google Cloud', status: 'completed', progress: 100, category: 'Infrastructure', priority: 'high', notes: 'Architecting end-to-end data pipelines and Vertex AI model serving.' },
@@ -138,6 +140,8 @@ export default function CertificationsPage() {
       });
       
       if (res.ok) {
+        const savedData = await res.json().catch(() => ({ ...formData, id: editingCert?.id || Date.now() }));
+        syncCertification(savedData);
         showToast(editingCert ? 'Certification updated!' : 'Certification recorded!', 'success');
         closeModal();
         fetchCertifications();

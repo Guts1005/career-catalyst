@@ -57,6 +57,10 @@ export default function CompensationEquityModeler() {
             max="350000"
             step="5000"
             value={base}
+            aria-label="Base Salary Amount"
+            aria-valuemin="120000"
+            aria-valuemax="350000"
+            aria-valuenow={base}
             onChange={(e) => setBase(Number(e.target.value))}
             className={styles.rangeInput}
           />
@@ -73,6 +77,10 @@ export default function CompensationEquityModeler() {
             max="1200000"
             step="25000"
             value={equityGrant}
+            aria-label="4-Year Total Equity Grant Amount"
+            aria-valuemin="100000"
+            aria-valuemax="1200000"
+            aria-valuenow={equityGrant}
             onChange={(e) => setEquityGrant(Number(e.target.value))}
             className={styles.rangeInput}
           />
@@ -89,6 +97,10 @@ export default function CompensationEquityModeler() {
             max="35"
             step="5"
             value={bonusPct}
+            aria-label="Target Annual Bonus Percentage"
+            aria-valuemin="0"
+            aria-valuemax="35"
+            aria-valuenow={bonusPct}
             onChange={(e) => setBonusPct(Number(e.target.value))}
             className={styles.rangeInput}
           />
@@ -105,6 +117,10 @@ export default function CompensationEquityModeler() {
             max="30"
             step="5"
             value={annualAppreciation}
+            aria-label="Projected Annual Equity Appreciation Rate"
+            aria-valuemin="-10"
+            aria-valuemax="30"
+            aria-valuenow={annualAppreciation}
             onChange={(e) => setAnnualAppreciation(Number(e.target.value))}
             className={styles.rangeInput}
           />

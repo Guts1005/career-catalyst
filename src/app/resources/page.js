@@ -1,9 +1,10 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import styles from './page.module.css';
 import { showToast } from '@/components/Toast';
 import PageHeader from '@/components/PageHeader';
+import { useCareer } from '@/context/CareerContext';
 
 const BENCHMARK_PAPERS = [
   {
@@ -87,6 +88,7 @@ const BENCHMARK_PAPERS = [
 ];
 
 export default function ResourcesPage() {
+  const { syncResource } = useCareer();
   const [resources, setResources] = useState(BENCHMARK_PAPERS);
   const [loading, setLoading] = useState(false);
   const [search, setSearch] = useState('');
@@ -110,26 +112,7 @@ export default function ResourcesPage() {
     notes: '',
   });
 
-  useEffect(() => {
-    fetchResources();
-  }, []);
-
-  // Keyboard shortcut '/'
-  useEffect(() => {
-    const handleKeyDown = (e) => {
-      if (e.key === '/' && document.activeElement !== searchInputRef.current && !isModalOpen && !selectedDoc) {
-        e.preventDefault();
-        searchInputRef.current?.focus();
-      } else if (e.key === 'Escape') {
-        setSelectedDoc(null);
-        setIsModalOpen(false);
-      }
-    };
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [isModalOpen, selectedDoc]);
-
-  const fetchResources = async () => {
+  const fetchResources = useCallback(async () => {
     try {
       const res = await fetch('/api/resources');
       if (res.ok) {
@@ -148,7 +131,26 @@ export default function ResourcesPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
+
+  useEffect(() => {
+    fetchResources();
+  }, [fetchResources]);
+
+  // Keyboard shortcut '/'
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (e.key === '/' && document.activeElement !== searchInputRef.current && !isModalOpen && !selectedDoc) {
+        e.preventDefault();
+        searchInputRef.current?.focus();
+      } else if (e.key === 'Escape') {
+        setSelectedDoc(null);
+        setIsModalOpen(false);
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isModalOpen, selectedDoc]);
 
   const handleOpenModal = (resource = null) => {
     if (resource) {
@@ -183,7 +185,9 @@ export default function ResourcesPage() {
 
     try {
       if (editingResource) {
-        setResources(resources.map((r) => (r.id === editingResource.id ? { ...r, ...formData, completed: formData.completed ? 1 : 0 } : r)));
+        const updated = { ...editingResource, ...formData, completed: formData.completed ? 1 : 0 };
+        setResources(resources.map((r) => (r.id === editingResource.id ? updated : r)));
+        syncResource(updated);
         showToast('Resource entry updated!', 'success');
       } else {
         const newRes = {
@@ -192,6 +196,7 @@ export default function ResourcesPage() {
           completed: formData.completed ? 1 : 0,
         };
         setResources([newRes, ...resources]);
+        syncResource(newRes);
         showToast(`"${formData.title}" added to reading index!`, 'success');
       }
       setIsModalOpen(false);

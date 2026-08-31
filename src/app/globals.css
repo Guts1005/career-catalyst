@@ -104,7 +104,7 @@
   /* Text */
   --text-primary: #FAFAFA;    /* Headings, primary text */
   --text-secondary: #A1A1AA;  /* Descriptions, body text */
-  --text-muted: #71717A;      /* Timestamps, labels, placeholders */
+  --text-muted: #94949E;      /* Timestamps, labels, micro-tags (Calibrated for WCAG AA) */
   --text-disabled: #52525B;   /* Inactive elements */
   --text-inverse: #09090B;    /* Text on inverse backgrounds */
 
@@ -726,4 +726,28 @@ p {
     animation-duration: 0.01ms !important;
     transition-duration: 0.01ms !important;
   }
+}
+
+/* ─── ACCESSIBILITY SKIP LINK (WCAG 2.1 AA) ────────────────────────── */
+.skip-link {
+  position: absolute;
+  top: -100px;
+  left: 16px;
+  background: var(--text-primary);
+  color: var(--text-inverse);
+  padding: 10px 18px;
+  border-radius: var(--radius-sm);
+  font-family: var(--font-mono);
+  font-size: 12px;
+  font-weight: 700;
+  z-index: 999999;
+  text-decoration: none;
+  box-shadow: var(--shadow-lg);
+  transition: top 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.skip-link:focus {
+  top: 16px;
+  outline: 2px solid var(--blue);
+  outline-offset: 3px;
 }

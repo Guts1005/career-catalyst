@@ -1,0 +1,133 @@
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 3px 8px;
+  border-radius: var(--radius-xs);
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  line-height: 1.2;
+  white-space: nowrap;
+}
+
+.icon {
+  display: inline-flex;
+  align-items: center;
+}
+
+/* ── Green (Verified / Mastered) ─────────────────── */
+.green.subtle {
+  background: var(--green-subtle);
+  color: var(--green);
+  border: 1px solid var(--green-border);
+}
+
+.green.solid {
+  background: var(--green);
+  color: #ffffff;
+  border: 1px solid var(--green);
+}
+
+.green.outline {
+  background: transparent;
+  color: var(--green);
+  border: 1px solid var(--green);
+}
+
+/* ── Amber (Delta / In Progress) ─────────────────── */
+.amber.subtle {
+  background: var(--amber-subtle);
+  color: var(--amber);
+  border: 1px solid var(--amber-border);
+}
+
+.amber.solid {
+  background: var(--amber);
+  color: #ffffff;
+  border: 1px solid var(--amber);
+}
+
+.amber.outline {
+  background: transparent;
+  color: var(--amber);
+  border: 1px solid var(--amber);
+}
+
+/* ── Purple (Interview / Assessment) ─────────────── */
+.purple.subtle {
+  background: var(--purple-subtle);
+  color: var(--purple);
+  border: 1px solid var(--purple-border);
+}
+
+.purple.solid {
+  background: var(--purple);
+  color: #ffffff;
+  border: 1px solid var(--purple);
+}
+
+.purple.outline {
+  background: transparent;
+  color: var(--purple);
+  border: 1px solid var(--purple);
+}
+
+/* ── Blue (Infrastructure / Systems) ─────────────── */
+.blue.subtle {
+  background: var(--blue-subtle);
+  color: var(--blue);
+  border: 1px solid var(--blue-border);
+}
+
+.blue.solid {
+  background: var(--blue);
+  color: #ffffff;
+  border: 1px solid var(--blue);
+}
+
+.blue.outline {
+  background: transparent;
+  color: var(--blue);
+  border: 1px solid var(--blue);
+}
+
+/* ── Red (Deficit / Critical) ────────────────────── */
+.red.subtle {
+  background: var(--red-subtle);
+  color: var(--red);
+  border: 1px solid var(--red-border);
+}
+
+.red.solid {
+  background: var(--red);
+  color: #ffffff;
+  border: 1px solid var(--red);
+}
+
+.red.outline {
+  background: transparent;
+  color: var(--red);
+  border: 1px solid var(--red);
+}
+
+/* ── Gray (Default / Claim) ──────────────────────── */
+.gray.subtle {
+  background: var(--bg-subtle);
+  color: var(--text-secondary);
+  border: 1px solid var(--border);
+}
+
+.gray.solid {
+  background: var(--text-secondary);
+  color: #ffffff;
+  border: 1px solid var(--text-secondary);
+}
+
+.gray.outline {
+  background: transparent;
+  color: var(--text-secondary);
+  border: 1px solid var(--border);
+}

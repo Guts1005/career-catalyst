@@ -30,10 +30,13 @@ export default function RootLayout({ children }) {
         />
       </head>
       <body suppressHydrationWarning>
+        <a href="#main-content" className="skip-link">
+          Skip to main content →
+        </a>
         <CareerProvider>
           <div className="app-layout">
             <Sidebar />
-            <main className="main-content">
+            <main id="main-content" className="main-content">
               {children}
             </main>
           </div>
