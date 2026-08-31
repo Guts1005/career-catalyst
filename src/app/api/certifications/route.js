@@ -88,8 +88,8 @@ export async function GET(request) {
     const finalCerts = (certifications && certifications.length > 0) ? certifications : defaultCerts;
     return NextResponse.json(finalCerts);
   } catch (error) {
-    console.error('Failed to fetch certifications:', error);
-    return NextResponse.json({ error: 'Failed to fetch certifications' }, { status: 500 });
+    console.error('Failed to fetch certifications, using defaults:', error);
+    return NextResponse.json(defaultCerts);
   }
 }
 

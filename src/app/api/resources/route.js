@@ -100,10 +100,18 @@ export async function GET(request) {
     ];
 
     const finalResources = (resources && resources.length > 0) ? resources : defaultPapers;
-    return NextResponse.json(finalResources);
+    return NextResponse.json(finalResources, {
+      headers: {
+        'Cache-Control': 'public, s-maxage=3600, stale-while-revalidate=86400',
+      },
+    });
   } catch (error) {
-    console.error('Failed to fetch resources:', error);
-    return NextResponse.json({ error: 'Failed to fetch resources' }, { status: 500 });
+    console.error('Failed to fetch resources, using defaults:', error);
+    return NextResponse.json(defaultPapers, {
+      headers: {
+        'Cache-Control': 'public, s-maxage=3600, stale-while-revalidate=86400',
+      },
+    });
   }
 }
 
