@@ -4,8 +4,21 @@
  * evidence weighting, readiness algorithms, and Next Best Action scoring.
  */
 
+import type {
+  CareerTrack,
+  CareerRole,
+  EvidenceConfig,
+  EvidenceLevel,
+  Skill,
+  Project,
+  JobApplication,
+  ReadinessResult,
+  NextBestAction,
+  DemoPersona,
+} from '../types/career.ts';
+
 // ─── Track & Role Framework ─────────────────────────────────────────
-export const CAREER_TRACKS = [
+export const CAREER_TRACKS: CareerTrack[] = [
   {
     category: 'ENTRY & EARLY CAREER',
     roles: [
@@ -121,7 +134,7 @@ export const CAREER_TRACKS = [
 ];
 
 // Helper to look up a role definition by ID
-export function getRoleById(roleId) {
+export function getRoleById(roleId: string): CareerRole {
   for (const track of CAREER_TRACKS) {
     const found = track.roles.find((r) => r.id === roleId);
     if (found) return found;
@@ -131,12 +144,23 @@ export function getRoleById(roleId) {
 }
 
 // ─── Evidence Weight Multipliers ────────────────────────────────────
-export const EVIDENCE_LEVELS = {
+export const EVIDENCE_LEVELS: Record<string, EvidenceConfig> = {
   CLAIM: { label: 'Self-Claimed', weight: 0.35, description: 'Listed on profile without linked project or repo' },
+  'SELF-REPORTED': { label: 'Self-Claimed', weight: 0.35, description: 'Self-reported without linked proof' },
   ASSESSED: { label: 'Assessment Passed', weight: 0.65, description: 'Validated via technical quiz or mock interview' },
   PROJECT: { label: 'Project Built', weight: 0.85, description: 'Demonstrated in documented portfolio project' },
   VERIFIED: { label: 'Verified Codebase', weight: 1.0, description: 'Backed by live GitHub repo / public deployment' },
 };
+
+export interface CalculateReadinessParams {
+  targetRole?: string | CareerRole;
+  skills?: Skill[];
+  projects?: Project[];
+  jobs?: JobApplication[];
+  resumeData?: any;
+  assessments?: any[];
+  certifications?: any[];
+}
 
 // ─── Canonical Readiness Score Calculator ───────────────────────────
 export function calculateCareerReadiness({
@@ -147,7 +171,7 @@ export function calculateCareerReadiness({
   resumeData = null,
   assessments = [],
   certifications = [],
-}) {
+}: CalculateReadinessParams): ReadinessResult {
   const roleDef = typeof targetRole === 'string' ? getRoleById(targetRole) : targetRole || getRoleById('senior_ml');
   const required = roleDef.requiredSkills || [];
 
@@ -170,7 +194,7 @@ export function calculateCareerReadiness({
   const skillScore = totalSkillWeight > 0 ? Math.round((earnedSkillPoints / totalSkillWeight) * 100) : 60;
 
   // 2. Portfolio Evidence Coverage (30% weight)
-  const projectDemonstratedSkills = new Set();
+  const projectDemonstratedSkills = new Set<string>();
   projects.forEach((p) => {
     const rawSkills = p.skills_demonstrated || p.technologies || '';
     rawSkills.split(',').forEach((sk) => projectDemonstratedSkills.add(sk.trim().toLowerCase()));
@@ -193,7 +217,11 @@ export function calculateCareerReadiness({
   // 4. Application & Interview Activity (20% weight)
   const activeApplications = jobs.length;
   const interviewCount = jobs.filter((j) => ['interview', 'final', 'offer'].includes(j.status)).length;
-  const appScore = Math.min(Math.round(activeApplications * 6 + interviewCount * 18 + (assessments.length > 0 ? 20 : 15)), 100);
+  const certBonus = (certifications && certifications.length > 0) ? 5 : 0;
+  const appScore = Math.min(
+    Math.round(activeApplications * 6 + interviewCount * 18 + (assessments.length > 0 ? 20 : 15) + certBonus),
+    100
+  );
 
   // Overall Weighted Score
   const overall = Math.round(
@@ -222,7 +250,7 @@ export function calculateCareerReadiness({
           current: cur,
           target: req.targetLevel,
           delta: Math.max(req.targetLevel - cur, 0),
-          evidenceLevel: userSkill?.evidence_level || 'CLAIM',
+          evidenceLevel: (userSkill?.evidence_level || 'CLAIM') as EvidenceLevel,
         };
       })
       .filter((g) => g.delta > 0)
@@ -230,8 +258,22 @@ export function calculateCareerReadiness({
   };
 }
 
+export interface NextBestActionParams {
+  targetRole?: string | CareerRole;
+  skills?: Skill[];
+  projects?: Project[];
+  jobs?: JobApplication[];
+  readiness?: ReadinessResult;
+}
+
 // ─── Next Best Action Engine ────────────────────────────────────────
-export function generateNextBestAction({ targetRole, skills = [], projects = [], jobs = [], readiness }) {
+export function generateNextBestAction({
+  targetRole,
+  skills = [],
+  projects = [],
+  jobs = [],
+  readiness,
+}: NextBestActionParams): NextBestAction {
   const roleDef = typeof targetRole === 'string' ? getRoleById(targetRole) : targetRole || getRoleById('senior_ml');
   const roleTitle = roleDef.title;
 
@@ -308,7 +350,7 @@ export function generateNextBestAction({ targetRole, skills = [], projects = [],
 }
 
 // ─── 3 Rich Interactive Candidate Personas (Real-World Benchmark Testing Data) ──
-export const DEMO_PERSONAS = [
+export const DEMO_PERSONAS: DemoPersona[] = [
   {
     id: 'sharvin_ml',
     personaName: 'Sharvin Neve',
@@ -464,4 +506,4 @@ export const DEMO_PERSONAS = [
   },
 ];
 
-export const BENCHMARK_DEMO_DATA = DEMO_PERSONAS[0];
+export const BENCHMARK_DEMO_DATA: DemoPersona = DEMO_PERSONAS[0];
