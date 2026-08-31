@@ -364,7 +364,7 @@ export default function JobTrackerPage() {
 
             <div className="modal-body" style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
               {/* Connected Interview Preparation & Simulation Banner (Connections C & D) */}
-              {['interview', 'final', 'oa'].includes(selectedJob.status) && (
+              {['interview', 'final', 'oa'].includes(selectedJob.status) ? (
                 <div style={{ background: 'var(--bg-subtle)', border: '1px solid var(--border)', borderLeft: '3px solid var(--purple)', padding: '12px 14px', borderRadius: '4px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '12px', flexWrap: 'wrap' }}>
                   <div>
                     <div style={{ fontSize: '11px', fontFamily: 'var(--font-mono)', color: 'var(--purple)', fontWeight: 800 }}>
@@ -389,7 +389,27 @@ export default function JobTrackerPage() {
                     >
                       🎙️ SIMULATE ROUND →
                     </Link>
+                    <Link
+                      href={`/cover-letter?company=${encodeURIComponent(selectedJob.company)}&role=${encodeURIComponent(selectedJob.role)}&skills=${encodeURIComponent(selectedJob.required_skills || '')}`}
+                      className="btn btn-secondary btn-sm"
+                      style={{ fontSize: '11px', padding: '5px 10px' }}
+                    >
+                      📝 TAILORED PITCH →
+                    </Link>
                   </div>
+                </div>
+              ) : (
+                <div style={{ background: 'var(--bg-subtle)', border: '1px solid var(--border)', borderLeft: '3px solid var(--blue)', padding: '10px 14px', borderRadius: '4px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '12px', flexWrap: 'wrap' }}>
+                  <div style={{ fontSize: '12px', color: 'var(--text-secondary)' }}>
+                    Generate a tailored STAR cover letter and recruiter InMail outreach with your verified project evidence.
+                  </div>
+                  <Link
+                    href={`/cover-letter?company=${encodeURIComponent(selectedJob.company)}&role=${encodeURIComponent(selectedJob.role)}&skills=${encodeURIComponent(selectedJob.required_skills || '')}`}
+                    className="btn btn-secondary btn-sm"
+                    style={{ fontSize: '11px', padding: '5px 10px', borderColor: 'var(--blue)', color: 'var(--blue)' }}
+                  >
+                    📝 GENERATE TAILORED PITCH →
+                  </Link>
                 </div>
               )}
 

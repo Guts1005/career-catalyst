@@ -134,7 +134,7 @@ export const ALLOWED_FIELDS: Record<string, string[]> = {
   github_import: [
     'name', 'description', 'html_url', 'language', 'stargazers_count',
   ],
-  cover_letter: ['company', 'role', 'job_description', 'required_skills'],
+  cover_letter: ['company', 'role', 'job_description', 'required_skills', 'candidate_projects', 'candidate_skills'],
   mock_interview: ['track', 'duration_minutes', 'answers', 'company', 'role'],
   salary_insights: [
     'company', 'role', 'baseOffered', 'equityOffered', 'bonusOffered',
