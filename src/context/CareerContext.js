@@ -8,7 +8,8 @@ import {
   DEMO_PERSONAS,
   BENCHMARK_DEMO_DATA,
 } from '@/lib/careerGraph';
-import { showToast } from '@/components/Toast';
+import { evaluateStateDelta } from '@/lib/readinessDeltaEngine';
+import { showToast, showReadinessFeedback } from '@/components/Toast';
 
 const CareerContext = createContext(null);
 
@@ -110,29 +111,72 @@ export function CareerProvider({ children }) {
   const syncCertification = useCallback((cert) => {
     setCertifications((prev) => {
       const idx = prev.findIndex((c) => c.id === cert.id);
-      if (idx >= 0) {
-        const next = [...prev];
-        next[idx] = cert;
-        return next;
+      const next = idx >= 0 ? [...prev] : [cert, ...prev];
+      if (idx >= 0) next[idx] = cert;
+
+      const prevState = { targetRole, skills, projects, jobs, resumeData, certifications: prev, assessments: solvedProblems };
+      const nextState = { ...prevState, certifications: next };
+
+      const deltaResult = evaluateStateDelta(prevState, nextState, {
+        actionType: 'CERTIFICATION_VERIFIED',
+        entityName: cert.name || 'Accredited Credential',
+        customReason: `Verified ${cert.issuer || 'cloud'} credential added bonus evidence to Pipeline & Interview Readiness.`,
+      });
+
+      if (deltaResult.isSignificant) {
+        showReadinessFeedback(deltaResult);
+      } else {
+        showToast(`Certification Synced: ${cert.name}`, 'success');
       }
-      return [cert, ...prev];
+
+      return next;
     });
-    showToast(`Certification Synced: ${cert.name}`, 'success');
-  }, []);
+  }, [targetRole, skills, projects, jobs, resumeData, solvedProblems]);
 
   // Synchronize a Solved Algorithmic Problem
   const syncSolvedProblem = useCallback((problem) => {
     setSolvedProblems((prev) => {
       const idx = prev.findIndex((p) => p.id === problem.id);
-      if (idx >= 0) {
-        const next = [...prev];
-        next[idx] = problem;
-        return next;
+      const nextSolved = idx >= 0 ? [...prev] : [problem, ...prev];
+      if (idx >= 0) nextSolved[idx] = problem;
+
+      // Update matching skill to VERIFIED evidence tier
+      const prevSkills = skills;
+      const nextSkills = prevSkills.map((s) => {
+        const probTitle = (problem.title || '').toLowerCase();
+        const probCat = (problem.category || '').toLowerCase();
+        const sName = (s.name || '').toLowerCase();
+
+        if (probTitle.includes(sName) || sName.includes(probTitle) || sName.includes(probCat)) {
+          return {
+            ...s,
+            current_level: Math.min((s.current_level || 60) + 4, 100),
+            evidence_level: 'VERIFIED',
+          };
+        }
+        return s;
+      });
+
+      const prevState = { targetRole, skills: prevSkills, projects, jobs, resumeData, certifications, assessments: prev };
+      const nextState = { ...prevState, skills: nextSkills, assessments: nextSolved };
+
+      const deltaResult = evaluateStateDelta(prevState, nextState, {
+        actionType: 'ALGORITHM_VERIFIED',
+        entityName: problem.title || 'Technical Problem',
+        customReason: `Solved systems algorithm verified code execution and upgraded competency tier.`,
+      });
+
+      setSkills(nextSkills);
+
+      if (deltaResult.isSignificant) {
+        showReadinessFeedback(deltaResult);
+      } else {
+        showToast(`Algorithm Solved: ${problem.title || 'Problem'} (+Readiness)`, 'success');
       }
-      return [problem, ...prev];
+
+      return nextSolved;
     });
-    showToast(`Algorithm Solved: ${problem.title || 'Problem'} (+Readiness)`, 'success');
-  }, []);
+  }, [targetRole, skills, projects, jobs, resumeData, certifications]);
 
   // Synchronize a Read Resource or Paper
   const syncResource = useCallback((resource) => {
@@ -149,8 +193,8 @@ export function CareerProvider({ children }) {
 
   // Bidirectional ATS Proof Injector: Upgrades skill evidence and links to resume
   const injectATSProof = useCallback((skillName, projectName) => {
-    setSkills((prev) =>
-      prev.map((s) => {
+    setSkills((prev) => {
+      const next = prev.map((s) => {
         if (s.name.toLowerCase() === skillName.toLowerCase()) {
           return {
             ...s,
@@ -159,10 +203,26 @@ export function CareerProvider({ children }) {
           };
         }
         return s;
-      })
-    );
-    showToast(`Injected verified evidence for "${skillName}" from ${projectName}!`, 'success');
-  }, []);
+      });
+
+      const prevState = { targetRole, skills: prev, projects, jobs, resumeData, certifications, assessments: solvedProblems };
+      const nextState = { ...prevState, skills: next };
+
+      const deltaResult = evaluateStateDelta(prevState, nextState, {
+        actionType: 'ATS_PROOF_INJECTED',
+        entityName: `${skillName} from ${projectName}`,
+        customReason: `Injected verified project evidence from "${projectName}" into ATS keyword proof canvas.`,
+      });
+
+      if (deltaResult.isSignificant) {
+        showReadinessFeedback(deltaResult);
+      } else {
+        showToast(`Injected verified evidence for "${skillName}"!`, 'success');
+      }
+
+      return next;
+    });
+  }, [targetRole, projects, jobs, resumeData, certifications, solvedProblems]);
 
   // Set & Propagate Target Role
   const setTargetRole = useCallback((roleId) => {
