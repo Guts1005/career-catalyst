@@ -171,6 +171,8 @@ export default function AtsCheckerPage() {
     }
   };
 
+  const pendingBulletCount = (typeof window !== 'undefined' && injectATSProof) ? 0 : 0; // placeholder for count
+
   return (
     <div className={styles.container}>
       <PageHeader
@@ -352,6 +354,36 @@ export default function AtsCheckerPage() {
                   </div>
                 </div>
               )}
+
+              {/* Connection F: Resume Canvas Evidence Sync CTA */}
+              <div style={{
+                background: 'var(--bg-subtle)',
+                border: '1px solid var(--border)',
+                borderLeft: '3px solid var(--blue)',
+                padding: '12px 14px',
+                borderRadius: '4px',
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+                gap: '12px',
+                flexWrap: 'wrap',
+              }}>
+                <div>
+                  <div style={{ fontSize: '11px', fontFamily: 'var(--font-mono)', color: 'var(--blue)', fontWeight: 800 }}>
+                    📋 RESUME CANVAS EVIDENCE SYNC
+                  </div>
+                  <div style={{ fontSize: '12px', color: 'var(--text-secondary)', marginTop: '2px' }}>
+                    Injected keywords generate structured achievement bullets ready for 1-click insertion into your resume.
+                  </div>
+                </div>
+                <Link
+                  href="/resume-builder"
+                  className="btn btn-secondary btn-sm"
+                  style={{ fontSize: '11px', padding: '5px 10px', borderColor: 'var(--blue)', color: 'var(--blue)', whiteSpace: 'nowrap' }}
+                >
+                  VIEW RESUME CANVAS →
+                </Link>
+              </div>
             </>
           )}
         </div>

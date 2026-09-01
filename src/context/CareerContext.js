@@ -28,6 +28,7 @@ export function CareerProvider({ children }) {
   const [solvedProblems, setSolvedProblems] = useState([]);
   const [resources, setResources] = useState([]);
   const [resumeData, setResumeData] = useState(null);
+  const [injectedBullets, setInjectedBullets] = useState([]);
   const [loading, setLoading] = useState(true);
 
   // Sync state from server / localStorage on load
@@ -191,8 +192,44 @@ export function CareerProvider({ children }) {
     });
   }, []);
 
-  // Bidirectional ATS Proof Injector: Upgrades skill evidence and links to resume
+  // Bidirectional ATS Proof Injector: Upgrades skill evidence, links to resume, and generates structured bullet
   const injectATSProof = useCallback((skillName, projectName) => {
+    // Generate a structured STAR achievement bullet for resume injection (Connection F)
+    const BULLET_TEMPLATES = {
+      'PyTorch': `Engineered high-throughput PyTorch model training pipelines with mixed-precision (AMP) optimization, reducing GPU memory consumption by 38% across distributed training clusters.`,
+      'CUDA': `Developed custom CUDA kernels for attention mechanism optimization, achieving 2.3× throughput improvement over baseline implementations on H100 GPUs.`,
+      'FlashAttention': `Implemented FlashAttention-2 online softmax tiling with custom SRAM management, reducing KV-cache memory demand by 45% on multi-GPU inference clusters.`,
+      'Triton': `Architected custom Triton GPU kernel pipelines for fused attention and MLP operations, eliminating shared memory bank conflicts and achieving sub-15ms P99 serving latency.`,
+      'DeepSpeed': `Scaled distributed model training with DeepSpeed ZeRO-3 optimizer partitioning across 64-GPU clusters, reducing memory footprint by 8× while maintaining linear throughput scaling.`,
+      'RLHF': `Implemented end-to-end RLHF alignment pipeline with reward model training, PPO optimization loops, and safety guardrail evaluation achieving 94% harmlessness scores.`,
+      'DPO': `Designed Direct Preference Optimization (DPO) training pipeline eliminating reward model dependency, reducing alignment compute cost by 60% while maintaining preference accuracy.`,
+      'vLLM': `Deployed production vLLM serving infrastructure with PagedAttention and continuous batching, sustaining 4,800 req/sec with P99 latency < 15ms under peak load.`,
+      'Kubernetes': `Orchestrated auto-scaling ML inference clusters on Kubernetes with custom HPA policies, achieving 99.95% uptime and sub-second cold-start container initialization.`,
+      'NCCL': `Optimized NCCL All-Reduce communication topology across multi-node GPU clusters, reducing gradient synchronization overhead by 35% with ring-based collective operations.`,
+      'Docker': `Containerized distributed ML training and inference workloads with Docker multi-stage builds, reducing image size by 62% and deployment cycle time by 4×.`,
+      'TensorRT-LLM': `Integrated TensorRT-LLM with FP8/INT8 quantization for production LLM serving, achieving 3.1× inference speedup with < 0.5% accuracy degradation.`,
+      'FAISS': `Built production vector similarity search infrastructure using FAISS IVF-PQ indexing, serving 50M+ embeddings with sub-5ms query latency at 99th percentile.`,
+      'Kafka': `Engineered real-time ML feature pipelines with Apache Kafka streaming, processing 2M+ events/sec with exactly-once semantics and end-to-end latency < 200ms.`,
+      'Ray': `Scaled distributed hyperparameter optimization with Ray Tune across 32-node clusters, reducing model selection time by 8× with early stopping and population-based training.`,
+    };
+
+    const bulletText = BULLET_TEMPLATES[skillName] ||
+      `Demonstrated proven competency in ${skillName}${projectName ? ` through verified work on "${projectName}"` : ''}, contributing to production system reliability and engineering velocity.`;
+
+    // Store the injected bullet for Resume Canvas consumption
+    setInjectedBullets((prev) => {
+      // Avoid duplicates
+      if (prev.some((b) => b.keyword === skillName)) return prev;
+      return [...prev, {
+        id: `ats-${Date.now()}-${skillName.replace(/\s+/g, '-').toLowerCase()}`,
+        keyword: skillName,
+        projectEvidence: projectName || null,
+        bulletText,
+        injectedAt: new Date().toISOString(),
+        accepted: false,
+      }];
+    });
+
     setSkills((prev) => {
       const next = prev.map((s) => {
         if (s.name.toLowerCase() === skillName.toLowerCase()) {
@@ -211,18 +248,27 @@ export function CareerProvider({ children }) {
       const deltaResult = evaluateStateDelta(prevState, nextState, {
         actionType: 'ATS_PROOF_INJECTED',
         entityName: `${skillName} from ${projectName}`,
-        customReason: `Injected verified project evidence from "${projectName}" into ATS keyword proof canvas.`,
+        customReason: `Injected verified project evidence from "${projectName}" into ATS keyword proof canvas. Resume bullet generated for Review.`,
       });
 
       if (deltaResult.isSignificant) {
         showReadinessFeedback(deltaResult);
       } else {
-        showToast(`Injected verified evidence for "${skillName}"!`, 'success');
+        showToast(`Injected "${skillName}" — resume bullet ready for review in Resume Canvas!`, 'success');
       }
 
       return next;
     });
   }, [targetRole, projects, jobs, resumeData, certifications, solvedProblems]);
+
+  // Accept or dismiss an injected bullet (Connection F)
+  const acceptInjectedBullet = useCallback((bulletId) => {
+    setInjectedBullets((prev) => prev.map((b) => b.id === bulletId ? { ...b, accepted: true } : b));
+  }, []);
+
+  const dismissInjectedBullet = useCallback((bulletId) => {
+    setInjectedBullets((prev) => prev.filter((b) => b.id !== bulletId));
+  }, []);
 
   // Set & Propagate Target Role
   const setTargetRole = useCallback((roleId) => {
@@ -367,6 +413,9 @@ export function CareerProvider({ children }) {
     setResources,
     syncResource,
     injectATSProof,
+    injectedBullets,
+    acceptInjectedBullet,
+    dismissInjectedBullet,
     resumeData,
     setResumeData,
     readiness,

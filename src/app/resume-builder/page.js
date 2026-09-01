@@ -14,7 +14,14 @@ import {
 } from '@/components/Icons';
 
 export default function ResumeBuilderPage() {
-  const { userProfile, skills: careerSkills, projects: careerProjects } = useCareer();
+  const {
+    userProfile,
+    skills: careerSkills,
+    projects: careerProjects,
+    injectedBullets,
+    acceptInjectedBullet,
+    dismissInjectedBullet,
+  } = useCareer();
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -134,6 +141,17 @@ export default function ResumeBuilderPage() {
     const next = [...experienceList];
     next[expIndex].bullets = next[expIndex].bullets.filter((_, i) => i !== bulletIndex);
     setExperienceList(next);
+  };
+
+  // Connection F: Accept an ATS-injected bullet and insert into first experience entry
+  const handleAcceptInjectedBullet = (bullet) => {
+    const next = [...experienceList];
+    if (next.length > 0) {
+      next[0].bullets.push(bullet.bulletText);
+      setExperienceList(next);
+    }
+    acceptInjectedBullet(bullet.id);
+    showToast(`Achievement bullet for "${bullet.keyword}" inserted into resume experience!`, 'success');
   };
 
   // Generate Overleaf-Compatible LaTeX Code
@@ -399,6 +417,76 @@ Coursework: ${edu.coursework}
               </div>
             ))}
           </div>
+
+          {/* Connection F: ATS-Injected Evidence Bullets Pending Review */}
+          {injectedBullets && injectedBullets.filter((b) => !b.accepted).length > 0 && (
+            <div className={styles.sectionCard} style={{ borderLeft: '3px solid var(--blue)' }}>
+              <div className={styles.sectionHeader}>
+                <div className={styles.sectionTitle} style={{ color: 'var(--blue)' }}>
+                  📋 ATS Evidence Bullets — Pending Review ({injectedBullets.filter((b) => !b.accepted).length})
+                </div>
+              </div>
+              <p style={{ fontSize: '12px', color: 'var(--text-secondary)', margin: '0 0 12px 0' }}>
+                These structured achievement bullets were generated from your ATS Keyword Matcher injections. Accept to insert into your resume, or dismiss.
+              </p>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                {injectedBullets.filter((b) => !b.accepted).map((bullet) => (
+                  <div
+                    key={bullet.id}
+                    style={{
+                      background: 'var(--bg-subtle)',
+                      border: '1px solid var(--border)',
+                      borderRadius: '6px',
+                      padding: '12px 14px',
+                    }}
+                  >
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px', flexWrap: 'wrap', gap: '6px' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                        <span style={{
+                          fontSize: '10.5px',
+                          fontFamily: 'var(--font-mono)',
+                          color: 'var(--blue)',
+                          background: 'rgba(96, 165, 250, 0.1)',
+                          padding: '2px 8px',
+                          borderRadius: '3px',
+                          border: '1px solid rgba(96, 165, 250, 0.3)',
+                          fontWeight: 700,
+                        }}>
+                          {bullet.keyword}
+                        </span>
+                        {bullet.projectEvidence && (
+                          <span style={{ fontSize: '10.5px', color: 'var(--text-muted)', fontFamily: 'var(--font-mono)' }}>
+                            from {bullet.projectEvidence}
+                          </span>
+                        )}
+                      </div>
+                      <div style={{ display: 'flex', gap: '6px' }}>
+                        <button
+                          type="button"
+                          className="btn btn-primary btn-sm"
+                          onClick={() => handleAcceptInjectedBullet(bullet)}
+                          style={{ fontSize: '10.5px', padding: '3px 10px' }}
+                        >
+                          ✓ ACCEPT & INSERT
+                        </button>
+                        <button
+                          type="button"
+                          className="btn btn-ghost btn-sm"
+                          onClick={() => dismissInjectedBullet(bullet.id)}
+                          style={{ fontSize: '10.5px', padding: '3px 8px' }}
+                        >
+                          ✕
+                        </button>
+                      </div>
+                    </div>
+                    <p style={{ fontSize: '12.5px', color: 'var(--text-primary)', margin: 0, lineHeight: 1.55 }}>
+                      {bullet.bulletText}
+                    </p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
         </div>
 
         {/* Right: Clean Printable Paper Preview */}
