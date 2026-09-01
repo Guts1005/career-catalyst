@@ -5,14 +5,11 @@ import Link from 'next/link';
 import styles from './page.module.css';
 import { useCareer } from '@/context/CareerContext';
 import OnboardingModal from '@/components/OnboardingModal';
-import LiveTelemetryTicker from '@/components/LiveTelemetryTicker';
-import OrientationBanner from '@/components/OrientationBanner';
 
 export default function HomePage() {
   const {
     readiness,
     nextBestAction,
-    targetRole,
     skills,
     projects,
     jobs,
@@ -24,251 +21,227 @@ export default function HomePage() {
 
   const [isOnboardingOpen, setIsOnboardingOpen] = useState(false);
 
-  const handleReopenGuide = () => {
-    if (typeof window !== 'undefined') {
-      window.dispatchEvent(new CustomEvent('catalyst:reopen-orientation'));
-    }
-  };
-
-  // 4 Cohesive Career Journey Portals
+  // 4 Core Semantic Career Journey Portals (Linear/Vercel Bento Architecture)
   const portals = [
     {
       phaseNumber: '01',
       id: 'radar',
-      tag: 'PHASE 01 • DIAGNOSTICS',
-      title: 'Readiness & Competency Radar',
-      desc: 'Evaluate verified skills, multi-factor telemetry, and target role skill deficits.',
+      phaseLabel: '01 • READINESS & RADAR',
+      title: 'Competency Radar & Skill Gaps',
+      description: 'Continuous diagnostic telemetry measuring GPU kernel optimization, distributed training scale, and target role deficit gaps.',
       score: readiness?.breakdown?.skills?.score || 66,
       weight: '30% Weight',
-      primaryAction: { label: 'Open Competency Radar →', href: '/skills' },
-      secondaryAction: { label: 'Career Analytics Telemetry ↗', href: '/analytics' },
-      meta: `${skills.filter((s) => s.evidence_level === 'VERIFIED').length} Verified Skills • ${readiness?.gaps?.length || 0} Deficits`,
+      stats: [
+        { label: 'VERIFIED SKILLS', val: `${skills.filter((s) => s.evidence_level === 'VERIFIED').length} Skills` },
+        { label: 'ACTIVE DEFICITS', val: `${readiness?.gaps?.length || 0} Gaps` },
+      ],
+      primaryLink: { label: 'Open Competency Radar →', href: '/skills' },
+      secondaryLink: { label: 'Career Analytics ↗', href: '/analytics' },
     },
     {
       phaseNumber: '02',
       id: 'proof',
-      tag: 'PHASE 02 • EVIDENCE',
-      title: 'Engineering Proof & Portfolio',
-      desc: 'Hopper H100 benchmarks, verified code milestones, and peer-reviewed research papers.',
+      phaseLabel: '02 • EVIDENCE & PROOF',
+      title: 'Engineering Proof & Case Studies',
+      description: 'Hopper H100 kernel latency benchmarks, verified milestones, systems coding ledger, and peer-reviewed arXiv research citations.',
       score: readiness?.breakdown?.portfolio?.score || 61,
       weight: '30% Weight',
-      primaryAction: { label: 'Inspect Portfolio Proof →', href: '/projects' },
-      secondaryAction: { label: 'Research Paper Library ↗', href: '/resources' },
-      meta: `${projects.length} System Case Studies • P99 < 15ms Latency`,
+      stats: [
+        { label: 'SYSTEM PROJECTS', val: `${projects.length} Repos` },
+        { label: 'P99 LATENCY', val: '< 13.8ms' },
+      ],
+      primaryLink: { label: 'Inspect Portfolio Proof →', href: '/projects' },
+      secondaryLink: { label: 'Research Paper Library ↗', href: '/resources' },
     },
     {
       phaseNumber: '03',
       id: 'applications',
-      tag: 'PHASE 03 • CONVERT',
-      title: 'Job Pipeline & Resume Canvas',
-      desc: 'ATS keyword matcher, tailored STAR pitches, and real-time Overleaf LaTeX resume canvas.',
+      phaseLabel: '03 • APPLICATIONS & RESUME',
+      title: 'Application Pipeline & Resume Canvas',
+      description: 'Connected job application kanban with ATS keyword matcher, STAR pitch studio, and live Overleaf LaTeX export canvas.',
       score: readiness?.breakdown?.resume?.score || 75,
       weight: '20% Weight',
-      primaryAction: { label: 'Open Job Pipeline →', href: '/job-tracker' },
-      secondaryAction: { label: 'ATS Matcher & Resume Canvas ↗', href: '/ats-checker' },
-      meta: `${jobs.length} Active Target Roles • 92% Average Match`,
+      stats: [
+        { label: 'ACTIVE PIPELINE', val: `${jobs.length} Roles` },
+        { label: 'ATS MATCH RATE', val: '92% Average' },
+      ],
+      primaryLink: { label: 'Open Job Pipeline →', href: '/job-tracker' },
+      secondaryLink: { label: 'ATS Matcher & Resume ↗', href: '/ats-checker' },
     },
     {
       phaseNumber: '04',
       id: 'interview',
-      tag: 'PHASE 04 • CLOSE',
-      title: 'Interviews & Compensation',
-      desc: 'Company-calibrated question bank, 15-min system design simulations, and 4-year RSU modeler.',
+      phaseLabel: '04 • INTERVIEWS & CLOSE',
+      title: 'Interview Simulator & Compensation',
+      description: 'Company-calibrated technical question banks, 15-minute system design simulator, and 4-year RSU equity waterfall scenario modeler.',
       score: readiness?.breakdown?.applications?.score || 51,
       weight: '20% Weight',
-      primaryAction: { label: 'Launch Question Bank →', href: '/interview-prep' },
-      secondaryAction: { label: 'Equity & Compensation Modeler ↗', href: '/salary-insights' },
-      meta: 'Anthropic Priority Prep • Top 10% Benchmark Comp',
+      stats: [
+        { label: 'PRIORITY CALIBRATION', val: 'Anthropic' },
+        { label: 'EQUITY MODEL', val: '4-Yr RSU Waterfall' },
+      ],
+      primaryLink: { label: 'Launch Question Bank →', href: '/interview-prep' },
+      secondaryLink: { label: 'Equity & Comp Modeler ↗', href: '/salary-insights' },
     },
   ];
 
   return (
     <div className={styles.container}>
-      {/* ─── Real-Time Live Telemetry Ticker Bar ────────────────────── */}
-      <LiveTelemetryTicker />
-
-      {/* ─── Interactive Persona Switcher Toolbar ───────────────────── */}
-      <div className={styles.personaBar}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-          <span className={styles.personaLabel}>
-            EXPLORE CANDIDATE TRACKS:
-          </span>
+      {/* ─── Unified Top Executive Control Strip ─────────────────────── */}
+      <header className={styles.topControlBar}>
+        <div className={styles.statusIndicator}>
+          <span className={styles.statusDot} />
+          <span className={styles.statusText}>HARDWARE VERIFIED • 8x H100 CLUSTER TELEMETRY</span>
         </div>
-        <div style={{ display: 'flex', gap: '8px', alignItems: 'center', flexWrap: 'wrap' }}>
-          {demoPersonas?.map((p) => {
-            const isActive = activePersonaId === p.id;
-            return (
-              <button
-                key={p.id}
-                type="button"
-                className={`${styles.personaBtn} ${isActive ? styles.personaBtnActive : ''}`}
-                onClick={() => selectPersona(p.id)}
-                aria-pressed={isActive}
-              >
-                {p.badge} ({p.personaName.split(' ')[0]})
-              </button>
-            );
-          })}
+
+        <div className={styles.personaControls}>
+          <span className={styles.personaLabel}>TRACK:</span>
+          <div className={styles.personaSegmentedGroup}>
+            {demoPersonas?.map((p) => {
+              const isActive = activePersonaId === p.id;
+              return (
+                <button
+                  key={p.id}
+                  type="button"
+                  onClick={() => selectPersona(p.id)}
+                  className={`${styles.personaPill} ${isActive ? styles.personaPillActive : ''}`}
+                  aria-pressed={isActive}
+                >
+                  {p.badge} {p.personaName.split(' ')[0]}
+                </button>
+              );
+            })}
+          </div>
 
           <button
             type="button"
-            onClick={handleReopenGuide}
-            aria-label="Reopen Catalyst OS orientation guide"
-            className={styles.guideBtn}
+            onClick={() => setIsOnboardingOpen(true)}
+            className={styles.calibrateBtn}
+            title="Calibrate target role and candidate goals"
           >
-            🧭 GUIDE
+            ⚙ CALIBRATE
           </button>
         </div>
-      </div>
+      </header>
 
-      {/* ─── Lightweight Non-Intrusive Orientation Banner ─────────── */}
-      <div style={{ padding: '0 clamp(16px, 3vw, 40px)', marginTop: '16px' }}>
-        <OrientationBanner
-          nextBestAction={nextBestAction}
-          onOpenCalibration={() => setIsOnboardingOpen(true)}
-        />
-      </div>
+      {/* ─── Hero Executive Overview ─────────────────────────────────── */}
+      <main className={styles.heroSection}>
+        <div className={styles.heroIntro}>
+          <div className={styles.systemBadge}>CATALYST OS v2.6 • CAREER OPERATING SYSTEM</div>
+          <h1 className={styles.heroHeadline}>
+            The Career Operating System for Systems Engineers.
+          </h1>
+          <p className={styles.heroSubtext}>
+            Connect technical competency telemetry, Hopper H100 project evidence, active job pipeline rounds, and interview compensation into one unified intelligence engine.
+          </p>
+        </div>
 
-      {/* ─── Executive Overview Hero Hub ────────────────────────────── */}
-      <main className={styles.mainContent}>
-        <section className={styles.commandHero}>
-          <div className={styles.heroIdentity}>
-            <div className={styles.heroMicroTag}>
-              CATALYST OS v2.6 • CAREER OPERATING SYSTEM
+        {/* ─── Bento Hero Summary Card (3-Column Executive Widget) ────── */}
+        <section className={styles.heroCommandCard}>
+          {/* Column 1: Candidate Track Identity */}
+          <div className={styles.commandColIdentity}>
+            <div className={styles.cardMicroLabel}>CANDIDATE PROFILE</div>
+            <div className={styles.candidateName}>{userProfile?.name || 'SHARVIN NEVE'}</div>
+            <div className={styles.targetRoleBadge}>
+              TARGET: <strong>{readiness?.targetRoleTitle?.toUpperCase() || 'STAFF AI ENGINEER'}</strong>
             </div>
-            <h1 className={styles.heroCandidateName}>
-              {userProfile?.name || 'SHARVIN NEVE'}
-            </h1>
-            <div className={styles.heroRoleTarget}>
-              TARGET ROLE: <strong>{readiness?.targetRoleTitle?.toUpperCase() || 'STAFF AI ENGINEER'}</strong>
-            </div>
-            <p className={styles.heroSummaryText}>
-              A unified engineering workspace connecting competency telemetry, verifiable code evidence, active hiring pipeline rounds, and interview compensation scenarios.
-            </p>
-            <div className={styles.heroActionRow}>
-              <button
-                type="button"
-                className="btn btn-primary"
-                onClick={() => setIsOnboardingOpen(true)}
-                style={{ fontSize: '13px', padding: '10px 20px' }}
-              >
-                ⚙ CALIBRATE CAREER TRACK
-              </button>
-              <Link href="/job-tracker" className="btn btn-secondary" style={{ fontSize: '13px', padding: '10px 18px' }}>
-                VIEW PIPELINE ({jobs.length} ACTIVE)
-              </Link>
+            <div className={styles.profileMetaList}>
+              <span>• Domain: ML Systems & Distributed Training</span>
+              <span>• Evidence: Triton Kernels & vLLM Serving</span>
             </div>
           </div>
 
-          <div className={styles.heroReadinessCard}>
-            <div className={styles.readinessHeader}>
-              <span className={styles.readinessTag}>TOTAL PROFILE READINESS</span>
-              <span className={styles.readinessStatus}>CALIBRATED</span>
+          {/* Column 2: Total Readiness Gauge */}
+          <div className={styles.commandColReadiness}>
+            <div className={styles.cardMicroLabel}>TOTAL PROFILE READINESS</div>
+            <div className={styles.readinessScoreNumber}>
+              {readiness?.overallScore || 63}<span>%</span>
             </div>
-            <div className={styles.readinessScoreVal}>
-              {readiness?.overallScore || 63}%
+            <div className={styles.readinessSubtext}>
+              Calibrated against Frontier AI hiring bars
             </div>
-            <div className={styles.readinessTrackLabel}>
-              Calibrated against Frontier AI hiring standards
+            <div className={styles.readinessMiniBars}>
+              <div className={styles.miniBar}>
+                <div className={styles.miniBarLabel}>
+                  <span>Radar (30%)</span>
+                  <strong>{readiness?.breakdown?.skills?.score || 66}%</strong>
+                </div>
+                <div className={styles.miniBarTrack}>
+                  <div className={styles.miniBarFill} style={{ width: `${readiness?.breakdown?.skills?.score || 66}%` }} />
+                </div>
+              </div>
+              <div className={styles.miniBar}>
+                <div className={styles.miniBarLabel}>
+                  <span>Proof (30%)</span>
+                  <strong>{readiness?.breakdown?.portfolio?.score || 61}%</strong>
+                </div>
+                <div className={styles.miniBarTrack}>
+                  <div className={styles.miniBarFill} style={{ width: `${readiness?.breakdown?.portfolio?.score || 61}%` }} />
+                </div>
+              </div>
             </div>
+          </div>
 
-            <div className={styles.readinessBars}>
-              <div className={styles.miniBarRow}>
-                <span>Radar & Skills (30%)</span>
-                <strong>{readiness?.breakdown?.skills?.score || 66}%</strong>
-              </div>
-              <div className={styles.miniBarTrack}>
-                <div className={styles.miniBarFill} style={{ width: `${readiness?.breakdown?.skills?.score || 66}%` }} />
-              </div>
-
-              <div className={styles.miniBarRow}>
-                <span>Portfolio Proof (30%)</span>
-                <strong>{readiness?.breakdown?.portfolio?.score || 61}%</strong>
-              </div>
-              <div className={styles.miniBarTrack}>
-                <div className={styles.miniBarFill} style={{ width: `${readiness?.breakdown?.portfolio?.score || 61}%` }} />
-              </div>
-
-              <div className={styles.miniBarRow}>
-                <span>Resume Match (20%)</span>
-                <strong>{readiness?.breakdown?.resume?.score || 75}%</strong>
-              </div>
-              <div className={styles.miniBarTrack}>
-                <div className={styles.miniBarFill} style={{ width: `${readiness?.breakdown?.resume?.score || 75}%` }} />
-              </div>
-
-              <div className={styles.miniBarRow}>
-                <span>Pipeline Velocity (20%)</span>
-                <strong>{readiness?.breakdown?.applications?.score || 51}%</strong>
-              </div>
-              <div className={styles.miniBarTrack}>
-                <div className={styles.miniBarFill} style={{ width: `${readiness?.breakdown?.applications?.score || 51}%` }} />
-              </div>
+          {/* Column 3: Next Best Action Focus */}
+          <div className={styles.commandColAction}>
+            <div className={styles.actionHeaderRow}>
+              <span className={styles.actionTag}>● NEXT BEST ACTION</span>
+              <span className={styles.actionBadge}>{nextBestAction?.badge || 'HIGH PRIORITY'}</span>
+            </div>
+            <div className={styles.actionTitle}>
+              {nextBestAction?.title || 'Prepare Technical System Design for Anthropic'}
+            </div>
+            <div className={styles.actionReason}>
+              {nextBestAction?.reason || 'Upcoming technical interview round detected in Job Pipeline.'}
+            </div>
+            <div className={styles.actionButtonWrap}>
+              <Link href={nextBestAction?.actionUrl || '/interview-prep'} className="btn btn-primary" style={{ width: '100%', justifyContent: 'center', padding: '9px 16px', fontSize: '12.5px' }}>
+                {nextBestAction?.actionLabel || 'EXECUTE ACTION →'}
+              </Link>
             </div>
           </div>
         </section>
 
-        {/* ─── Prominent Next Best Action Recommendation ───────────── */}
-        {nextBestAction && (
-          <section className={styles.nextActionCard} aria-label="Next Best Action Recommendation">
-            <div className={styles.nextActionHeader}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <span className={styles.actionLiveDot}>●</span>
-                <span className={styles.nextActionHeading}>RECOMMENDED NEXT BEST ACTION</span>
-              </div>
-              <span className={styles.actionBadge}>{nextBestAction.badge}</span>
+        {/* ─── 4 Connected Career Journey Portals (Bento Grid) ────────── */}
+        <section className={styles.portalsContainer} aria-label="Career Journey Portals">
+          <div className={styles.portalsSectionHeader}>
+            <div>
+              <h2 className={styles.portalsSectionTitle}>Career Journey Portals</h2>
+              <p className={styles.portalsSectionDesc}>
+                Four integrated workspaces taking you from initial gap detection to verified portfolio proof, application conversion, and equity negotiation.
+              </p>
             </div>
-
-            <div className={styles.nextActionBody}>
-              <div>
-                <h2 className={styles.nextActionTitle}>{nextBestAction.title}</h2>
-                <p className={styles.nextActionReason}>{nextBestAction.reason}</p>
-              </div>
-
-              <div className={styles.nextActionFooter}>
-                <div className={styles.actionMetrics}>
-                  <span>IMPACT: <strong style={{ color: 'var(--text-primary)' }}>{nextBestAction.impact}</strong></span>
-                  <span>EFFORT: <strong style={{ color: 'var(--text-primary)' }}>{nextBestAction.effort}</strong></span>
-                </div>
-                <Link href={nextBestAction.actionUrl} className="btn btn-primary" style={{ padding: '9px 20px', fontSize: '12.5px' }}>
-                  {nextBestAction.actionLabel}
-                </Link>
-              </div>
-            </div>
-          </section>
-        )}
-
-        {/* ─── 4 Structured Career Journey Portals (2x2 Grid) ──────── */}
-        <section className={styles.portalsSection} aria-label="Connected Career Portals">
-          <div className={styles.portalsHeader}>
-            <div className={styles.portalsTitle}>CAREER OPERATING SYSTEM JOURNEY PORTALS</div>
-            <div className={styles.portalsSubtitle}>Select any connected stage to view dedicated workflows, tests, and evidence.</div>
           </div>
 
           <div className={styles.portalsGrid}>
             {portals.map((p) => (
               <div key={p.id} className={styles.portalCard}>
-                <div className={styles.portalTop}>
-                  <span className={styles.portalBadge}>{p.tag}</span>
-                  <div className={styles.portalScoreBadge}>
-                    <span>{p.score}%</span>
+                <div className={styles.portalHeader}>
+                  <span className={styles.portalPhaseLabel}>{p.phaseLabel}</span>
+                  <div className={styles.portalScorePill}>
+                    <strong>{p.score}%</strong>
                     <small>{p.weight}</small>
                   </div>
                 </div>
 
-                <h3 className={styles.portalTitle}>{p.title}</h3>
-                <p className={styles.portalDesc}>{p.desc}</p>
+                <h3 className={styles.portalCardTitle}>{p.title}</h3>
+                <p className={styles.portalCardDesc}>{p.description}</p>
 
-                <div className={styles.portalMeta}>
-                  {p.meta}
+                <div className={styles.portalStatsRow}>
+                  {p.stats.map((stat, i) => (
+                    <div key={i} className={styles.statItem}>
+                      <span className={styles.statItemLabel}>{stat.label}</span>
+                      <strong className={styles.statItemVal}>{stat.val}</strong>
+                    </div>
+                  ))}
                 </div>
 
-                <div className={styles.portalActions}>
-                  <Link href={p.primaryAction.href} className="btn btn-primary btn-sm" style={{ width: '100%', textAlign: 'center', justifyContent: 'center' }}>
-                    {p.primaryAction.label}
+                <div className={styles.portalActionsGroup}>
+                  <Link href={p.primaryLink.href} className="btn btn-primary btn-sm" style={{ width: '100%', justifyContent: 'center', padding: '8px 14px' }}>
+                    {p.primaryLink.label}
                   </Link>
-                  <Link href={p.secondaryAction.href} className={styles.portalSecondaryLink}>
-                    {p.secondaryAction.label}
+                  <Link href={p.secondaryLink.href} className={styles.portalSecondaryAction}>
+                    {p.secondaryLink.label}
                   </Link>
                 </div>
               </div>
@@ -276,24 +249,27 @@ export default function HomePage() {
           </div>
         </section>
 
-        {/* ─── Secondary Specialized Labs Hub Strip ──────────────────── */}
-        <section className={styles.labsSection}>
-          <div className={styles.labsTitle}>SPECIALIZED TECHNICAL LABS & SHOWCASE:</div>
-          <div className={styles.labsLinks}>
-            <Link href="/project-generator" className={styles.labLink}>
-              🚀 Architecture Blueprints
+        {/* ─── Specialized Labs & Ecosystem Hub ───────────────────────── */}
+        <footer className={styles.specializedHub}>
+          <div className={styles.hubLabel}>SPECIALIZED TECHNICAL LABS & SHOWCASE</div>
+          <div className={styles.hubLinks}>
+            <Link href="/project-generator" className={styles.hubLinkItem}>
+              <span>🚀 Architecture Blueprints</span>
+              <small>Custom project generator with 1-click import</small>
             </Link>
-            <Link href="/algorithm-sandbox" className={styles.labLink}>
-              ⚡ Triton Latency Sandbox
+            <Link href="/algorithm-sandbox" className={styles.hubLinkItem}>
+              <span>⚡ Triton Latency Sandbox</span>
+              <small>Interactive Hopper H100 batch latency model</small>
             </Link>
-            <Link href="/portfolio/sharvin" className={styles.labLink}>
-              🌐 Public Portfolio Showcase
+            <Link href="/portfolio/sharvin" className={styles.hubLinkItem}>
+              <span>🌐 Public Portfolio Showcase</span>
+              <small>Candidate portfolio viewable by recruiters</small>
             </Link>
           </div>
-        </section>
+        </footer>
       </main>
 
-      {/* Onboarding & Target Role Calibration Modal */}
+      {/* Target Role & Track Calibration Modal */}
       <OnboardingModal
         isOpen={isOnboardingOpen}
         onClose={() => setIsOnboardingOpen(false)}
