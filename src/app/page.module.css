@@ -1,333 +1,225 @@
-/* ──────────────────────────────────────────────────────────────────
-   EDITORIAL × MINIMAL LANDING PAGE STYLESHEET (LIGHT & DARK AWARE)
-   ────────────────────────────────────────────────────────────────── */
-
-.landingRoot {
+.container {
   width: 100%;
   min-height: 100vh;
   background: var(--bg-primary);
   color: var(--text-primary);
-  overflow-x: hidden;
+  padding-bottom: 64px;
 }
 
-/* ─── Hero Section ───────────────────────────────────────────────── */
-.heroSection {
-  min-height: 90vh;
-  padding: 40px clamp(24px, 5vw, 80px);
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  border-bottom: 1px solid var(--border);
-  background: var(--bg-primary);
-}
-
-.heroMetaTop {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  border-bottom: 1px solid var(--border);
-  padding-bottom: 16px;
-  font-family: var(--font-mono);
-  font-size: 11px;
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-  color: var(--text-muted);
-}
-
-.heroMain {
-  padding: 40px 0;
-  display: grid;
-  grid-template-columns: 1.4fr 0.6fr;
-  gap: 40px;
-  align-items: flex-end;
-}
-
-@media (max-width: 900px) {
-  .heroMain {
-    grid-template-columns: 1fr;
-  }
-}
-
-.heroDisplayTitle {
-  font-size: clamp(52px, 8vw, 120px);
-  font-weight: 900;
-  line-height: 1.04;
-  letter-spacing: -0.025em;
-  text-transform: uppercase;
-  color: var(--text-primary);
-}
-
-.heroSubtitleBlock {
-  max-width: 460px;
-}
-
-.heroDescription {
-  font-size: 16px;
-  line-height: 1.7;
-  color: var(--text-secondary);
-  margin-bottom: 28px;
-}
-
-.heroCtaGroup {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-}
-
-.heroMetaBottom {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  border-top: 1px solid var(--border);
-  padding-top: 16px;
-  font-family: var(--font-mono);
-  font-size: 11px;
-  color: var(--text-muted);
-}
-
-/* ─── Alternating Editorial Section Structure ───────────────────── */
-.narrativeSection {
-  padding: 80px clamp(24px, 5vw, 80px);
-  border-bottom: 1px solid var(--border);
-  background: var(--bg-primary);
-}
-
-.narrativeSectionDark {
-  padding: 80px clamp(24px, 5vw, 80px);
+/* ─── Persona Switcher Bar ──────────────────────────────────────── */
+.personaBar {
   background: var(--bg-surface);
-  color: var(--text-primary);
-  border-bottom: 1px solid var(--border-strong);
-}
-
-@media (max-width: 768px) {
-  .heroSection {
-    padding: 24px 16px;
-    min-height: auto;
-  }
-
-  .narrativeSection, .narrativeSectionDark {
-    padding: 48px 16px;
-  }
-
-  .actSection {
-    padding: 64px 16px !important;
-  }
-
-  .heroDisplayTitle {
-    font-size: clamp(38px, 11vw, 64px);
-    line-height: 1.05;
-  }
-
-  .chapterHeading {
-    font-size: clamp(30px, 8vw, 48px);
-    line-height: 1.1;
-  }
-}
-
-.sectionHeaderRow {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 36px;
-  margin-bottom: 48px;
-  align-items: flex-start;
-}
-
-@media (max-width: 768px) {
-  .sectionHeaderRow {
-    grid-template-columns: 1fr;
-    margin-bottom: 28px;
-  }
-}
-
-.chapterNumber {
-  font-family: var(--font-mono);
-  font-size: 12px;
-  text-transform: uppercase;
-  letter-spacing: 0.1em;
-  color: var(--text-muted);
-  margin-bottom: 14px;
-}
-
-.chapterHeading {
-  font-size: clamp(36px, 4.8vw, 72px);
-  font-weight: 900;
-  line-height: 1.14;
-  letter-spacing: -0.02em;
-  text-transform: uppercase;
-  color: var(--text-primary);
-}
-
-.chapterDescription {
-  font-size: 15.5px;
-  line-height: 1.7;
-  color: var(--text-secondary);
-  max-width: 480px;
-}
-
-/* ─── Chapter 01: KNOW & 4 Pillars ──────────────────────────────── */
-.knowGrid {
-  display: grid;
-  grid-template-columns: 1.2fr 0.8fr;
-  gap: 40px;
+  border-bottom: 1px solid var(--border);
+  padding: 10px clamp(16px, 3vw, 40px);
+  display: flex;
   align-items: center;
-  margin-bottom: 36px;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 10px;
 }
 
-@media (max-width: 860px) {
-  .knowGrid {
-    grid-template-columns: 1fr;
-  }
-}
-
-.bigStatBlock {
-  border-left: 2px solid var(--text-primary);
-  padding-left: 24px;
-}
-
-.statHugeNumber {
-  font-size: clamp(64px, 10vw, 120px);
-  font-weight: 900;
+.personaLabel {
+  font-size: 10.5px;
   font-family: var(--font-mono);
-  line-height: 1;
-  letter-spacing: -0.05em;
-  color: var(--text-primary);
-}
-
-.statHugeLabel {
-  font-size: 14px;
+  color: var(--text-muted);
+  text-transform: uppercase;
   font-weight: 700;
-  text-transform: uppercase;
   letter-spacing: 0.05em;
-  color: var(--text-secondary);
-  margin-top: 12px;
 }
 
-.strengthList {
+.personaBtn {
+  cursor: pointer;
+  background: var(--bg-subtle);
+  color: var(--text-primary);
+  border: 1px solid var(--border);
+  font-size: 11.5px;
+  padding: 5px 12px;
+  font-weight: 600;
+  border-radius: 4px;
+  transition: all 0.15s ease;
+}
+
+.personaBtn:hover {
+  background: var(--bg-hover);
+  border-color: var(--border-strong);
+}
+
+.personaBtnActive {
+  background: var(--bg-inverse);
+  color: var(--text-inverse);
+  border-color: var(--bg-inverse);
+}
+
+.guideBtn {
+  cursor: pointer;
+  background: transparent;
+  border: 1px dashed var(--border-strong);
+  color: var(--text-secondary);
+  font-size: 11px;
+  font-family: var(--font-mono);
+  padding: 5px 10px;
+  border-radius: 4px;
+  transition: all 0.15s ease;
+}
+
+.guideBtn:hover {
+  background: var(--bg-hover);
+  color: var(--text-primary);
+}
+
+/* ─── Main Content Container ────────────────────────────────────── */
+.mainContent {
+  max-width: 1300px;
+  margin: 0 auto;
+  padding: 24px clamp(16px, 3vw, 40px);
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 24px;
 }
 
-.strengthRow {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 12px 16px;
-  background: var(--bg-surface);
-  border: 1px solid var(--border);
-  border-radius: 4px;
-  font-size: 13px;
-}
-
-/* ─── Clickable 4-Pillar Dashboard Grid ─────────────────────────── */
-.pillarsGrid {
+/* ─── Command Hero Section ──────────────────────────────────────── */
+.commandHero {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 16px;
-  margin: 36px 0;
+  grid-template-columns: 1.4fr 1fr;
+  gap: 24px;
+  align-items: stretch;
 }
 
-@media (max-width: 1024px) {
-  .pillarsGrid {
-    grid-template-columns: repeat(2, 1fr);
-  }
-}
-
-@media (max-width: 640px) {
-  .pillarsGrid {
+@media (max-width: 960px) {
+  .commandHero {
     grid-template-columns: 1fr;
   }
 }
 
-.pillarCard {
+.heroIdentity {
   background: var(--bg-surface);
   border: 1px solid var(--border);
   border-radius: 8px;
-  padding: 18px 20px;
+  padding: 28px 32px;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  text-decoration: none;
+  box-shadow: var(--shadow-sm);
+}
+
+.heroMicroTag {
+  font-size: 10px;
+  font-family: var(--font-mono);
+  color: var(--blue, #3b82f6);
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  margin-bottom: 6px;
+}
+
+.heroCandidateName {
+  font-size: clamp(28px, 4vw, 40px);
+  font-weight: 900;
+  letter-spacing: -0.03em;
+  text-transform: uppercase;
   color: var(--text-primary);
-  transition: all 0.16s ease;
-  position: relative;
+  margin: 0 0 6px 0;
+  line-height: 1.1;
 }
 
-.pillarCard:hover {
-  border-color: var(--border-strong);
-  transform: translateY(-2px);
-  box-shadow: var(--shadow-md, 0 4px 12px rgba(0, 0, 0, 0.1));
+.heroRoleTarget {
+  font-size: 13px;
+  font-family: var(--font-mono);
+  color: var(--text-secondary);
+  margin-bottom: 14px;
 }
 
-.pillarCard:focus-visible {
-  outline: 2px solid var(--blue);
-  outline-offset: 2px;
+.heroRoleTarget strong {
+  color: var(--text-primary);
 }
 
-.pillarCardTop {
+.heroSummaryText {
+  font-size: 13.5px;
+  line-height: 1.6;
+  color: var(--text-secondary);
+  margin-bottom: 24px;
+  flex: 1;
+}
+
+.heroActionRow {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+/* ─── Hero Readiness Card ───────────────────────────────────────── */
+.heroReadinessCard {
+  background: var(--bg-surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 28px;
+  display: flex;
+  flex-direction: column;
+  box-shadow: var(--shadow-sm);
+}
+
+.readinessHeader {
   display: flex;
   justify-content: space-between;
   align-items: center;
   margin-bottom: 12px;
 }
 
-.pillarBadge {
+.readinessTag {
+  font-size: 10.5px;
   font-family: var(--font-mono);
-  font-size: 9.5px;
-  font-weight: 700;
+  font-weight: 800;
   color: var(--text-muted);
   text-transform: uppercase;
   letter-spacing: 0.06em;
 }
 
-.pillarArrow {
+.readinessStatus {
+  font-size: 10px;
   font-family: var(--font-mono);
-  font-size: 14px;
-  color: var(--text-muted);
-  transition: transform 0.15s ease, color 0.15s ease;
+  color: var(--green);
+  background: var(--green-subtle);
+  border: 1px solid var(--green-border);
+  padding: 2px 6px;
+  border-radius: 3px;
+  font-weight: 700;
 }
 
-.pillarCard:hover .pillarArrow {
-  transform: translateX(3px);
+.readinessScoreVal {
+  font-size: clamp(48px, 6vw, 64px);
+  font-weight: 900;
+  font-family: var(--font-mono);
   color: var(--text-primary);
+  line-height: 1;
+  margin-bottom: 4px;
 }
 
-.pillarTitle {
-  font-size: 14px;
-  font-weight: 800;
-  color: var(--text-primary);
-  margin: 0 0 6px 0;
-  letter-spacing: -0.01em;
-}
-
-.pillarDesc {
-  font-size: 12px;
+.readinessTrackLabel {
+  font-size: 11.5px;
   color: var(--text-secondary);
-  line-height: 1.45;
-  margin: 0 0 16px 0;
+  margin-bottom: 20px;
 }
 
-.pillarScoreRow {
+.readinessBars {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: auto;
+}
+
+.miniBarRow {
   display: flex;
   justify-content: space-between;
-  align-items: baseline;
-  margin-bottom: 6px;
+  font-size: 11px;
+  font-family: var(--font-mono);
+  color: var(--text-secondary);
 }
 
-.pillarScoreValue {
-  font-family: var(--font-mono);
-  font-size: 20px;
-  font-weight: 900;
+.miniBarRow strong {
   color: var(--text-primary);
 }
 
-.pillarWeight {
-  font-family: var(--font-mono);
-  font-size: 10px;
-  color: var(--text-muted);
-}
-
-.pillarProgressBar {
+.miniBarTrack {
   width: 100%;
   height: 4px;
   background: var(--bg-subtle);
@@ -335,55 +227,262 @@
   overflow: hidden;
 }
 
-.pillarProgressFill {
+.miniBarFill {
   height: 100%;
-  background: var(--text-primary);
+  background: var(--blue, #3b82f6);
   border-radius: 2px;
-  transition: width 0.3s ease;
+  transition: width 0.4s ease;
 }
 
-/* ─── Chapter 02: PROVE (Project Ledger) ────────────────────────── */
-.projectLedger {
+/* ─── Next Best Action Card ─────────────────────────────────────── */
+.nextActionCard {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-strong);
+  border-left: 4px solid var(--green);
+  border-radius: 8px;
+  padding: 22px 26px;
+  box-shadow: var(--shadow-sm);
+}
+
+.nextActionHeader {
   display: flex;
-  flex-direction: column;
-  margin-top: 36px;
-}
-
-.projectLedgerItem {
-  display: grid;
-  grid-template-columns: 80px 1fr auto;
-  gap: 24px;
-  padding: 24px 0;
+  justify-content: space-between;
   align-items: center;
+  margin-bottom: 10px;
 }
 
-@media (max-width: 768px) {
-  .projectLedgerItem {
-    grid-template-columns: 1fr;
-    gap: 12px;
-  }
+.actionLiveDot {
+  color: var(--green);
+  font-size: 10px;
 }
 
-.projectLedgerIndex {
+.nextActionHeading {
+  font-size: 10.5px;
   font-family: var(--font-mono);
-  font-size: 18px;
-  font-weight: 700;
+  font-weight: 800;
+  color: var(--green);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.actionBadge {
+  font-size: 10px;
+  font-family: var(--font-mono);
+  background: var(--bg-subtle);
+  border: 1px solid var(--border);
+  padding: 2px 8px;
+  border-radius: 4px;
   color: var(--text-muted);
 }
 
-.projectLedgerTitle {
-  font-size: 16px;
+.nextActionTitle {
+  font-size: 17px;
   font-weight: 800;
-  margin-bottom: 6px;
+  text-transform: uppercase;
+  color: var(--text-primary);
+  margin: 0 0 6px 0;
+  line-height: 1.3;
+}
+
+.nextActionReason {
+  font-size: 13px;
+  color: var(--text-secondary);
+  line-height: 1.55;
+  margin: 0 0 16px 0;
+}
+
+.nextActionFooter {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 14px;
+  padding-top: 14px;
+  border-top: 1px solid var(--border-subtle);
+}
+
+.actionMetrics {
+  display: flex;
+  gap: 16px;
+  font-size: 11.5px;
+  font-family: var(--font-mono);
+  color: var(--text-muted);
+}
+
+/* ─── 4 Career Journey Portals ──────────────────────────────────── */
+.portalsSection {
+  margin-top: 8px;
+}
+
+.portalsHeader {
+  margin-bottom: 16px;
+}
+
+.portalsTitle {
+  font-size: 11.5px;
+  font-family: var(--font-mono);
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--text-muted);
+}
+
+.portalsSubtitle {
+  font-size: 13px;
+  color: var(--text-secondary);
+  margin-top: 2px;
+}
+
+.portalsGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 18px;
+}
+
+@media (max-width: 860px) {
+  .portalsGrid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.portalCard {
+  background: var(--bg-surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  box-shadow: var(--shadow-sm);
+  transition: border-color 0.15s ease, box-shadow 0.15s ease, transform 0.15s ease;
+}
+
+.portalCard:hover {
+  border-color: var(--border-strong);
+  box-shadow: var(--shadow);
+  transform: translateY(-2px);
+}
+
+.portalTop {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.portalBadge {
+  font-size: 10px;
+  font-family: var(--font-mono);
+  font-weight: 700;
+  color: var(--text-muted);
+  letter-spacing: 0.06em;
+}
+
+.portalScoreBadge {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  font-family: var(--font-mono);
+}
+
+.portalScoreBadge span {
+  font-size: 18px;
+  font-weight: 900;
   color: var(--text-primary);
 }
 
-.projectLedgerDesc {
-  font-size: 13px;
-  color: var(--text-secondary);
-  line-height: 1.5;
+.portalScoreBadge small {
+  font-size: 10px;
+  color: var(--text-muted);
 }
 
-.projectLedgerLink {
-  text-align: right;
+.portalTitle {
+  font-size: 16px;
+  font-weight: 800;
+  color: var(--text-primary);
+  margin: 0 0 6px 0;
+  line-height: 1.3;
+}
+
+.portalDesc {
+  font-size: 12.5px;
+  line-height: 1.55;
+  color: var(--text-secondary);
+  margin: 0 0 16px 0;
+  flex: 1;
+}
+
+.portalMeta {
+  font-size: 11px;
+  font-family: var(--font-mono);
+  color: var(--text-muted);
+  background: var(--bg-subtle);
+  border: 1px solid var(--border);
+  padding: 6px 10px;
+  border-radius: 4px;
+  margin-bottom: 16px;
+}
+
+.portalActions {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  align-items: center;
+}
+
+.portalSecondaryLink {
+  font-size: 11.5px;
+  font-family: var(--font-mono);
+  color: var(--text-muted);
+  text-decoration: none;
+  transition: color 0.15s ease;
+}
+
+.portalSecondaryLink:hover {
+  color: var(--text-primary);
+}
+
+/* ─── Specialized Labs Hub Strip ────────────────────────────────── */
+.labsSection {
+  background: var(--bg-surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 16px 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 10px;
+}
+
+.labsTitle {
+  font-size: 10.5px;
+  font-family: var(--font-mono);
+  font-weight: 800;
+  color: var(--text-muted);
+  text-transform: uppercase;
+}
+
+.labsLinks {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.labLink {
+  font-size: 12px;
+  font-family: var(--font-mono);
+  color: var(--text-primary);
+  background: var(--bg-subtle);
+  border: 1px solid var(--border);
+  padding: 4px 10px;
+  border-radius: 4px;
+  text-decoration: none;
+  font-weight: 600;
+  transition: border-color 0.15s ease, background 0.15s ease;
+}
+
+.labLink:hover {
+  background: var(--bg-hover);
+  border-color: var(--border-strong);
 }
