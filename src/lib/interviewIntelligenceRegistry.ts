@@ -26,6 +26,15 @@ export interface ResolvedInterviewContext {
   activeApplicationCount?: number;
 }
 
+export interface ResearchCitation {
+  title: string;
+  authors: string;
+  year: number | string;
+  arxivId?: string;
+  url?: string;
+  takeaway?: string;
+}
+
 export interface PrioritizedQuestion {
   id: number | string;
   category: string;
@@ -37,7 +46,59 @@ export interface PrioritizedQuestion {
   priorityScore: number;
   isCompanyPriority: boolean;
   matchReason?: string;
+  citedPaper?: ResearchCitation;
 }
+
+export const RESEARCH_PAPER_CITATIONS: Record<string, ResearchCitation> = {
+  flashattention: {
+    title: 'FlashAttention-2: Faster Attention with Better Parallelism and Work Partitioning',
+    authors: 'Tri Dao (Stanford / Together AI)',
+    year: '2023',
+    arxivId: '2307.08691',
+    url: 'https://arxiv.org/abs/2307.08691',
+    takeaway: 'Eliminates quadratic HBM I/O bottlenecks via online softmax tiling directly in on-chip SRAM.'
+  },
+  megatron: {
+    title: 'Megatron-LM: Training Multi-Billion Parameter Language Models Using Model Parallelism',
+    authors: 'Mohammad Shoeybi et al. (NVIDIA Research)',
+    year: '2019',
+    arxivId: '1909.08053',
+    url: 'https://arxiv.org/abs/1909.08053',
+    takeaway: 'Column-parallel and row-parallel GEMM splitting with minimal All-Reduce collective overhead.'
+  },
+  pagedattention: {
+    title: 'Efficient Memory Management for Large Language Model Serving with PagedAttention',
+    authors: 'Woosuk Kwon et al. (UC Berkeley / LMSYS)',
+    year: '2023',
+    arxivId: '2309.06180',
+    url: 'https://arxiv.org/abs/2309.06180',
+    takeaway: 'Partitions continuous KV-cache into virtual memory pages, reducing wasted fragmentation from 80% to < 4%.'
+  },
+  dpo: {
+    title: 'Direct Preference Optimization: Your Language Model is Secretly a Reward Model',
+    authors: 'Rafael Rafailov et al. (Stanford University)',
+    year: '2023',
+    arxivId: '2305.18290',
+    url: 'https://arxiv.org/abs/2305.18290',
+    takeaway: 'Derives closed-form implicit reward function to optimize preference objectives with binary cross-entropy.'
+  },
+  triton: {
+    title: 'Triton: An Intermediate Language and Compiler for Tiled Neural Network Computations',
+    authors: 'Philippe Tillet, H.T. Kung, David Cox (Harvard / OpenAI)',
+    year: '2019',
+    arxivId: 'MAPL 2019',
+    url: 'https://www.eecs.harvard.edu/~htk/publication/2019-mapl-tillet-kung-cox.pdf',
+    takeaway: 'Python-based programming model for high-performance GPU kernel engineering and bank conflict avoidance.'
+  },
+  deepseek: {
+    title: 'DeepSeek-V3 Technical Report: Multi-Head Latent Attention & DeepSeekMoE',
+    authors: 'DeepSeek-AI Team',
+    year: '2024',
+    arxivId: '2412.19437',
+    url: 'https://arxiv.org/abs/2412.19437',
+    takeaway: 'Multi-Head Latent Attention (MLA) compresses the KV cache into a low-rank latent vector to dramatically reduce inference memory footprint.'
+  }
+};
 
 export const COMPANY_PROFILES: CompanyIntelligenceProfile[] = [
   {
@@ -249,11 +310,30 @@ export function prioritizeQuestions(
 
       const isCompanyPriority = score >= 30;
 
+      // 4. Peer-Reviewed Research Paper Citation (Connection G)
+      let citedPaper = q.citedPaper;
+      if (!citedPaper) {
+        if (qText.includes('flashattention') || qText.includes('online softmax')) {
+          citedPaper = RESEARCH_PAPER_CITATIONS.flashattention;
+        } else if (qText.includes('megatron') || qText.includes('tensor parallelism')) {
+          citedPaper = RESEARCH_PAPER_CITATIONS.megatron;
+        } else if (qText.includes('pagedattention') || qText.includes('kv-cache') || qText.includes('gqa') || qText.includes('grouped-query')) {
+          citedPaper = RESEARCH_PAPER_CITATIONS.pagedattention;
+        } else if (qText.includes('dpo') || qText.includes('direct preference') || qText.includes('rlhf')) {
+          citedPaper = RESEARCH_PAPER_CITATIONS.dpo;
+        } else if (qText.includes('triton') || qText.includes('gpu kernel')) {
+          citedPaper = RESEARCH_PAPER_CITATIONS.triton;
+        } else if (qText.includes('deepseek') || qText.includes('latent attention')) {
+          citedPaper = RESEARCH_PAPER_CITATIONS.deepseek;
+        }
+      }
+
       return {
         ...q,
         priorityScore: score,
         isCompanyPriority,
         matchReason: reasons.length > 0 ? reasons[0] : undefined,
+        citedPaper,
       };
     })
     .sort((a, b) => b.priorityScore - a.priorityScore);

@@ -1,13 +1,34 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import styles from './CompensationEquityModeler.module.css';
 
-export default function CompensationEquityModeler() {
-  const [base, setBase] = useState(195000);
-  const [equityGrant, setEquityGrant] = useState(360000); // 4-year grant
-  const [bonusPct, setBonusPct] = useState(15);
-  const [annualAppreciation, setAnnualAppreciation] = useState(10); // % stock growth
+export default function CompensationEquityModeler({
+  initialBase = 195000,
+  initialEquityGrant = 360000,
+  initialBonusPct = 15,
+  initialAppreciation = 10,
+}) {
+  const [base, setBase] = useState(initialBase);
+  const [equityGrant, setEquityGrant] = useState(initialEquityGrant); // 4-year grant
+  const [bonusPct, setBonusPct] = useState(initialBonusPct);
+  const [annualAppreciation, setAnnualAppreciation] = useState(initialAppreciation); // % stock growth
+
+  useEffect(() => {
+    if (initialBase) setBase(Number(initialBase));
+  }, [initialBase]);
+
+  useEffect(() => {
+    if (initialEquityGrant) setEquityGrant(Number(initialEquityGrant));
+  }, [initialEquityGrant]);
+
+  useEffect(() => {
+    if (initialBonusPct !== undefined) setBonusPct(Number(initialBonusPct));
+  }, [initialBonusPct]);
+
+  useEffect(() => {
+    if (initialAppreciation !== undefined) setAnnualAppreciation(Number(initialAppreciation));
+  }, [initialAppreciation]);
 
   const annualBonus = Math.round(base * (bonusPct / 100));
 

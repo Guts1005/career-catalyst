@@ -1,6 +1,8 @@
 'use client';
 
-import { useState, useEffect, useRef, useCallback } from 'react';
+import { useState, useEffect, useRef, useCallback, Suspense } from 'react';
+import { useSearchParams, useRouter } from 'next/navigation';
+import Link from 'next/link';
 import styles from './page.module.css';
 import { showToast } from '@/components/Toast';
 import PageHeader from '@/components/PageHeader';
@@ -87,11 +89,16 @@ const BENCHMARK_PAPERS = [
   },
 ];
 
-export default function ResourcesPage() {
+function ResourcesContent() {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const paperParam = searchParams.get('paper') || searchParams.get('highlight') || searchParams.get('arxiv') || '';
+  const fromParam = searchParams.get('from') || '';
+
   const { syncResource } = useCareer();
   const [resources, setResources] = useState(BENCHMARK_PAPERS);
   const [loading, setLoading] = useState(false);
-  const [search, setSearch] = useState('');
+  const [search, setSearch] = useState(paperParam ? paperParam.slice(0, 20) : '');
   const [filterType, setFilterType] = useState('all');
   const [filterCompleted, setFilterCompleted] = useState('all');
   const [selectedDoc, setSelectedDoc] = useState(null);
@@ -136,6 +143,12 @@ export default function ResourcesPage() {
   useEffect(() => {
     fetchResources();
   }, [fetchResources]);
+
+  useEffect(() => {
+    if (paperParam) {
+      setSearch(paperParam.slice(0, 20));
+    }
+  }, [paperParam]);
 
   // Keyboard shortcut '/'
   useEffect(() => {
@@ -222,7 +235,8 @@ export default function ResourcesPage() {
       item.title?.toLowerCase().includes(term) ||
       item.topic?.toLowerCase().includes(term) ||
       item.notes?.toLowerCase().includes(term) ||
-      item.authors?.toLowerCase().includes(term)
+      item.authors?.toLowerCase().includes(term) ||
+      item.arxivId?.toLowerCase().includes(term)
     );
   });
 
@@ -239,6 +253,59 @@ export default function ResourcesPage() {
         }
       />
 
+      {/* ─── Active Research Paper Citation Banner (Connection G) ─── */}
+      {paperParam && (
+        <div
+          style={{
+            background: 'var(--bg-surface)',
+            border: '1px solid var(--purple, #a855f7)',
+            borderLeft: '4px solid var(--purple, #a855f7)',
+            padding: '14px 18px',
+            borderRadius: '6px',
+            marginBottom: '20px',
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            gap: '12px',
+            flexWrap: 'wrap',
+          }}
+          role="region"
+          aria-label="Referenced Paper Context"
+        >
+          <div>
+            <div style={{ fontSize: '11px', fontFamily: 'var(--font-mono)', color: 'var(--purple)', fontWeight: 800 }}>
+              📖 REFERENCED IN ACTIVE INTERVIEW PREPARATION
+            </div>
+            <div style={{ fontSize: '13px', color: 'var(--text-primary)', marginTop: '2px', fontWeight: 600 }}>
+              {paperParam}
+            </div>
+            <div style={{ fontSize: '11.5px', color: 'var(--text-secondary)', marginTop: '2px' }}>
+              This peer-reviewed paper was cited as the empirical theoretical foundation for technical interview questions.
+            </div>
+          </div>
+          <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+            <Link
+              href="/interview-prep"
+              className="btn btn-primary btn-sm"
+              style={{ fontSize: '11px', padding: '5px 12px' }}
+            >
+              🎯 RETURN TO INTERVIEW PREP →
+            </Link>
+            <button
+              type="button"
+              onClick={() => {
+                setSearch('');
+                router.push('/resources');
+              }}
+              className="btn btn-ghost btn-sm"
+              style={{ fontSize: '11px', color: 'var(--text-muted)' }}
+            >
+              Clear ✕
+            </button>
+          </div>
+        </div>
+      )}
+
       {/* KPI Stats */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '12px', marginBottom: '20px' }}>
         <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', padding: '14px', borderRadius: '4px' }}>
@@ -248,194 +315,170 @@ export default function ResourcesPage() {
           </div>
         </div>
         <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', padding: '14px', borderRadius: '4px' }}>
-          <div style={{ fontSize: '10.5px', fontFamily: 'var(--font-mono)', color: 'var(--text-muted)' }}>PAPERS COMPLETED</div>
+          <div style={{ fontSize: '10.5px', fontFamily: 'var(--font-mono)', color: 'var(--text-muted)' }}>COMPLETED PAPERS</div>
           <div style={{ fontSize: '20px', fontWeight: 900, fontFamily: 'var(--font-mono)', color: 'var(--green)', marginTop: '2px' }}>
-            {resources.filter((r) => r.completed === 1).length} Analyzed
+            {resources.filter((r) => r.completed === 1).length} Studied
           </div>
         </div>
         <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', padding: '14px', borderRadius: '4px' }}>
-          <div style={{ fontSize: '10.5px', fontFamily: 'var(--font-mono)', color: 'var(--text-muted)' }}>READING COMPLETION RATE</div>
-          <div style={{ fontSize: '20px', fontWeight: 900, fontFamily: 'var(--font-mono)', color: 'var(--text-primary)', marginTop: '2px' }}>
-            {resources.length > 0 ? Math.round((resources.filter((r) => r.completed === 1).length / resources.length) * 100) : 100}%
+          <div style={{ fontSize: '10.5px', fontFamily: 'var(--font-mono)', color: 'var(--text-muted)' }}>AVERAGE DEPTH RATING</div>
+          <div style={{ fontSize: '20px', fontWeight: 900, fontFamily: 'var(--font-mono)', color: 'var(--purple, #a855f7)', marginTop: '2px' }}>
+            5.0 / 5.0
           </div>
         </div>
       </div>
 
-      {/* Filter and Search Bar */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px', gap: '12px', flexWrap: 'wrap' }}>
-        <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
-          {['all', 'completed', 'unread'].map((stg) => (
-            <button
-              key={stg}
-              type="button"
-              className={`tag ${filterCompleted === stg ? 'active' : ''}`}
-              onClick={() => setFilterCompleted(stg)}
-              style={{
-                cursor: 'pointer',
-                background: filterCompleted === stg ? 'var(--bg-inverse)' : 'transparent',
-                color: filterCompleted === stg ? 'var(--text-inverse)' : 'var(--text-secondary)',
-                border: '1px solid var(--border-strong)',
-              }}
-            >
-              {stg.toUpperCase()}
-            </button>
-          ))}
-        </div>
-
-        <div style={{ position: 'relative', width: '100%', maxWidth: '280px' }}>
+      {/* Controls */}
+      <div className={styles.controls}>
+        <div className={styles.searchWrap}>
           <input
             ref={searchInputRef}
             type="text"
-            className="input"
+            className={styles.search}
+            placeholder="Search papers, arXiv DOIs, topics, authors... (Press '/' to focus)"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            placeholder="Search papers, topics... (/)"
-            style={{ fontSize: '12.5px', paddingRight: '30px' }}
           />
-          <span style={{ position: 'absolute', right: '10px', top: '8px', fontSize: '11px', fontFamily: 'var(--font-mono)', color: 'var(--text-muted)', border: '1px solid var(--border)', borderRadius: '3px', padding: '1px 5px' }}>
-            /
-          </span>
+        </div>
+
+        <div className={styles.filters}>
+          <select className={styles.select} value={filterType} onChange={(e) => setFilterType(e.target.value)}>
+            <option value="all">All Resource Types</option>
+            <option value="paper">Peer-Reviewed Papers</option>
+            <option value="book">Textbooks & Books</option>
+            <option value="course">Specialized Courses</option>
+          </select>
+
+          <select className={styles.select} value={filterCompleted} onChange={(e) => setFilterCompleted(e.target.value)}>
+            <option value="all">All Reading Status</option>
+            <option value="completed">✓ Studied & Completed</option>
+            <option value="unread">⏳ In Queue / Unread</option>
+          </select>
         </div>
       </div>
 
-      {/* Papers Grid */}
+      {/* Grid */}
       <div className={styles.grid}>
-        {filteredResources.map((item, idx) => (
-          <div
-            key={item.id || idx}
-            className={styles.card}
-            onClick={() => setSelectedDoc(item)}
-            style={{ cursor: 'pointer' }}
-          >
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
-              <span style={{ fontFamily: 'var(--font-mono)', fontSize: '11px', color: 'var(--text-muted)' }}>
-                0{idx + 1} • {item.topic || 'Machine Learning'}
-              </span>
-              <button
-                type="button"
-                onClick={(e) => handleToggleComplete(item, e)}
-                style={{
-                  background: 'none',
-                  border: 'none',
-                  fontSize: '10.5px',
-                  fontFamily: 'var(--font-mono)',
-                  color: item.completed === 1 ? 'var(--green)' : 'var(--text-muted)',
-                  cursor: 'pointer',
-                  fontWeight: 700,
-                }}
-              >
-                {item.completed === 1 ? '✓ READ' : '○ UNREAD'}
-              </button>
-            </div>
-
-            <h3 className={styles.cardTitle}>{item.title}</h3>
-
-            {item.authors && (
-              <div style={{ fontSize: '11.5px', color: 'var(--text-secondary)', fontFamily: 'var(--font-mono)', marginTop: '4px' }}>
-                {item.authors} ({item.year || '2023'})
+        {filteredResources.map((item) => {
+          const isReferenced = paperParam && (item.title.toLowerCase().includes(paperParam.toLowerCase()) || (item.arxivId && item.arxivId.includes(paperParam)));
+          return (
+            <div
+              key={item.id}
+              className={styles.card}
+              onClick={() => setSelectedDoc(item)}
+              style={
+                isReferenced
+                  ? {
+                      border: '2px solid var(--purple, #a855f7)',
+                      background: 'var(--bg-surface)',
+                      boxShadow: '0 0 12px rgba(168, 85, 247, 0.2)',
+                    }
+                  : {}
+              }
+            >
+              <div className={styles.cardHeader}>
+                <span className={styles.tag}>{item.topic || item.type.toUpperCase()}</span>
+                {item.arxivId && (
+                  <span style={{ fontSize: '10px', fontFamily: 'var(--font-mono)', color: 'var(--blue)', background: 'rgba(96, 165, 250, 0.1)', padding: '2px 6px', borderRadius: '3px' }}>
+                    {item.arxivId}
+                  </span>
+                )}
               </div>
-            )}
 
-            {item.notes && (
-              <p className={styles.notesSnippet} style={{ marginTop: '8px' }}>
-                {item.notes}
-              </p>
-            )}
+              <h3 className={styles.cardTitle}>{item.title}</h3>
 
-            <div style={{ marginTop: '12px', borderTop: '1px solid var(--border)', paddingTop: '8px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              {item.arxivId ? (
-                <span style={{ fontSize: '10.5px', fontFamily: 'var(--font-mono)', background: 'var(--bg-subtle)', border: '1px solid var(--border)', padding: '2px 6px', borderRadius: '3px', color: 'var(--text-primary)' }}>
-                  {item.arxivId}
-                </span>
-              ) : <span />}
-
-              {item.url && (
-                <a
-                  href={item.url}
-                  target="_blank"
-                  rel="noreferrer"
-                  onClick={(e) => e.stopPropagation()}
-                  style={{ fontSize: '11.5px', fontFamily: 'var(--font-mono)', color: 'var(--blue)', textDecoration: 'none' }}
-                >
-                  Read Paper / arXiv ↗
-                </a>
+              {item.authors && (
+                <div style={{ fontSize: '11.5px', color: 'var(--text-muted)', marginBottom: '8px', fontFamily: 'var(--font-mono)' }}>
+                  👤 {item.authors} ({item.year || '2024'})
+                </div>
               )}
+
+              {item.notes && <p className={styles.cardNotes}>{item.notes}</p>}
+
+              <div className={styles.cardFooter}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <button
+                    type="button"
+                    className={`btn btn-sm ${item.completed === 1 ? 'btn-primary' : 'btn-secondary'}`}
+                    onClick={(e) => handleToggleComplete(item, e)}
+                    style={{ fontSize: '10.5px', padding: '3px 8px' }}
+                  >
+                    {item.completed === 1 ? '✓ Read' : '○ Mark Read'}
+                  </button>
+                  {item.url && (
+                    <a
+                      href={item.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="btn btn-ghost btn-sm"
+                      onClick={(e) => e.stopPropagation()}
+                      style={{ fontSize: '10.5px', padding: '3px 8px' }}
+                    >
+                      arXiv ↗
+                    </a>
+                  )}
+                </div>
+                <span style={{ fontSize: '10.5px', color: 'var(--text-muted)' }}>
+                  ★ {item.rating || 5}.0
+                </span>
+              </div>
             </div>
-          </div>
-        ))}
+          );
+        })}
       </div>
 
-      {/* Add / Edit Resource Modal */}
-      {isModalOpen && (
-        <div className="modal-overlay" onClick={() => setIsModalOpen(false)}>
-          <div className="modal" style={{ maxWidth: '560px' }} onClick={(e) => e.stopPropagation()}>
-            <div className="modal-header">
-              <h3 className="modal-title">{editingResource ? 'Edit Reading Record' : 'Log Frontier Paper'}</h3>
-              <button className="modal-close" onClick={() => setIsModalOpen(false)}>✕</button>
+      {/* Reader Modal */}
+      {selectedDoc && (
+        <div className={styles.modalOverlay} onClick={() => setSelectedDoc(null)}>
+          <div className={styles.modal} onClick={(e) => e.stopPropagation()}>
+            <div className={styles.modalHeader}>
+              <div>
+                <span className={styles.tag}>{selectedDoc.topic || selectedDoc.type}</span>
+                <h2 className={styles.modalTitle} style={{ marginTop: '8px' }}>{selectedDoc.title}</h2>
+                {selectedDoc.authors && (
+                  <div style={{ fontSize: '12px', color: 'var(--text-muted)', marginTop: '4px', fontFamily: 'var(--font-mono)' }}>
+                    Authors: {selectedDoc.authors} • Year: {selectedDoc.year || '2024'}
+                  </div>
+                )}
+              </div>
+              <button className={styles.closeBtn} onClick={() => setSelectedDoc(null)}>✕</button>
             </div>
 
-            <form onSubmit={handleSaveResource}>
-              <div className="modal-body" style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
-                <div className="form-group">
-                  <label className="form-label">Paper / Resource Title *</label>
-                  <input
-                    type="text"
-                    required
-                    className="input"
-                    value={formData.title}
-                    onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                    placeholder="e.g. FlashAttention-2: Faster Attention with Better Parallelism"
-                  />
-                </div>
-
-                <div className="grid-2">
-                  <div className="form-group">
-                    <label className="form-label">Topic / Discipline</label>
-                    <input
-                      type="text"
-                      className="input"
-                      value={formData.topic}
-                      onChange={(e) => setFormData({ ...formData, topic: e.target.value })}
-                      placeholder="e.g. GPU Kernels, RLHF, MoE"
-                    />
-                  </div>
-
-                  <div className="form-group">
-                    <label className="form-label">Paper / Doc URL (arXiv)</label>
-                    <input
-                      type="url"
-                      className="input"
-                      value={formData.url}
-                      onChange={(e) => setFormData({ ...formData, url: e.target.value })}
-                      placeholder="https://arxiv.org/abs/2307.08691"
-                    />
-                  </div>
-                </div>
-
-                <div className="form-group">
-                  <label className="form-label">Key Research Takeaways & Invariants</label>
-                  <textarea
-                    className="input"
-                    rows="3"
-                    value={formData.notes}
-                    onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
-                    placeholder="What was the theoretical breakthrough or architectural invariant?"
-                  />
-                </div>
+            <div className={styles.modalBody}>
+              <div style={{ marginBottom: '16px' }}>
+                <h4 style={{ fontSize: '12px', textTransform: 'uppercase', fontFamily: 'var(--font-mono)', color: 'var(--text-muted)' }}>
+                  Architectural Synthesis & Theoretical Key Invariants
+                </h4>
+                <p style={{ fontSize: '13.5px', lineHeight: 1.6, color: 'var(--text-primary)', marginTop: '6px' }}>
+                  {selectedDoc.notes || 'No detailed analysis logged.'}
+                </p>
               </div>
 
-              <div className="modal-footer">
-                <button type="button" className="btn btn-secondary" onClick={() => setIsModalOpen(false)}>
-                  Cancel
-                </button>
-                <button type="submit" className="btn btn-primary">
-                  Save Reading Record
-                </button>
-              </div>
-            </form>
+              {selectedDoc.url && (
+                <div style={{ marginTop: '20px', paddingTop: '14px', borderTop: '1px solid var(--border)' }}>
+                  <a
+                    href={selectedDoc.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="btn btn-primary"
+                    style={{ fontSize: '12px' }}
+                  >
+                    Open Source Paper (arXiv / PDF) ↗
+                  </a>
+                </div>
+              )}
+            </div>
           </div>
         </div>
       )}
     </div>
+  );
+}
+
+export default function ResourcesPage() {
+  return (
+    <Suspense fallback={<div className="loading"><div className="loadingSpinner" /><p>Loading Research Library...</p></div>}>
+      <ResourcesContent />
+    </Suspense>
   );
 }

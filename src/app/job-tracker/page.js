@@ -363,8 +363,28 @@ export default function JobTrackerPage() {
             </div>
 
             <div className="modal-body" style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-              {/* Connected Interview Preparation & Simulation Banner (Connections C & D) */}
-              {['interview', 'final', 'oa'].includes(selectedJob.status) ? (
+              {/* Connected Stage Banners (Connections C, D, E, H) */}
+              {['offer', 'negotiation'].includes(selectedJob.status) ? (
+                <div style={{ background: 'var(--bg-subtle)', border: '1px solid var(--amber)', borderLeft: '4px solid var(--amber)', padding: '12px 14px', borderRadius: '4px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '12px', flexWrap: 'wrap' }}>
+                  <div>
+                    <div style={{ fontSize: '11px', fontFamily: 'var(--font-mono)', color: 'var(--amber)', fontWeight: 800 }}>
+                      🎉 ACTIVE OFFER & NEGOTIATION STAGE
+                    </div>
+                    <div style={{ fontSize: '12px', color: 'var(--text-secondary)', marginTop: '2px' }}>
+                      Model multi-year RSU waterfalls, base/bonus splits, and leverage scripts for {selectedJob.company}.
+                    </div>
+                  </div>
+                  <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
+                    <Link
+                      href={`/salary-insights?company=${encodeURIComponent(selectedJob.company)}&role=${encodeURIComponent(selectedJob.role)}&base=${selectedJob.salary_min || 215000}&equity=${selectedJob.equity || 160000}&bonus=${selectedJob.bonus || 35000}&stage=${selectedJob.status}`}
+                      className="btn btn-primary btn-sm"
+                      style={{ fontSize: '11px', padding: '5px 12px', background: 'var(--amber)', color: '#000', borderColor: 'var(--amber)' }}
+                    >
+                      💰 MODEL OFFER & EQUITY SCENARIOS →
+                    </Link>
+                  </div>
+                </div>
+              ) : ['interview', 'final', 'oa'].includes(selectedJob.status) ? (
                 <div style={{ background: 'var(--bg-subtle)', border: '1px solid var(--border)', borderLeft: '3px solid var(--purple)', padding: '12px 14px', borderRadius: '4px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '12px', flexWrap: 'wrap' }}>
                   <div>
                     <div style={{ fontSize: '11px', fontFamily: 'var(--font-mono)', color: 'var(--purple)', fontWeight: 800 }}>
@@ -427,7 +447,15 @@ export default function JobTrackerPage() {
                   </div>
                 </div>
                 <div style={{ background: 'var(--bg-subtle)', padding: '10px', borderRadius: '4px', border: '1px solid var(--border)' }}>
-                  <div style={{ fontSize: '10px', fontFamily: 'var(--font-mono)', color: 'var(--text-muted)' }}>COMPENSATION</div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <div style={{ fontSize: '10px', fontFamily: 'var(--font-mono)', color: 'var(--text-muted)' }}>COMPENSATION</div>
+                    <Link
+                      href={`/salary-insights?company=${encodeURIComponent(selectedJob.company)}&role=${encodeURIComponent(selectedJob.role)}`}
+                      style={{ fontSize: '9.5px', fontFamily: 'var(--font-mono)', color: 'var(--blue)', textDecoration: 'none' }}
+                    >
+                      Model ↗
+                    </Link>
+                  </div>
                   <div style={{ fontSize: '12.5px', fontWeight: 700, fontFamily: 'var(--font-mono)', marginTop: '2px', color: 'var(--text-primary)' }}>
                     {selectedJob.salary || '$180k - $240k'}
                   </div>

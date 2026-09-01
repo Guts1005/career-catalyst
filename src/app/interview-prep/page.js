@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback, useRef, useMemo, Suspense } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
+import Link from 'next/link';
 import styles from './page.module.css';
 import { showToast } from '@/components/Toast';
 import PageHeader from '@/components/PageHeader';
@@ -480,6 +481,42 @@ function InterviewPrepContent() {
                         Empirical Benchmark Artifacts / Citations
                       </div>
                       <p style={{ margin: 0, fontSize: '12px', color: 'var(--text-secondary)' }}>{q.user_notes}</p>
+                    </div>
+                  )}
+
+                  {/* Peer-Reviewed Research Paper Citation (Connection G) */}
+                  {q.citedPaper && (
+                    <div style={{
+                      marginBottom: '14px',
+                      background: 'var(--bg-subtle)',
+                      border: '1px solid var(--border)',
+                      borderLeft: '3px solid var(--blue)',
+                      padding: '12px 14px',
+                      borderRadius: '4px',
+                      display: 'flex',
+                      justifyContent: 'space-between',
+                      alignItems: 'center',
+                      gap: '12px',
+                      flexWrap: 'wrap'
+                    }}>
+                      <div style={{ maxWidth: '560px' }}>
+                        <div style={{ fontSize: '10.5px', fontFamily: 'var(--font-mono)', color: 'var(--blue)', fontWeight: 700, textTransform: 'uppercase' }}>
+                          📄 Peer-Reviewed Research Paper Citation
+                        </div>
+                        <div style={{ fontSize: '12.5px', fontWeight: 600, color: 'var(--text-primary)', marginTop: '2px' }}>
+                          {q.citedPaper.title}
+                        </div>
+                        <div style={{ fontSize: '11px', color: 'var(--text-secondary)', marginTop: '2px' }}>
+                          {q.citedPaper.authors} ({q.citedPaper.year}) • {q.citedPaper.takeaway}
+                        </div>
+                      </div>
+                      <Link
+                        href={`/resources?paper=${encodeURIComponent(q.citedPaper.title)}&arxiv=${q.citedPaper.arxivId || ''}&from=interview-prep`}
+                        className="btn btn-secondary btn-sm"
+                        style={{ fontSize: '11px', padding: '5px 10px', borderColor: 'var(--blue)', color: 'var(--blue)', whiteSpace: 'nowrap' }}
+                      >
+                        📖 READ PAPER IN LIBRARY →
+                      </Link>
                     </div>
                   )}
 
