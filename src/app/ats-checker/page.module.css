@@ -53,12 +53,16 @@
 }
 
 .inputSection h2 {
-  font-size: 14px;
+  font-size: 11.5px;
   font-weight: 800;
   text-transform: uppercase;
-  letter-spacing: -0.01em;
-  color: var(--text-primary);
+  letter-spacing: 0.06em;
+  font-family: var(--font-mono);
+  color: var(--text-secondary);
   margin-bottom: 12px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
 
 .textarea {
@@ -66,26 +70,41 @@
   height: 240px;
   background-color: var(--bg-subtle);
   border: 1px solid var(--border-strong);
-  border-radius: 4px;
-  padding: 12px;
+  border-radius: 6px;
+  padding: 14px 16px;
   color: var(--text-primary);
-  font-family: inherit;
-  font-size: 13px;
-  line-height: 1.5;
+  font-family: var(--font-mono);
+  font-size: 12.5px;
+  line-height: 1.6;
   resize: vertical;
   margin-bottom: 16px;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04) inset;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease, background-color 0.15s ease;
 }
 
-@media (max-width: 768px) {
-  .textarea {
-    font-size: 16px;
-    height: 180px;
-  }
+.textarea:hover {
+  border-color: var(--text-muted);
+  background-color: var(--bg-hover);
 }
 
 .textarea:focus {
   outline: none;
-  border-color: var(--text-primary);
+  border-color: var(--blue);
+  background-color: var(--bg-surface);
+  box-shadow: 0 0 0 3px var(--blue-subtle), 0 1px 2px rgba(0, 0, 0, 0.04) inset;
+}
+
+.textarea::placeholder {
+  color: var(--text-muted);
+  opacity: 0.7;
+}
+
+@media (max-width: 768px) {
+  .textarea {
+    font-size: 13px;
+    height: 180px;
+    padding: 12px;
+  }
 }
 
 .analyzeBtn {

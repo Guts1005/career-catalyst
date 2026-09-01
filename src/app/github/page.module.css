@@ -36,14 +36,24 @@
   background-color: var(--bg-subtle);
   border: 1px solid var(--border-strong);
   color: var(--text-primary);
-  padding: 8px 12px;
+  padding: 10px 14px;
   border-radius: var(--radius-sm);
   font-size: 13px;
+  font-family: var(--font-mono);
   outline: none;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.03) inset;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease, background-color 0.15s ease;
+}
+
+.input:hover {
+  border-color: var(--text-muted);
+  background-color: var(--bg-hover);
 }
 
 .input:focus {
-  border-color: var(--text-primary);
+  border-color: var(--blue);
+  background-color: var(--bg-surface);
+  box-shadow: 0 0 0 3px var(--blue-subtle), 0 1px 2px rgba(0, 0, 0, 0.03) inset;
 }
 
 .analyzeButton {

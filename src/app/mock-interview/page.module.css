@@ -109,17 +109,32 @@
   min-height: 240px;
   background: var(--bg-subtle);
   border: 1px solid var(--border-strong);
-  border-radius: 4px;
-  padding: 14px;
+  border-radius: 6px;
+  padding: 16px 18px;
   font-family: var(--font-mono);
   font-size: 13px;
   color: var(--text-primary);
-  line-height: 1.5;
+  line-height: 1.65;
+  tab-size: 2;
   resize: vertical;
   margin-bottom: 20px;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04) inset;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease, background-color 0.15s ease;
+}
+
+.simTextarea:hover {
+  border-color: var(--text-muted);
+  background: var(--bg-hover);
 }
 
 .simTextarea:focus {
   outline: none;
-  border-color: var(--text-primary);
+  border-color: var(--purple, #a855f7);
+  background: var(--bg-surface);
+  box-shadow: 0 0 0 3px var(--purple-subtle, rgba(168, 85, 247, 0.15)), 0 1px 2px rgba(0, 0, 0, 0.04) inset;
+}
+
+.simTextarea::placeholder {
+  color: var(--text-muted);
+  opacity: 0.7;
 }
