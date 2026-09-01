@@ -119,30 +119,29 @@ function ResourcesContent() {
     notes: '',
   });
 
-  const fetchResources = useCallback(async () => {
-    try {
-      const res = await fetch('/api/resources');
-      if (res.ok) {
-        const data = await res.json();
-        if (data && data.length > 0) {
-          setResources(data);
+  useEffect(() => {
+    const fetchResources = async () => {
+      try {
+        const res = await fetch('/api/resources');
+        if (res.ok) {
+          const data = await res.json();
+          if (data && data.length > 0) {
+            setResources(data);
+          } else {
+            setResources(BENCHMARK_PAPERS);
+          }
         } else {
           setResources(BENCHMARK_PAPERS);
         }
-      } else {
+      } catch (err) {
+        console.error('Failed to fetch resources:', err);
         setResources(BENCHMARK_PAPERS);
+      } finally {
+        setLoading(false);
       }
-    } catch (err) {
-      console.error('Failed to fetch resources:', err);
-      setResources(BENCHMARK_PAPERS);
-    } finally {
-      setLoading(false);
-    }
-  }, []);
-
-  useEffect(() => {
+    };
     fetchResources();
-  }, [fetchResources]);
+  }, []);
 
   useEffect(() => {
     if (paperParam) {
