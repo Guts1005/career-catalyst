@@ -341,30 +341,20 @@ function InterviewPrepContent() {
         </div>
       )}
 
-      {/* Stats KPI Row */}
-      <div className={styles.statsRow}>
-        <div className={styles.statCard}>
-          <div className={styles.statVal}>{questions.length}</div>
-          <div className={styles.statLabel}>Available Problems</div>
-        </div>
-        <div className={styles.statCard}>
-          <div className={styles.statVal} style={{ color: 'var(--green)' }}>
-            {questions.filter((q) => q.user_status === 'mastered').length}
-          </div>
-          <div className={styles.statLabel}>Mastered Solutions</div>
-        </div>
-        <div className={styles.statCard}>
-          <div className={styles.statVal} style={{ color: 'var(--amber)' }}>
-            {questions.filter((q) => q.user_status === 'needs_review').length}
-          </div>
-          <div className={styles.statLabel}>Needs Review</div>
-        </div>
-        <div className={styles.statCard}>
-          <div className={styles.statVal} style={{ color: 'var(--purple)' }}>
-            {prioritizedQuestionList.filter((q) => q.isCompanyPriority).length}
-          </div>
-          <div className={styles.statLabel}>Target Priorities</div>
-        </div>
+      {/* Streamlined Inline Question Summary */}
+      <div style={{ display: 'flex', gap: '10px', alignItems: 'center', marginBottom: '18px', flexWrap: 'wrap' }}>
+        <span style={{ fontSize: '11px', fontFamily: 'var(--font-mono)', color: 'var(--text-muted)', background: 'var(--bg-surface)', border: '1px solid var(--border)', padding: '4px 10px', borderRadius: '4px' }}>
+          QUESTIONS: <strong style={{ color: 'var(--text-primary)' }}>{questions.length}</strong>
+        </span>
+        <span style={{ fontSize: '11px', fontFamily: 'var(--font-mono)', color: 'var(--green)', background: 'var(--green-subtle)', border: '1px solid var(--green-border)', padding: '4px 10px', borderRadius: '4px' }}>
+          MASTERED: <strong>{questions.filter((q) => q.user_status === 'mastered').length}</strong>
+        </span>
+        <span style={{ fontSize: '11px', fontFamily: 'var(--font-mono)', color: 'var(--amber)', background: 'var(--amber-subtle)', border: '1px solid var(--amber-border)', padding: '4px 10px', borderRadius: '4px' }}>
+          NEEDS REVIEW: <strong>{questions.filter((q) => q.user_status === 'needs_review').length}</strong>
+        </span>
+        <span style={{ fontSize: '11px', fontFamily: 'var(--font-mono)', color: 'var(--purple)', background: 'var(--purple-subtle)', border: '1px solid var(--purple-border)', padding: '4px 10px', borderRadius: '4px' }}>
+          COMPANY PRIORITIES: <strong>{prioritizedQuestionList.filter((q) => q.isCompanyPriority).length}</strong>
+        </span>
       </div>
 
       {/* Filter and Search Bar */}

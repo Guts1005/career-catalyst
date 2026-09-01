@@ -305,26 +305,17 @@ function ResourcesContent() {
         </div>
       )}
 
-      {/* KPI Stats */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '12px', marginBottom: '20px' }}>
-        <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', padding: '14px', borderRadius: '4px' }}>
-          <div style={{ fontSize: '10.5px', fontFamily: 'var(--font-mono)', color: 'var(--text-muted)' }}>TOTAL ARCHIVE</div>
-          <div style={{ fontSize: '20px', fontWeight: 900, fontFamily: 'var(--font-mono)', color: 'var(--text-primary)', marginTop: '2px' }}>
-            {resources.length} Research Papers
-          </div>
-        </div>
-        <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', padding: '14px', borderRadius: '4px' }}>
-          <div style={{ fontSize: '10.5px', fontFamily: 'var(--font-mono)', color: 'var(--text-muted)' }}>COMPLETED PAPERS</div>
-          <div style={{ fontSize: '20px', fontWeight: 900, fontFamily: 'var(--font-mono)', color: 'var(--green)', marginTop: '2px' }}>
-            {resources.filter((r) => r.completed === 1).length} Studied
-          </div>
-        </div>
-        <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', padding: '14px', borderRadius: '4px' }}>
-          <div style={{ fontSize: '10.5px', fontFamily: 'var(--font-mono)', color: 'var(--text-muted)' }}>AVERAGE DEPTH RATING</div>
-          <div style={{ fontSize: '20px', fontWeight: 900, fontFamily: 'var(--font-mono)', color: 'var(--purple, #a855f7)', marginTop: '2px' }}>
-            5.0 / 5.0
-          </div>
-        </div>
+      {/* Streamlined Inline Metadata */}
+      <div style={{ display: 'flex', gap: '12px', alignItems: 'center', marginBottom: '16px', flexWrap: 'wrap' }}>
+        <span style={{ fontSize: '11.5px', fontFamily: 'var(--font-mono)', color: 'var(--text-muted)', background: 'var(--bg-surface)', border: '1px solid var(--border)', padding: '4px 10px', borderRadius: '4px' }}>
+          ARCHIVE: <strong style={{ color: 'var(--text-primary)' }}>{resources.length} PAPERS</strong>
+        </span>
+        <span style={{ fontSize: '11.5px', fontFamily: 'var(--font-mono)', color: 'var(--green)', background: 'var(--green-subtle)', border: '1px solid var(--green-border)', padding: '4px 10px', borderRadius: '4px' }}>
+          STUDIED: <strong>{resources.filter((r) => r.completed === 1).length} COMPLETED</strong>
+        </span>
+        <span style={{ fontSize: '11.5px', fontFamily: 'var(--font-mono)', color: 'var(--purple)', background: 'var(--purple-subtle)', border: '1px solid var(--purple-border)', padding: '4px 10px', borderRadius: '4px' }}>
+          DEPTH: <strong>5.0 / 5.0 RATING</strong>
+        </span>
       </div>
 
       {/* Controls */}

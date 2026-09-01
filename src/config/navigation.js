@@ -28,31 +28,31 @@ export const NAVIGATION_PHASES = [
   {
     id: 'command-center',
     phaseNumber: '01',
-    title: 'COMMAND CENTER',
+    title: 'READINESS & RADAR',
     purpose: 'Understand where you currently stand',
     items: [
       { href: '/', label: 'Executive Overview', shortLabel: 'Overview', icon: IconDashboard },
       { href: '/analytics', label: 'Career Analytics', shortLabel: 'Analytics', icon: IconAnalytics },
+      { href: '/skills', label: 'Competency Radar', shortLabel: 'Skills', icon: IconSkills },
     ],
   },
   {
     id: 'build-proof',
     phaseNumber: '02',
-    title: 'BUILD PROOF',
+    title: 'EVIDENCE & PROOF',
     purpose: 'Build and validate technical evidence',
     items: [
       { href: '/projects', label: 'Portfolio Projects', shortLabel: 'Projects', icon: IconProjects },
-      { href: '/skills', label: 'Competency Matrix', shortLabel: 'Skills', icon: IconSkills },
       { href: '/coding-tracker', label: 'Systems Coding', shortLabel: 'Coding', icon: IconCoding },
-      { href: '/certifications', label: 'Certifications', shortLabel: 'Certs', icon: IconCertifications },
       { href: '/resources', label: 'Research Library', shortLabel: 'Papers', icon: IconResources },
+      { href: '/certifications', label: 'Certifications', shortLabel: 'Certs', icon: IconCertifications },
       { href: '/github', label: 'GitHub Evidence', shortLabel: 'GitHub', icon: IconGitHub },
     ],
   },
   {
     id: 'land-the-role',
     phaseNumber: '03',
-    title: 'LAND THE ROLE',
+    title: 'APPLICATIONS & RESUME',
     purpose: 'Convert verified proof into hiring opportunities',
     items: [
       { href: '/job-tracker', label: 'Job Pipeline', shortLabel: 'Pipeline', icon: IconJobs },
@@ -75,14 +75,14 @@ export const NAVIGATION_PHASES = [
 ];
 
 export const SECONDARY_NAV_ITEMS = [
-  { href: '/portfolio/sharvin', label: 'Public Portfolio Showcase', shortLabel: 'Public Showcase', icon: IconPortfolio },
-  { href: '/algorithm-sandbox', label: 'Triton Latency Sandbox', shortLabel: 'GPU Sandbox', icon: IconSandbox },
   { href: '/project-generator', label: 'Architecture Blueprints', shortLabel: 'Blueprints', icon: IconBlueprints },
+  { href: '/algorithm-sandbox', label: 'Triton Latency Sandbox', shortLabel: 'GPU Sandbox', icon: IconSandbox },
+  { href: '/portfolio/sharvin', label: 'Public Showcase', shortLabel: 'Public Showcase', icon: IconPortfolio },
 ];
 
 export const MOBILE_PRIMARY_TABS = [
   { href: '/', label: 'Overview', icon: IconDashboard },
+  { href: '/skills', label: 'Skills', icon: IconSkills },
   { href: '/projects', label: 'Proof', icon: IconProjects },
   { href: '/job-tracker', label: 'Pipeline', icon: IconJobs },
-  { href: '/ats-checker', label: 'ATS', icon: IconATS },
 ];

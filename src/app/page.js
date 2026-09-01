@@ -26,21 +26,6 @@ export default function HomePage() {
 
   const [isOnboardingOpen, setIsOnboardingOpen] = useState(false);
 
-  // Quick 30-Second Diagnostic Widget State
-  const [diagStep, setDiagStep] = useState(1);
-  const [diagFramework, setDiagFramework] = useState('PyTorch / Triton');
-  const [diagDistributed, setDiagDistributed] = useState('Multi-Node / FSDP');
-  const [diagCompGoal, setDiagCompGoal] = useState('$250k - $350k');
-  const [diagScore, setDiagScore] = useState(null);
-
-  const handleRunDiagnostic = () => {
-    let score = 75;
-    if (diagFramework === 'PyTorch / Triton') score += 12;
-    if (diagDistributed === 'Multi-Node / FSDP') score += 10;
-    setDiagScore(score);
-    showToast(`Diagnostic Complete: Calibrated ${score}% Initial Readiness!`, 'success');
-  };
-
   const topCompetencies = skills.slice(0, 4);
 
   const handleReopenGuide = () => {
@@ -274,69 +259,9 @@ export default function HomePage() {
           ))}
         </div>
 
-        {/* ─── Quick 30-Second Diagnostic Interactive Widget ────────── */}
-        <div style={{ marginTop: '36px', background: 'var(--bg-subtle)', border: '1px solid var(--border)', borderRadius: '8px', padding: '20px' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '14px', flexWrap: 'wrap', gap: '8px' }}>
-            <span style={{ fontSize: '11px', fontFamily: 'var(--font-mono)', fontWeight: 800, color: 'var(--text-muted)', textTransform: 'uppercase' }}>
-              ⚡ 30-SECOND RAPID TECHNICAL DIAGNOSTIC
-            </span>
-            {diagScore && (
-              <span style={{ fontSize: '12px', fontFamily: 'var(--font-mono)', color: 'var(--green)', fontWeight: 800 }}>
-                ✓ DIAGNOSED READINESS: {diagScore}%
-              </span>
-            )}
-          </div>
-
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '12px', marginBottom: '16px' }}>
-            <div>
-              <label style={{ fontSize: '10.5px', fontFamily: 'var(--font-mono)', color: 'var(--text-muted)', textTransform: 'uppercase', display: 'block', marginBottom: '4px' }}>
-                Primary Core Framework
-              </label>
-              <select className="select" value={diagFramework} onChange={(e) => setDiagFramework(e.target.value)} style={{ width: '100%' }}>
-                <option value="PyTorch / Triton">PyTorch & Custom Triton</option>
-                <option value="TensorFlow / JAX">TensorFlow & JAX</option>
-                <option value="Scikit-Learn / Classical">Scikit-Learn & Classical ML</option>
-              </select>
-            </div>
-
-            <div>
-              <label style={{ fontSize: '10.5px', fontFamily: 'var(--font-mono)', color: 'var(--text-muted)', textTransform: 'uppercase', display: 'block', marginBottom: '4px' }}>
-                Distributed Training Scale
-              </label>
-              <select className="select" value={diagDistributed} onChange={(e) => setDiagDistributed(e.target.value)} style={{ width: '100%' }}>
-                <option value="Multi-Node / FSDP">Multi-Node (FSDP / Megatron)</option>
-                <option value="Single-Node / Multi-GPU">Single-Node (DDP / 8x GPU)</option>
-                <option value="Single GPU / Cloud API">Single GPU / Colab / APIs</option>
-              </select>
-            </div>
-
-            <div>
-              <label style={{ fontSize: '10.5px', fontFamily: 'var(--font-mono)', color: 'var(--text-muted)', textTransform: 'uppercase', display: 'block', marginBottom: '4px' }}>
-                Target Compensation Tier
-              </label>
-              <select className="select" value={diagCompGoal} onChange={(e) => setDiagCompGoal(e.target.value)} style={{ width: '100%' }}>
-                <option value="$250k - $350k">$250,000 - $350,000+ (Staff/Principal)</option>
-                <option value="$180k - $250k">$180,000 - $250,000 (Senior ML)</option>
-                <option value="$120k - $180k">$120,000 - $180,000 (Core Engineer)</option>
-              </select>
-            </div>
-          </div>
-
-          <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
-            <button
-              type="button"
-              className="btn btn-primary"
-              onClick={handleRunDiagnostic}
-              style={{ fontSize: '12px', padding: '8px 18px' }}
-            >
-              RUN RAPID DIAGNOSTIC →
-            </button>
-          </div>
-        </div>
-
         {/* ─── Next Best Action Card (Core Intelligence Loop) ───────── */}
         {nextBestAction && (
-          <div style={{ marginTop: '36px', background: 'var(--bg-surface)', border: '1px solid var(--border-strong)', borderRadius: '8px', padding: '24px', color: 'var(--text-primary)' }}>
+          <div style={{ marginTop: '28px', background: 'var(--bg-surface)', border: '1px solid var(--border-strong)', borderRadius: '8px', padding: '24px', color: 'var(--text-primary)', boxShadow: 'var(--shadow-sm)' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
               <span style={{ fontSize: '11px', fontFamily: 'var(--font-mono)', color: 'var(--green)', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.08em' }}>
                 ● YOUR NEXT BEST ACTION
